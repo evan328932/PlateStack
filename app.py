@@ -6,7 +6,7 @@ from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder="public")
 
-RATE_LIMIT = 15
+RATE_LIMIT = 7
 RATE_WINDOW = 3600
 request_log = defaultdict(list)
 
