@@ -6,7 +6,6 @@ from flask import Flask, request, jsonify, send_from_directory
 
 app = Flask(__name__, static_folder="public")
 
-# ── Rate limiting ──────────────────────────────────────────────────────────────
 RATE_LIMIT = 15
 RATE_WINDOW = 3600
 request_log = defaultdict(list)
@@ -24,13 +23,13 @@ def get_ip():
     forwarded = request.headers.get("X-Forwarded-For", "")
     return forwarded.split(",")[0].strip() if forwarded else request.remote_addr
 
-def sanitize(text):
-    text = str(text).strip()
+def sanitize(text, max_len=500):
+    text = str(text).strip()[:max_len]
     while "\n\n\n" in text:
         text = text.replace("\n\n\n", "\n\n")
     return text
 
-# ── Routes ─────────────────────────────────────────────────────────────────────
+
 @app.route("/")
 def index():
     return send_from_directory("public", "index.html")
@@ -49,20 +48,21 @@ def plan():
     lifts = data.get("lifts", [])
     unit = data.get("unit", "lbs")
     goal = sanitize(data.get("goal", ""))
-    experience = sanitize(data.get("experience", "beginner"))
+    experience = sanitize(data.get("experience", "beginner"), 50)
+    days = sanitize(str(data.get("days", "3")), 10)
+    split = sanitize(data.get("split", "Full body"), 100)
+    age = data.get("age")
+    bodyweight = data.get("bodyweight")
+    sex = data.get("sex")
+    height = data.get("height")
 
-    if not lifts or not isinstance(lifts, list):
+    if not isinstance(lifts, list) or not lifts:
         return jsonify({"error": "No lifts provided."}), 400
     if len(lifts) > 20:
         return jsonify({"error": "Maximum 20 lifts allowed."}), 400
     if unit not in ("lbs", "kg"):
         unit = "lbs"
-    if experience not in ("beginner", "intermediate", "advanced"):
-        experience = "beginner"
-    if len(goal) > 500:
-        goal = goal[:500]
 
-    # Validate lift data
     clean_lifts = []
     for l in lifts:
         try:
@@ -78,30 +78,46 @@ def plan():
     if not clean_lifts:
         return jsonify({"error": "No valid lifts provided."}), 400
 
+    # Build athlete profile string
+    profile_parts = []
+    if age: profile_parts.append(f"Age: {str(age)[:3]}")
+    if bodyweight: profile_parts.append(f"Bodyweight: {sanitize(str(bodyweight), 20)}")
+    if height: profile_parts.append(f"Height: {sanitize(str(height), 20)}")
+    if sex: profile_parts.append(f"Sex: {sanitize(str(sex), 10)}")
+    profile = ", ".join(profile_parts) if profile_parts else "Not provided"
+
     lifts_text = "\n".join([
-        f"- {l['name']}: {l['weight']}{unit} × {l['reps']} reps (estimated 1RM: {l['max']}{unit})"
+        f"- {l['name']}: {l['weight']}{unit} x {l['reps']} reps (estimated 1RM: {l['max']}{unit})"
         for l in clean_lifts
     ])
 
     system_prompt = (
-        "You are an expert strength and conditioning coach with deep knowledge of powerlifting, "
-        "bodybuilding, and general fitness. You give specific, practical, evidence-based advice. "
-        "You write in a direct, motivating tone — like a knowledgeable coach talking to an athlete. "
-        "Never give vague generic advice. Always be specific with numbers, sets, reps, and percentages. "
-        "Do not add any preamble or closing remarks — just the training plan content."
+        "You are an expert strength and conditioning coach. "
+        "Give specific, practical, evidence-based advice with exact numbers. "
+        "Write in a direct, motivating tone like a knowledgeable coach. "
+        "Format your response using markdown: use ## for section headers and bullet points for lists. "
+        "Never use ** for bolding mid-sentence — only use it for labels like 'Day 1:' or 'Week 1:'. "
+        "Do not add preamble or closing remarks — start directly with the plan content."
     )
 
     user_msg = (
-        f"Here are my current lifts:\n{lifts_text}\n\n"
+        f"Athlete profile: {profile}\n"
         f"Experience level: {experience}\n"
+        f"Training schedule: {days} days per week, {split}\n"
         f"Goal: {goal}\n"
         f"Units: {unit}\n\n"
-        "Based on my lifts and goal, give me:\n"
-        "1. A brief analysis of where I'm at relative to my goal\n"
-        "2. A specific weekly training program — include exact sets, reps, and percentages of my 1RM for each exercise\n"
-        "3. What I should work up to over the next 8-12 weeks with specific milestone targets\n"
-        "4. 2-3 key tips specific to my situation\n\n"
-        "Be specific with the numbers. Use my actual lift numbers throughout."
+        f"Current lifts:\n{lifts_text}\n\n"
+        "Based on all of this, provide:\n"
+        "## Where You're At\n"
+        "Brief analysis of current strength levels relative to the goal.\n\n"
+        "## Weekly Training Program\n"
+        f"A complete {days}-day program matching the {split} split. "
+        "Include exact sets, reps, and percentages of 1RM for each exercise. "
+        "Lay out each training day clearly.\n\n"
+        "## 8-12 Week Progression\n"
+        "Specific milestone targets with numbers — what they should hit at 4 weeks, 8 weeks, and 12 weeks.\n\n"
+        "## Key Tips\n"
+        "2-3 specific tips based on their actual numbers and situation."
     )
 
     try:
@@ -114,7 +130,7 @@ def plan():
             },
             json={
                 "model": "claude-sonnet-4-20250514",
-                "max_tokens": 1500,
+                "max_tokens": 1800,
                 "system": system_prompt,
                 "messages": [{"role": "user", "content": user_msg}],
             },
@@ -134,3 +150,4 @@ def plan():
 
 if __name__ == "__main__":
     app.run(debug=False)
+
