@@ -53,6 +53,20 @@ nav a:hover{color:#e8e8f0;background:#16181c}
 .card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#f97316}
 .card-meta{font-size:12px;color:#333}
 
+.saved-banner{display:none;align-items:center;gap:8px;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.15);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:#888}
+.saved-banner b{color:#f97316;font-weight:600}
+.clear-btn{margin-left:auto;font-size:12px;color:#444;background:none;border:1px solid #1a1c22;border-radius:7px;padding:3px 10px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.clear-btn:hover{color:#888;border-color:#333}
+
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:500px){.info-grid{grid-template-columns:1fr}}
+.info-field{display:flex;flex-direction:column;gap:5px}
+.field-label{font-size:12px;font-weight:600;color:#666;letter-spacing:0.03em}
+.field-input{background:#0c0d0f;border:1px solid #1a1c22;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:14px;color:#e0e0ec;transition:border-color 0.15s;width:100%}
+.field-input::placeholder{color:#2a2c32}
+.field-input:focus{outline:none;border-color:rgba(249,115,22,0.5);background:#0e0f12}
+select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23444' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+
 .lifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:540px){.lifts-grid{grid-template-columns:1fr}}
 .lift-row{display:flex;flex-direction:column;gap:5px}
@@ -84,6 +98,8 @@ textarea:focus{outline:none;border-color:rgba(249,115,22,0.5);background:#0e0f12
 .chip:hover{border-color:#2e303a;color:#aaa}
 .chip.active{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.4);color:#fb923c}
 
+.days-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+
 .calc-btn{width:100%;padding:16px;background:#f97316;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-0.01em;transition:opacity 0.15s,transform 0.1s;margin-top:0.25rem}
 .calc-btn:hover{opacity:0.88}
 .calc-btn:active{transform:scale(0.99)}
@@ -111,7 +127,14 @@ textarea:focus{outline:none;border-color:rgba(249,115,22,0.5);background:#0e0f12
 
 .plan-section{border-top:1px solid #16181c;padding-top:1.5rem}
 .plan-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#f97316;margin-bottom:1rem}
-.plan-text{font-size:14px;color:#c8c8d8;line-height:1.85;white-space:pre-wrap}
+
+.plan-text{font-size:14px;color:#c8c8d8;line-height:1.85}
+.plan-text h3{font-size:15px;font-weight:700;color:#fff;margin:1.25rem 0 0.5rem}
+.plan-text h3:first-child{margin-top:0}
+.plan-text p{margin-bottom:0.75rem}
+.plan-text ul,.plan-text ol{padding-left:1.25rem;margin-bottom:0.75rem}
+.plan-text li{margin-bottom:4px}
+.plan-text strong{color:#e8e8e8;font-weight:600}
 
 .results-footer{margin-top:1rem;padding-top:1rem;border-top:1px solid #16181c;font-size:12px;color:#2a2c32}
 
@@ -130,9 +153,9 @@ footer a:hover{color:#777}
   <h2>Track lifts. Hit goals.</h2>
   <p>LiftLab uses your actual gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic advice.</p>
   <div class="how-steps">
-    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your lifts</strong><span>Input the weight and reps for any exercise. The more lifts you add, the better.</span></div></div>
-    <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Tell us what you're training for — strength, size, endurance, or a specific target weight.</span></div></div>
-    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan</strong><span>See your estimated 1 rep max for every lift, plus a detailed program to reach your goal.</span></div></div>
+    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Add your age, bodyweight, training schedule, and current lift numbers.</span></div></div>
+    <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Tell us what you're training for — strength, size, endurance, or something specific.</span></div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan</strong><span>See your 1RM for every lift plus a detailed weekly program tailored to your schedule and goal. Everything saves automatically.</span></div></div>
   </div>
 </div>
 </div>
@@ -144,7 +167,7 @@ footer a:hover{color:#777}
   <div class="modal-badge badge-green">Free during beta</div>
   <h2>Completely free right now</h2>
   <p>LiftLab is in early access and fully free to use — no account, no credit card, no limits. Use it as much as you want.</p>
-  <p>As the tool grows, a paid plan may be introduced for advanced features like saved programs, progress tracking, and periodization planning. Early users will get the best rates.</p>
+  <p>As the tool grows, a paid plan may be introduced for advanced features like progress tracking and periodization planning. Early users will get the best rates.</p>
   <p style="color:#333;font-size:13px">Pricing hasn't been decided yet. When it is, it will be fair.</p>
 </div>
 </div>
@@ -156,12 +179,12 @@ footer a:hover{color:#777}
   <div class="modal-badge badge-yellow">Terms of service</div>
   <h2>Terms of Service</h2>
   <p>By using LiftLab you agree to these terms.</p>
-  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing on this site is medical or professional training advice. Consult a qualified professional before starting any new exercise program, especially if you have injuries or health conditions. You train at your own risk.</p></div>
-  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>One-rep max calculations are estimates based on established formulas. Actual maxes vary by person, day, and conditions. Never attempt a true one-rep max without a spotter. Use these numbers as a guide only.</p></div>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing here is medical or professional training advice. Consult a qualified professional before starting any new program, especially if you have injuries or health conditions. You train at your own risk.</p></div>
+  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>One-rep max calculations are estimates based on the Epley formula. Actual maxes vary by person and conditions. Never attempt a true one-rep max without a spotter. Use these numbers as a guide only.</p></div>
   <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use the information provided. LiftLab is not liable for any injury, loss, or damage resulting from following advice generated by this tool.</p></div>
-  <div class="tos-section"><h3>4. Privacy</h3><p>We do not store your lift data after your session. No account is required. We collect only basic usage data for rate limiting and do not sell any data.</p></div>
+  <div class="tos-section"><h3>4. Privacy and data</h3><p>Your data is saved locally in your own browser using localStorage — it never leaves your device and is not stored on our servers. No account is required. We collect only basic usage data for rate limiting and do not sell any data.</p></div>
   <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not attempt to abuse or spam the service. We reserve the right to block access for users who misuse the tool.</p></div>
-  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is with no guarantees of accuracy, availability, or fitness for a particular purpose. The service may change or become paid in the future.</p></div>
+  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is with no guarantees of accuracy or availability. The service may change or become paid in the future.</p></div>
   <div class="tos-section"><h3>7. Liability</h3><p>To the fullest extent permitted by law, LiftLab and its operator are not liable for any indirect, incidental, or consequential damages. Total liability is capped at what you have paid us (zero during free beta).</p></div>
   <p class="tos-updated">Last updated: April 2026.</p>
 </div>
@@ -188,14 +211,72 @@ footer a:hover{color:#777}
 
 <div class="main">
 
-  <!-- UNIT TOGGLE -->
+  <!-- SAVED BANNER -->
+  <div class="saved-banner" id="savedBanner">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+    <span><b>Data loaded</b> — your info was saved from last time</span>
+    <button class="clear-btn" onclick="clearSaved()">Clear all</button>
+  </div>
+
+  <!-- UNITS -->
   <div class="card">
-    <div class="card-header">
-      <span class="card-label">Units</span>
-    </div>
+    <div class="card-header"><span class="card-label">Units</span></div>
     <div class="unit-toggle">
       <button class="unit-btn active" id="lbsBtn" onclick="setUnit('lbs')">lbs</button>
       <button class="unit-btn" id="kgBtn" onclick="setUnit('kg')">kg</button>
+    </div>
+  </div>
+
+  <!-- BODY STATS -->
+  <div class="card">
+    <div class="card-header"><span class="card-label">About you</span><span class="card-meta">optional but improves the plan</span></div>
+    <div class="info-grid">
+      <div class="info-field">
+        <span class="field-label">Age</span>
+        <input class="field-input" id="userAge" type="number" min="13" max="99" placeholder="e.g. 22" oninput="autosave()">
+      </div>
+      <div class="info-field">
+        <span class="field-label">Bodyweight</span>
+        <input class="field-input" id="userWeight" type="number" min="50" max="700" placeholder="e.g. 185" oninput="autosave()">
+      </div>
+      <div class="info-field">
+        <span class="field-label">Sex</span>
+        <select class="field-input" id="userSex" onchange="autosave()">
+          <option value="">Prefer not to say</option>
+          <option value="male">Male</option>
+          <option value="female">Female</option>
+        </select>
+      </div>
+      <div class="info-field">
+        <span class="field-label">Height</span>
+        <input class="field-input" id="userHeight" type="text" placeholder='e.g. 5&apos;11" or 180cm' oninput="autosave()">
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING SCHEDULE -->
+  <div class="card">
+    <div class="card-header"><span class="card-label">Training schedule</span></div>
+    <div style="margin-bottom:1rem">
+      <div class="field-label" style="margin-bottom:8px">Days per week</div>
+      <div class="days-row" id="daysRow">
+        <div class="chip active" onclick="selectDays(this,'2')">2 days</div>
+        <div class="chip" onclick="selectDays(this,'3')">3 days</div>
+        <div class="chip" onclick="selectDays(this,'4')">4 days</div>
+        <div class="chip" onclick="selectDays(this,'5')">5 days</div>
+        <div class="chip" onclick="selectDays(this,'6')">6 days</div>
+      </div>
+    </div>
+    <div>
+      <div class="field-label" style="margin-bottom:8px">Workout split</div>
+      <div class="chip-row" id="splitRow">
+        <div class="chip active" onclick="selectSplit(this,'full_body')">Full body</div>
+        <div class="chip" onclick="selectSplit(this,'upper_lower')">Upper / lower</div>
+        <div class="chip" onclick="selectSplit(this,'ppl')">Push / pull / legs</div>
+        <div class="chip" onclick="selectSplit(this,'bro_split')">Bro split</div>
+        <div class="chip" onclick="selectSplit(this,'custom')">Custom</div>
+      </div>
+      <textarea id="splitCustom" rows="1" placeholder="Describe your split if custom, or any other notes about your schedule..." style="margin-top:10px;min-height:50px" oninput="autosave()"></textarea>
     </div>
   </div>
 
@@ -205,11 +286,9 @@ footer a:hover{color:#777}
       <span class="card-label">Your lifts</span>
       <span class="card-meta">weight × reps</span>
     </div>
-    <div class="lifts-grid" id="liftsGrid">
-      <!-- preset lifts -->
-    </div>
+    <div class="lifts-grid" id="liftsGrid"></div>
     <div class="add-lift-row">
-      <input class="custom-lift-input" id="customLiftName" placeholder="Custom exercise name..." />
+      <input class="custom-lift-input" id="customLiftName" placeholder="Custom exercise name...">
       <button class="add-btn" onclick="addCustomLift()">+ Add lift</button>
     </div>
   </div>
@@ -217,20 +296,20 @@ footer a:hover{color:#777}
   <!-- GOAL -->
   <div class="card">
     <div class="card-header"><span class="card-label">Your goal</span></div>
-    <div class="chip-row" style="margin-bottom:12px">
+    <div class="chip-row" id="goalRow" style="margin-bottom:12px">
       <div class="chip active" onclick="selectGoal(this,'strength')">Strength</div>
       <div class="chip" onclick="selectGoal(this,'muscle')">Muscle / size</div>
       <div class="chip" onclick="selectGoal(this,'endurance')">Endurance</div>
       <div class="chip" onclick="selectGoal(this,'lose_weight')">Lose weight</div>
-      <div class="chip" onclick="selectGoal(this,'custom')">Custom goal</div>
+      <div class="chip" onclick="selectGoal(this,'custom')">Custom</div>
     </div>
-    <textarea id="goalDetail" rows="2" placeholder="Optional: describe your goal in detail — e.g. 'I want to bench 225 lbs within 3 months' or 'I want to compete in powerlifting'"></textarea>
+    <textarea id="goalDetail" rows="2" placeholder="Optional: describe your goal — e.g. 'I want to bench 225 lbs within 3 months'" oninput="autosave()"></textarea>
   </div>
 
   <!-- EXPERIENCE -->
   <div class="card">
     <div class="card-header"><span class="card-label">Experience level</span></div>
-    <div class="chip-row">
+    <div class="chip-row" id="expRow">
       <div class="chip active" onclick="selectExp(this,'beginner')">Beginner</div>
       <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
       <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
@@ -241,7 +320,7 @@ footer a:hover{color:#777}
   <div id="error" class="error"></div>
   <div id="loading" class="loading">
     <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    <span id="loadingText">Calculating your maxes...</span>
+    <span id="loadingText">Building your training plan...</span>
   </div>
 
   <!-- RESULTS -->
@@ -252,14 +331,11 @@ footer a:hover{color:#777}
         <button class="action-btn" id="copyBtn" onclick="copyResults()">Copy plan</button>
       </div>
     </div>
-
     <div class="maxes-grid" id="maxesGrid"></div>
-
     <div class="plan-section">
       <div class="plan-label">Your training plan</div>
       <div class="plan-text" id="planText"></div>
     </div>
-
     <div class="results-footer" id="resultsFooter"></div>
   </div>
 
@@ -274,30 +350,92 @@ footer a:hover{color:#777}
 </footer>
 
 <script>
+const SAVE_KEY = 'liftlab_data';
+const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
+
 let unit = 'lbs';
 let selectedGoal = 'strength';
 let selectedExp = 'beginner';
+let selectedDays = '2';
+let selectedSplit = 'full_body';
 
-const presetLifts = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
+// ── Markdown renderer (strips ** ## and renders cleanly) ──────────────────────
+function renderMarkdown(text){
+  const div = document.createElement('div');
+  div.className = 'plan-text';
+  const lines = text.split('\n');
+  let html = '';
+  let inList = false;
 
-function initLifts(){
-  const grid = document.getElementById('liftsGrid');
-  grid.innerHTML = '';
-  presetLifts.forEach(name => grid.appendChild(makeLiftRow(name)));
+  lines.forEach(line => {
+    let l = line
+      .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g, '<em>$1</em>');
+
+    if(/^#{1,3}\s/.test(l)){
+      if(inList){ html += '</ul>'; inList = false; }
+      const heading = l.replace(/^#{1,3}\s/, '');
+      html += `<h3>${heading}</h3>`;
+    } else if(/^[-*]\s/.test(l)){
+      if(!inList){ html += '<ul>'; inList = true; }
+      html += `<li>${l.replace(/^[-*]\s/, '')}</li>`;
+    } else if(/^\d+\.\s/.test(l)){
+      if(!inList){ html += '<ol>'; inList = true; }
+      html += `<li>${l.replace(/^\d+\.\s/, '')}</li>`;
+    } else {
+      if(inList){ html += inList === 'ol' ? '</ol>' : '</ul>'; inList = false; }
+      if(l.trim()) html += `<p>${l}</p>`;
+    }
+  });
+
+  if(inList) html += '</ul>';
+  div.innerHTML = html;
+  return div;
 }
 
-function makeLiftRow(name){
+// ── Chip selectors ────────────────────────────────────────────────────────────
+function selectChipIn(rowId, el){
+  document.getElementById(rowId).querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+}
+function selectGoal(el, val){ selectChipIn('goalRow', el); selectedGoal = val; autosave(); }
+function selectExp(el, val){ selectChipIn('expRow', el); selectedExp = val; autosave(); }
+function selectDays(el, val){ selectChipIn('daysRow', el); selectedDays = val; autosave(); }
+function selectSplit(el, val){ selectChipIn('splitRow', el); selectedSplit = val; autosave(); }
+
+// ── Units ─────────────────────────────────────────────────────────────────────
+function setUnit(u){
+  unit = u;
+  document.getElementById('lbsBtn').classList.toggle('active', u==='lbs');
+  document.getElementById('kgBtn').classList.toggle('active', u==='kg');
+  document.querySelectorAll('.unit-display').forEach(el => el.textContent = u);
+  autosave();
+}
+
+// ── Lifts ─────────────────────────────────────────────────────────────────────
+function makeLiftRow(name, weight='', reps=''){
   const div = document.createElement('div');
   div.className = 'lift-row';
+  div.dataset.liftName = name;
   div.innerHTML = `
     <span class="lift-name">${name}</span>
     <div class="lift-inputs">
-      <input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" data-lift="${name}">
+      <input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${weight}" oninput="autosave()">
       <span class="lift-sep">×</span>
-      <input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" data-lift="${name}">
+      <input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${reps}" oninput="autosave()">
       <span class="lift-unit unit-display">${unit}</span>
     </div>`;
   return div;
+}
+
+function initLifts(savedLifts){
+  const grid = document.getElementById('liftsGrid');
+  grid.innerHTML = '';
+  if(savedLifts && savedLifts.length){
+    savedLifts.forEach(l => grid.appendChild(makeLiftRow(l.name, l.weight, l.reps)));
+  } else {
+    PRESET_LIFTS.forEach(name => grid.appendChild(makeLiftRow(name)));
+  }
 }
 
 function addCustomLift(){
@@ -306,32 +444,10 @@ function addCustomLift(){
   if(!name) return;
   document.getElementById('liftsGrid').appendChild(makeLiftRow(name));
   nameInput.value = '';
+  autosave();
 }
 
-function setUnit(u){
-  unit = u;
-  document.getElementById('lbsBtn').classList.toggle('active', u==='lbs');
-  document.getElementById('kgBtn').classList.toggle('active', u==='kg');
-  document.querySelectorAll('.unit-display').forEach(el => el.textContent = u);
-}
-
-function selectGoal(el, val){
-  document.querySelectorAll('.chip-row .chip').forEach(c => {
-    if(c.onclick && c.onclick.toString().includes('selectGoal')) c.classList.remove('active');
-  });
-  el.classList.add('active');
-  selectedGoal = val;
-}
-
-function selectExp(el, val){
-  document.querySelectorAll('.chip-row .chip').forEach(c => {
-    if(c.onclick && c.onclick.toString().includes('selectExp')) c.classList.remove('active');
-  });
-  el.classList.add('active');
-  selectedExp = val;
-}
-
-// Epley formula: 1RM = weight * (1 + reps/30)
+// ── Epley 1RM formula ─────────────────────────────────────────────────────────
 function calcMax(weight, reps){
   if(reps === 1) return weight;
   return Math.round(weight * (1 + reps / 30));
@@ -343,14 +459,89 @@ function getLifts(){
     const name = row.querySelector('.lift-name').textContent;
     const w = parseFloat(row.querySelector('.lift-weight').value);
     const r = parseInt(row.querySelector('.lift-reps').value);
-    if(w > 0 && r > 0){
-      lifts.push({ name, weight: w, reps: r, max: calcMax(w, r) });
-    }
+    if(w > 0 && r > 0) lifts.push({ name, weight: w, reps: r, max: calcMax(w, r) });
   });
   return lifts;
 }
 
-function setLoading(on, text='Calculating your maxes...'){
+// ── LocalStorage save / load ──────────────────────────────────────────────────
+function autosave(){
+  const lifts = [];
+  document.querySelectorAll('.lift-row').forEach(row => {
+    lifts.push({
+      name: row.querySelector('.lift-name').textContent,
+      weight: row.querySelector('.lift-weight').value,
+      reps: row.querySelector('.lift-reps').value
+    });
+  });
+  const data = {
+    unit,
+    selectedGoal,
+    selectedExp,
+    selectedDays,
+    selectedSplit,
+    age: document.getElementById('userAge').value,
+    bodyweight: document.getElementById('userWeight').value,
+    sex: document.getElementById('userSex').value,
+    height: document.getElementById('userHeight').value,
+    goalDetail: document.getElementById('goalDetail').value,
+    splitCustom: document.getElementById('splitCustom').value,
+    lifts
+  };
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e){}
+}
+
+function loadSaved(){
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    if(!raw) return false;
+    const d = JSON.parse(raw);
+
+    setUnit(d.unit || 'lbs');
+
+    if(d.age) document.getElementById('userAge').value = d.age;
+    if(d.bodyweight) document.getElementById('userWeight').value = d.bodyweight;
+    if(d.sex) document.getElementById('userSex').value = d.sex;
+    if(d.height) document.getElementById('userHeight').value = d.height;
+    if(d.goalDetail) document.getElementById('goalDetail').value = d.goalDetail;
+    if(d.splitCustom) document.getElementById('splitCustom').value = d.splitCustom;
+
+    if(d.selectedGoal){
+      const el = document.querySelector(`#goalRow .chip[onclick*="${d.selectedGoal}"]`);
+      if(el){ selectChipIn('goalRow', el); selectedGoal = d.selectedGoal; }
+    }
+    if(d.selectedExp){
+      const el = document.querySelector(`#expRow .chip[onclick*="${d.selectedExp}"]`);
+      if(el){ selectChipIn('expRow', el); selectedExp = d.selectedExp; }
+    }
+    if(d.selectedDays){
+      const el = document.querySelector(`#daysRow .chip[onclick*="'${d.selectedDays}'"]`);
+      if(el){ selectChipIn('daysRow', el); selectedDays = d.selectedDays; }
+    }
+    if(d.selectedSplit){
+      const el = document.querySelector(`#splitRow .chip[onclick*="${d.selectedSplit}"]`);
+      if(el){ selectChipIn('splitRow', el); selectedSplit = d.selectedSplit; }
+    }
+
+    initLifts(d.lifts);
+    return true;
+  } catch(e){ return false; }
+}
+
+function clearSaved(){
+  try { localStorage.removeItem(SAVE_KEY); } catch(e){}
+  document.getElementById('savedBanner').style.display = 'none';
+  document.getElementById('userAge').value = '';
+  document.getElementById('userWeight').value = '';
+  document.getElementById('userSex').value = '';
+  document.getElementById('userHeight').value = '';
+  document.getElementById('goalDetail').value = '';
+  document.getElementById('splitCustom').value = '';
+  initLifts(null);
+}
+
+// ── Calculate ─────────────────────────────────────────────────────────────────
+function setLoading(on, text='Building your training plan...'){
   document.getElementById('loadingText').textContent = text;
   document.getElementById('loading').style.display = on ? 'flex' : 'none';
   document.getElementById('calcBtn').disabled = on;
@@ -358,16 +549,10 @@ function setLoading(on, text='Calculating your maxes...'){
 
 async function calculate(){
   const lifts = getLifts();
-  const goalDetail = document.getElementById('goalDetail').value.trim();
   const err = document.getElementById('error');
   err.textContent = '';
+  if(!lifts.length){ err.textContent = 'Enter at least one lift with weight and reps.'; return; }
 
-  if(!lifts.length){
-    err.textContent = 'Enter at least one lift with weight and reps.';
-    return;
-  }
-
-  // Show maxes immediately from formula
   const grid = document.getElementById('maxesGrid');
   grid.innerHTML = '';
   lifts.forEach(l => {
@@ -378,26 +563,42 @@ async function calculate(){
   });
 
   document.getElementById('resultsCard').style.display = 'block';
-  document.getElementById('planText').textContent = '';
+  document.getElementById('planText').innerHTML = '';
   document.getElementById('resultsFooter').textContent = '';
+  setLoading(true);
 
-  setLoading(true, 'Building your training plan...');
+  const goalLabels = {strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
+  const splitLabels = {full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split (one muscle group per day)',custom:'Custom split'};
+  const goalText = document.getElementById('goalDetail').value.trim()
+    ? `${goalLabels[selectedGoal]} — specifically: ${document.getElementById('goalDetail').value.trim()}`
+    : goalLabels[selectedGoal];
 
-  const liftsText = lifts.map(l => `${l.name}: ${l.weight}${unit} × ${l.reps} reps (estimated 1RM: ${l.max}${unit})`).join('\n');
-  const goalLabel = {strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'}[selectedGoal];
-  const goalText = goalDetail ? `${goalLabel} — specifically: ${goalDetail}` : goalLabel;
+  const age = document.getElementById('userAge').value;
+  const bw = document.getElementById('userWeight').value;
+  const sex = document.getElementById('userSex').value;
+  const height = document.getElementById('userHeight').value;
+  const splitCustom = document.getElementById('splitCustom').value.trim();
 
   try {
     const res = await fetch('/api/plan', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ lifts, unit, goal: goalText, experience: selectedExp })
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        lifts, unit,
+        goal: goalText,
+        experience: selectedExp,
+        days: selectedDays,
+        split: splitLabels[selectedSplit] + (splitCustom ? ` (${splitCustom})` : ''),
+        age: age || null,
+        bodyweight: bw ? `${bw} ${unit}` : null,
+        sex: sex || null,
+        height: height || null
+      })
     });
     const data = await res.json();
     if(data.error) throw new Error(data.error);
-    document.getElementById('planText').textContent = data.plan;
-    document.getElementById('resultsFooter').textContent = `Based on ${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${goalLabel.toLowerCase()}`;
-    document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    document.getElementById('planText').replaceChildren(renderMarkdown(data.plan));
+    document.getElementById('resultsFooter').textContent = `${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
+    document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
   } catch(e){
     err.textContent = e.message || 'Something went wrong. Try again.';
   } finally {
@@ -406,17 +607,13 @@ async function calculate(){
 }
 
 function copyResults(){
-  const maxLines = [...document.querySelectorAll('.max-card')].map(c => {
-    const name = c.querySelector('.max-lift-name').textContent;
-    const val = c.querySelector('.max-value').textContent;
-    return `${name}: ${val} ${unit} 1RM`;
-  }).join('\n');
-  const plan = document.getElementById('planText').textContent;
-  const full = `MY LIFT MAXES\n${maxLines}\n\nTRAINING PLAN\n${plan}`;
-  navigator.clipboard.writeText(full).then(() => {
+  const maxLines = [...document.querySelectorAll('.max-card')].map(c =>
+    `${c.querySelector('.max-lift-name').textContent}: ${c.querySelector('.max-value').textContent} ${unit} 1RM`
+  ).join('\n');
+  const plan = document.getElementById('planText').innerText;
+  navigator.clipboard.writeText(`MY LIFT MAXES\n${maxLines}\n\nTRAINING PLAN\n${plan}`).then(() => {
     const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    btn.classList.add('done');
+    btn.textContent = 'Copied!'; btn.classList.add('done');
     setTimeout(() => { btn.textContent = 'Copy plan'; btn.classList.remove('done'); }, 1500);
   });
 }
@@ -424,10 +621,12 @@ function copyResults(){
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
-
 document.getElementById('customLiftName').addEventListener('keydown', e => { if(e.key==='Enter') addCustomLift(); });
 
-initLifts();
+// ── Init ──────────────────────────────────────────────────────────────────────
+const hadSaved = loadSaved();
+if(!hadSaved) initLifts(null);
+if(hadSaved) document.getElementById('savedBanner').style.display = 'flex';
 </script>
 </body>
 </html>
