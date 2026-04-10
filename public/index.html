@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>LiftLab — Know your max. Hit your goals.</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#08090a;color:#e8e8f0;min-height:100vh}
+
+header{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:60px;border-bottom:1px solid #16181c;position:sticky;top:0;background:#08090a;z-index:100}
+.logo{font-size:18px;font-weight:800;letter-spacing:-0.04em;color:#fff}
+.logo span{color:#f97316}
+nav{display:flex;gap:4px}
+nav a{font-size:13px;color:#555;text-decoration:none;padding:6px 12px;border-radius:8px;transition:all 0.15s}
+nav a:hover{color:#e8e8f0;background:#16181c}
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.75);z-index:200;align-items:center;justify-content:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:#111214;border:1px solid #22242a;border-radius:20px;padding:2rem;max-width:500px;width:100%;position:relative;max-height:85vh;overflow-y:auto}
+.modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:#555;font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px}
+.modal-close:hover{color:#e8e8f0;background:#1e2026}
+.modal h2{font-size:20px;font-weight:700;color:#fff;margin-bottom:0.5rem;letter-spacing:-0.02em}
+.modal p{font-size:14px;color:#777;line-height:1.75;margin-bottom:1rem}
+.modal p:last-child{margin-bottom:0}
+.modal-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:4px 11px;border-radius:100px;margin-bottom:1rem}
+.badge-orange{color:#f97316;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.25)}
+.badge-green{color:#34d399;background:rgba(52,211,153,0.1);border:1px solid rgba(52,211,153,0.25)}
+.badge-yellow{color:#fbbf24;background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
+.how-steps{display:flex;flex-direction:column;gap:14px;margin-top:1rem}
+.how-step{display:flex;gap:12px;align-items:flex-start}
+.how-num{width:26px;height:26px;border-radius:50%;background:rgba(249,115,22,0.15);color:#f97316;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.how-step-text strong{display:block;font-size:14px;font-weight:600;color:#e8e8f0;margin-bottom:2px}
+.how-step-text span{font-size:13px;color:#555}
+.tos-section{margin-bottom:1.25rem}
+.tos-section h3{font-size:12px;font-weight:700;color:#f97316;text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
+.tos-section p{font-size:13px;color:#666;line-height:1.7;margin-bottom:0}
+.tos-updated{font-size:11px;color:#2a2a30;margin-top:1.25rem;padding-top:1rem;border-top:1px solid #1a1c20}
+
+.hero{text-align:center;padding:5rem 1rem 3.5rem}
+.hero-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:#f97316;background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);border-radius:100px;padding:5px 14px;margin-bottom:1.5rem}
+.hero h1{font-size:54px;font-weight:900;letter-spacing:-0.045em;line-height:1.05;color:#fff;margin-bottom:1.25rem}
+.hero h1 em{font-style:normal;color:#f97316}
+.hero p{font-size:17px;color:#666;max-width:420px;margin:0 auto 3rem;line-height:1.65}
+.hero-steps{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap}
+.hero-step{display:flex;align-items:center;gap:8px;font-size:13px;color:#444}
+.hero-step-num{width:22px;height:22px;border-radius:50%;background:rgba(249,115,22,0.12);color:#f97316;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.main{max-width:800px;margin:0 auto;padding:0 1.5rem 6rem}
+
+.card{background:#111214;border:1px solid #1a1c22;border-radius:18px;padding:1.75rem;margin-bottom:1rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#f97316}
+.card-meta{font-size:12px;color:#333}
+
+.lifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:540px){.lifts-grid{grid-template-columns:1fr}}
+.lift-row{display:flex;flex-direction:column;gap:5px}
+.lift-name{font-size:12px;font-weight:600;color:#888;letter-spacing:0.03em}
+.lift-inputs{display:flex;gap:6px;align-items:center}
+.lift-inputs input{flex:1;background:#0c0d0f;border:1px solid #1a1c22;border-radius:9px;padding:10px 12px;font-family:inherit;font-size:14px;color:#e0e0ec;transition:border-color 0.15s;min-width:0}
+.lift-inputs input::placeholder{color:#2a2c32}
+.lift-inputs input:focus{outline:none;border-color:rgba(249,115,22,0.5);background:#0e0f12}
+.lift-sep{font-size:12px;color:#333;flex-shrink:0}
+.lift-unit{font-size:12px;color:#444;flex-shrink:0}
+
+.add-lift-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.custom-lift-input{flex:1;min-width:140px;background:#0c0d0f;border:1px solid #1a1c22;border-radius:9px;padding:9px 12px;font-family:inherit;font-size:13px;color:#e0e0ec}
+.custom-lift-input::placeholder{color:#2a2c32}
+.custom-lift-input:focus{outline:none;border-color:rgba(249,115,22,0.4)}
+.add-btn{font-size:13px;color:#f97316;background:rgba(249,115,22,0.08);border:1px solid rgba(249,115,22,0.2);border-radius:9px;padding:9px 15px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap}
+.add-btn:hover{background:rgba(249,115,22,0.15)}
+
+.unit-toggle{display:flex;gap:6px}
+.unit-btn{font-size:12px;font-weight:600;color:#444;background:#0c0d0f;border:1px solid #1a1c22;border-radius:8px;padding:5px 14px;cursor:pointer;transition:all 0.15s;font-family:inherit}
+.unit-btn.active{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.4);color:#f97316}
+
+textarea{width:100%;background:#0c0d0f;border:1px solid #1a1c22;border-radius:10px;padding:13px 15px;font-family:inherit;font-size:14px;color:#e0e0ec;resize:vertical;line-height:1.7;transition:border-color 0.15s;min-height:80px}
+textarea::placeholder{color:#2a2c32}
+textarea:focus{outline:none;border-color:rgba(249,115,22,0.5);background:#0e0f12}
+
+.chip-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
+.chip{font-size:12px;font-weight:500;color:#444;background:#0c0d0f;border:1px solid #1a1c22;border-radius:100px;padding:6px 14px;cursor:pointer;transition:all 0.15s;user-select:none;font-family:inherit}
+.chip:hover{border-color:#2e303a;color:#aaa}
+.chip.active{background:rgba(249,115,22,0.12);border-color:rgba(249,115,22,0.4);color:#fb923c}
+
+.calc-btn{width:100%;padding:16px;background:#f97316;color:#fff;border:none;border-radius:14px;font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;letter-spacing:-0.01em;transition:opacity 0.15s,transform 0.1s;margin-top:0.25rem}
+.calc-btn:hover{opacity:0.88}
+.calc-btn:active{transform:scale(0.99)}
+.calc-btn:disabled{opacity:0.25;cursor:not-allowed;transform:none}
+
+.error{color:#f87171;font-size:13px;margin-top:10px;font-weight:500}
+.loading{display:none;align-items:center;gap:10px;color:#444;font-size:14px;margin-top:14px}
+.dot{width:5px;height:5px;border-radius:50%;background:#f97316;animation:pulse 1.2s infinite}
+.dot:nth-child(2){animation-delay:0.2s}
+.dot:nth-child(3){animation-delay:0.4s}
+@keyframes pulse{0%,80%,100%{opacity:0.12}40%{opacity:1}}
+
+.results-card{display:none;background:#111214;border:1px solid #1a1c22;border-radius:18px;padding:1.75rem;margin-top:1rem}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
+.results-actions{display:flex;gap:7px}
+.action-btn{font-size:12px;font-weight:500;color:#444;background:#0c0d0f;border:1px solid #1a1c22;border-radius:8px;padding:6px 13px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.action-btn:hover{color:#aaa;border-color:#2e303a}
+.action-btn.done{color:#f97316;border-color:rgba(249,115,22,0.35)}
+
+.maxes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:1.5rem}
+.max-card{background:#0c0d0f;border:1px solid #1a1c22;border-radius:12px;padding:1rem}
+.max-lift-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:#555;margin-bottom:4px}
+.max-value{font-size:22px;font-weight:800;color:#f97316;letter-spacing:-0.02em;line-height:1}
+.max-unit{font-size:12px;color:#444;margin-top:2px}
+
+.plan-section{border-top:1px solid #16181c;padding-top:1.5rem}
+.plan-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#f97316;margin-bottom:1rem}
+.plan-text{font-size:14px;color:#c8c8d8;line-height:1.85;white-space:pre-wrap}
+
+.results-footer{margin-top:1rem;padding-top:1rem;border-top:1px solid #16181c;font-size:12px;color:#2a2c32}
+
+footer{text-align:center;font-size:12px;color:#222228;padding:2.5rem;border-top:1px solid #111318;margin-top:2rem}
+footer a{color:#333;text-decoration:none;margin:0 8px;transition:color 0.15s}
+footer a:hover{color:#777}
+</style>
+</head>
+<body>
+
+<!-- HOW IT WORKS -->
+<div class="modal-overlay" id="howModal" onclick="closeModal('howModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="modal-close" onclick="closeModal('howModal')">×</button>
+  <div class="modal-badge badge-orange">How it works</div>
+  <h2>Track lifts. Hit goals.</h2>
+  <p>LiftLab uses your actual gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic advice.</p>
+  <div class="how-steps">
+    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your lifts</strong><span>Input the weight and reps for any exercise. The more lifts you add, the better.</span></div></div>
+    <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Tell us what you're training for — strength, size, endurance, or a specific target weight.</span></div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan</strong><span>See your estimated 1 rep max for every lift, plus a detailed program to reach your goal.</span></div></div>
+  </div>
+</div>
+</div>
+
+<!-- PRICING -->
+<div class="modal-overlay" id="pricingModal" onclick="closeModal('pricingModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
+  <div class="modal-badge badge-green">Free during beta</div>
+  <h2>Completely free right now</h2>
+  <p>LiftLab is in early access and fully free to use — no account, no credit card, no limits. Use it as much as you want.</p>
+  <p>As the tool grows, a paid plan may be introduced for advanced features like saved programs, progress tracking, and periodization planning. Early users will get the best rates.</p>
+  <p style="color:#333;font-size:13px">Pricing hasn't been decided yet. When it is, it will be fair.</p>
+</div>
+</div>
+
+<!-- TERMS -->
+<div class="modal-overlay" id="tosModal" onclick="closeModal('tosModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="modal-close" onclick="closeModal('tosModal')">×</button>
+  <div class="modal-badge badge-yellow">Terms of service</div>
+  <h2>Terms of Service</h2>
+  <p>By using LiftLab you agree to these terms.</p>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing on this site is medical or professional training advice. Consult a qualified professional before starting any new exercise program, especially if you have injuries or health conditions. You train at your own risk.</p></div>
+  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>One-rep max calculations are estimates based on established formulas. Actual maxes vary by person, day, and conditions. Never attempt a true one-rep max without a spotter. Use these numbers as a guide only.</p></div>
+  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use the information provided. LiftLab is not liable for any injury, loss, or damage resulting from following advice generated by this tool.</p></div>
+  <div class="tos-section"><h3>4. Privacy</h3><p>We do not store your lift data after your session. No account is required. We collect only basic usage data for rate limiting and do not sell any data.</p></div>
+  <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not attempt to abuse or spam the service. We reserve the right to block access for users who misuse the tool.</p></div>
+  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is with no guarantees of accuracy, availability, or fitness for a particular purpose. The service may change or become paid in the future.</p></div>
+  <div class="tos-section"><h3>7. Liability</h3><p>To the fullest extent permitted by law, LiftLab and its operator are not liable for any indirect, incidental, or consequential damages. Total liability is capped at what you have paid us (zero during free beta).</p></div>
+  <p class="tos-updated">Last updated: April 2026.</p>
+</div>
+</div>
+
+<header>
+  <div class="logo">Lift<span>Lab</span></div>
+  <nav>
+    <a href="#" onclick="openModal('howModal');return false">How it works</a>
+    <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
+  </nav>
+</header>
+
+<div class="hero">
+  <div class="hero-badge">AI-powered training</div>
+  <h1>Know your max.<br><em>Hit your goals.</em></h1>
+  <p>Enter your lifts and get your one-rep max instantly — plus a personalized plan to reach your next goal.</p>
+  <div class="hero-steps">
+    <div class="hero-step"><div class="hero-step-num">1</div>Enter your lifts</div>
+    <div class="hero-step"><div class="hero-step-num">2</div>Set your goal</div>
+    <div class="hero-step"><div class="hero-step-num">3</div>Get your plan</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- UNIT TOGGLE -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Units</span>
+    </div>
+    <div class="unit-toggle">
+      <button class="unit-btn active" id="lbsBtn" onclick="setUnit('lbs')">lbs</button>
+      <button class="unit-btn" id="kgBtn" onclick="setUnit('kg')">kg</button>
+    </div>
+  </div>
+
+  <!-- LIFTS -->
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Your lifts</span>
+      <span class="card-meta">weight × reps</span>
+    </div>
+    <div class="lifts-grid" id="liftsGrid">
+      <!-- preset lifts -->
+    </div>
+    <div class="add-lift-row">
+      <input class="custom-lift-input" id="customLiftName" placeholder="Custom exercise name..." />
+      <button class="add-btn" onclick="addCustomLift()">+ Add lift</button>
+    </div>
+  </div>
+
+  <!-- GOAL -->
+  <div class="card">
+    <div class="card-header"><span class="card-label">Your goal</span></div>
+    <div class="chip-row" style="margin-bottom:12px">
+      <div class="chip active" onclick="selectGoal(this,'strength')">Strength</div>
+      <div class="chip" onclick="selectGoal(this,'muscle')">Muscle / size</div>
+      <div class="chip" onclick="selectGoal(this,'endurance')">Endurance</div>
+      <div class="chip" onclick="selectGoal(this,'lose_weight')">Lose weight</div>
+      <div class="chip" onclick="selectGoal(this,'custom')">Custom goal</div>
+    </div>
+    <textarea id="goalDetail" rows="2" placeholder="Optional: describe your goal in detail — e.g. 'I want to bench 225 lbs within 3 months' or 'I want to compete in powerlifting'"></textarea>
+  </div>
+
+  <!-- EXPERIENCE -->
+  <div class="card">
+    <div class="card-header"><span class="card-label">Experience level</span></div>
+    <div class="chip-row">
+      <div class="chip active" onclick="selectExp(this,'beginner')">Beginner</div>
+      <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
+      <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
+    </div>
+  </div>
+
+  <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate my max + get my plan</button>
+  <div id="error" class="error"></div>
+  <div id="loading" class="loading">
+    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+    <span id="loadingText">Calculating your maxes...</span>
+  </div>
+
+  <!-- RESULTS -->
+  <div class="results-card" id="resultsCard">
+    <div class="results-header">
+      <span class="card-label">Your results</span>
+      <div class="results-actions">
+        <button class="action-btn" id="copyBtn" onclick="copyResults()">Copy plan</button>
+      </div>
+    </div>
+
+    <div class="maxes-grid" id="maxesGrid"></div>
+
+    <div class="plan-section">
+      <div class="plan-label">Your training plan</div>
+      <div class="plan-text" id="planText"></div>
+    </div>
+
+    <div class="results-footer" id="resultsFooter"></div>
+  </div>
+
+</div>
+
+<footer>
+  LiftLab &mdash; free during beta &mdash; powered by Claude
+  <br style="margin-bottom:8px">
+  <a href="#" onclick="openModal('howModal');return false">How it works</a>
+  <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
+  <a href="#" onclick="openModal('tosModal');return false">Terms of service</a>
+</footer>
+
+<script>
+let unit = 'lbs';
+let selectedGoal = 'strength';
+let selectedExp = 'beginner';
+
+const presetLifts = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
+
+function initLifts(){
+  const grid = document.getElementById('liftsGrid');
+  grid.innerHTML = '';
+  presetLifts.forEach(name => grid.appendChild(makeLiftRow(name)));
+}
+
+function makeLiftRow(name){
+  const div = document.createElement('div');
+  div.className = 'lift-row';
+  div.innerHTML = `
+    <span class="lift-name">${name}</span>
+    <div class="lift-inputs">
+      <input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" data-lift="${name}">
+      <span class="lift-sep">×</span>
+      <input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" data-lift="${name}">
+      <span class="lift-unit unit-display">${unit}</span>
+    </div>`;
+  return div;
+}
+
+function addCustomLift(){
+  const nameInput = document.getElementById('customLiftName');
+  const name = nameInput.value.trim();
+  if(!name) return;
+  document.getElementById('liftsGrid').appendChild(makeLiftRow(name));
+  nameInput.value = '';
+}
+
+function setUnit(u){
+  unit = u;
+  document.getElementById('lbsBtn').classList.toggle('active', u==='lbs');
+  document.getElementById('kgBtn').classList.toggle('active', u==='kg');
+  document.querySelectorAll('.unit-display').forEach(el => el.textContent = u);
+}
+
+function selectGoal(el, val){
+  document.querySelectorAll('.chip-row .chip').forEach(c => {
+    if(c.onclick && c.onclick.toString().includes('selectGoal')) c.classList.remove('active');
+  });
+  el.classList.add('active');
+  selectedGoal = val;
+}
+
+function selectExp(el, val){
+  document.querySelectorAll('.chip-row .chip').forEach(c => {
+    if(c.onclick && c.onclick.toString().includes('selectExp')) c.classList.remove('active');
+  });
+  el.classList.add('active');
+  selectedExp = val;
+}
+
+// Epley formula: 1RM = weight * (1 + reps/30)
+function calcMax(weight, reps){
+  if(reps === 1) return weight;
+  return Math.round(weight * (1 + reps / 30));
+}
+
+function getLifts(){
+  const lifts = [];
+  document.querySelectorAll('.lift-row').forEach(row => {
+    const name = row.querySelector('.lift-name').textContent;
+    const w = parseFloat(row.querySelector('.lift-weight').value);
+    const r = parseInt(row.querySelector('.lift-reps').value);
+    if(w > 0 && r > 0){
+      lifts.push({ name, weight: w, reps: r, max: calcMax(w, r) });
+    }
+  });
+  return lifts;
+}
+
+function setLoading(on, text='Calculating your maxes...'){
+  document.getElementById('loadingText').textContent = text;
+  document.getElementById('loading').style.display = on ? 'flex' : 'none';
+  document.getElementById('calcBtn').disabled = on;
+}
+
+async function calculate(){
+  const lifts = getLifts();
+  const goalDetail = document.getElementById('goalDetail').value.trim();
+  const err = document.getElementById('error');
+  err.textContent = '';
+
+  if(!lifts.length){
+    err.textContent = 'Enter at least one lift with weight and reps.';
+    return;
+  }
+
+  // Show maxes immediately from formula
+  const grid = document.getElementById('maxesGrid');
+  grid.innerHTML = '';
+  lifts.forEach(l => {
+    const card = document.createElement('div');
+    card.className = 'max-card';
+    card.innerHTML = `<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div>`;
+    grid.appendChild(card);
+  });
+
+  document.getElementById('resultsCard').style.display = 'block';
+  document.getElementById('planText').textContent = '';
+  document.getElementById('resultsFooter').textContent = '';
+
+  setLoading(true, 'Building your training plan...');
+
+  const liftsText = lifts.map(l => `${l.name}: ${l.weight}${unit} × ${l.reps} reps (estimated 1RM: ${l.max}${unit})`).join('\n');
+  const goalLabel = {strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'}[selectedGoal];
+  const goalText = goalDetail ? `${goalLabel} — specifically: ${goalDetail}` : goalLabel;
+
+  try {
+    const res = await fetch('/api/plan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ lifts, unit, goal: goalText, experience: selectedExp })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    document.getElementById('planText').textContent = data.plan;
+    document.getElementById('resultsFooter').textContent = `Based on ${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${goalLabel.toLowerCase()}`;
+    document.getElementById('resultsCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch(e){
+    err.textContent = e.message || 'Something went wrong. Try again.';
+  } finally {
+    setLoading(false);
+  }
+}
+
+function copyResults(){
+  const maxLines = [...document.querySelectorAll('.max-card')].map(c => {
+    const name = c.querySelector('.max-lift-name').textContent;
+    const val = c.querySelector('.max-value').textContent;
+    return `${name}: ${val} ${unit} 1RM`;
+  }).join('\n');
+  const plan = document.getElementById('planText').textContent;
+  const full = `MY LIFT MAXES\n${maxLines}\n\nTRAINING PLAN\n${plan}`;
+  navigator.clipboard.writeText(full).then(() => {
+    const btn = document.getElementById('copyBtn');
+    btn.textContent = 'Copied!';
+    btn.classList.add('done');
+    setTimeout(() => { btn.textContent = 'Copy plan'; btn.classList.remove('done'); }, 1500);
+  });
+}
+
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.addEventListener('keydown', e => { if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
+
+document.getElementById('customLiftName').addEventListener('keydown', e => { if(e.key==='Enter') addCustomLift(); });
+
+initLifts();
+</script>
+</body>
+</html>
