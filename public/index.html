@@ -6,6 +6,8 @@
 <title>LiftLab — Know your max. Hit your goals.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -13,25 +15,30 @@
   --border:#1e2026;--border2:#252830;
   --orange:#f97316;--orange-dim:rgba(249,115,22,0.12);--orange-border:rgba(249,115,22,0.28);
   --text:#e8eaf0;--text-muted:#888;--text-dim:#444;--text-faint:#252830;
-  --green:#34d399;--green-dim:rgba(52,211,153,0.1);
-  --yellow:#fbbf24;--red:#f87171;
+  --green:#34d399;--green-dim:rgba(52,211,153,0.1);--green-border:rgba(52,211,153,0.25);
+  --yellow:#fbbf24;--red:#f87171;--blue:#60a5fa;
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-header{display:flex;align-items:center;justify-content:space-between;padding:0 2rem;height:58px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
+/* ── HEADER ── */
+header{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
 .logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:0.02em;color:#fff}
 .logo span{color:var(--orange)}
-nav{display:flex;gap:4px}
+.header-right{display:flex;align-items:center;gap:8px}
 nav a{font-size:13px;color:var(--text-dim);text-decoration:none;padding:6px 12px;border-radius:8px;transition:all 0.15s;font-weight:500}
 nav a:hover{color:var(--text);background:var(--surface2)}
+.signup-btn{font-size:13px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap}
+.signup-btn:hover{background:rgba(249,115,22,0.2)}
 
-.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:58px;z-index:90;padding:0 2rem}
-.tab{font-size:13px;font-weight:600;color:var(--text-dim);padding:14px 18px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;user-select:none}
+/* ── TABS ── */
+.tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:58px;z-index:90;padding:0 1.5rem;overflow-x:auto}
+.tab{font-size:13px;font-weight:600;color:var(--text-dim);padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;user-select:none}
 .tab:hover{color:var(--text-muted)}
 .tab.active{color:var(--orange);border-bottom-color:var(--orange)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
+/* ── MODALS ── */
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
 .modal{background:#111317;border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:520px;width:100%;position:relative;max-height:88vh;overflow-y:auto}
@@ -42,8 +49,9 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .modal p:last-child{margin-bottom:0}
 .modal-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.07em;text-transform:uppercase;padding:4px 11px;border-radius:100px;margin-bottom:1rem}
 .badge-orange{color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border)}
-.badge-green{color:var(--green);background:var(--green-dim);border:1px solid rgba(52,211,153,0.25)}
+.badge-green{color:var(--green);background:var(--green-dim);border:1px solid var(--green-border)}
 .badge-yellow{color:var(--yellow);background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
+.badge-blue{color:var(--blue);background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2)}
 .how-steps{display:flex;flex-direction:column;gap:14px;margin-top:1rem}
 .how-step{display:flex;gap:12px;align-items:flex-start}
 .how-num{width:26px;height:26px;border-radius:50%;background:var(--orange-dim);color:var(--orange);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
@@ -53,31 +61,58 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .tos-section h3{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
 .tos-section p{font-size:13px;color:#555;line-height:1.7;margin-bottom:0}
 
-.hero{text-align:center;padding:4.5rem 1rem 3rem}
-.hero-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:100px;padding:5px 14px;margin-bottom:1.5rem}
-.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:58px;font-weight:900;letter-spacing:0.01em;line-height:1;color:#fff;margin-bottom:1rem}
-.hero h1 em{font-style:normal;color:var(--orange)}
-.hero p{font-size:16px;color:var(--text-muted);max-width:400px;margin:0 auto 2.5rem;line-height:1.65}
+/* ── SIGNUP MODAL ── */
+.signup-features{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
+.signup-feature{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-muted)}
+.signup-feature-icon{width:20px;height:20px;border-radius:50%;background:var(--green-dim);color:var(--green);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.signup-form{display:flex;flex-direction:column;gap:10px;margin-top:1.25rem}
+.signup-input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%}
+.signup-input::placeholder{color:var(--text-faint)}
+.signup-input:focus{outline:none;border-color:var(--orange-border)}
+.signup-submit{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:opacity 0.15s}
+.signup-submit:hover{opacity:0.88}
+.signup-note{font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px}
 
+/* ── HERO ── */
+.hero{text-align:center;padding:4rem 1rem 2.5rem}
+.hero-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:100px;padding:5px 14px;margin-bottom:1.25rem}
+.hero h1{font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;letter-spacing:0.01em;line-height:1;color:#fff;margin-bottom:1rem}
+.hero h1 em{font-style:normal;color:var(--orange)}
+.hero p{font-size:16px;color:var(--text-muted);max-width:400px;margin:0 auto 2rem;line-height:1.65}
+
+/* ── MAIN ── */
 .main{max-width:820px;margin:0 auto;padding:1.5rem 1.5rem 6rem}
 
+/* ── CARDS ── */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:0.875rem}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
 .card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--orange)}
 .card-meta{font-size:12px;color:var(--text-faint)}
 
+/* ── BANNERS ── */
 .saved-banner{display:none;align-items:center;gap:8px;background:rgba(249,115,22,0.06);border:1px solid var(--orange-border);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--text-muted)}
-.saved-banner b{color:var(--orange);font-weight:600}
+.saved-banner b{color:var(--orange)}
 .clear-btn{margin-left:auto;font-size:12px;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:7px;padding:3px 10px;cursor:pointer;font-family:inherit;transition:all 0.15s}
 .clear-btn:hover{color:var(--text-muted);border-color:var(--border2)}
-
-.usage-banner{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:1rem;font-size:13px}
+.usage-banner{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:1rem}
 .usage-bar-track{flex:1;height:4px;background:var(--border);border-radius:100px;overflow:hidden}
 .usage-bar-fill{height:100%;background:var(--orange);border-radius:100px;transition:width 0.4s ease}
 .usage-label{font-size:12px;color:var(--text-dim);white-space:nowrap}
 .usage-cta{font-size:12px;font-weight:600;color:var(--orange);white-space:nowrap;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
 .usage-cta:hover{text-decoration:underline}
 
+/* ── ADMIN ── */
+.admin-row{display:flex;gap:8px;margin-top:8px}
+.admin-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
+.admin-input::placeholder{color:var(--text-faint)}
+.admin-input:focus{outline:none;border-color:var(--orange-border)}
+.admin-btn{font-size:12px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s}
+.admin-btn:hover{background:rgba(249,115,22,0.2)}
+.admin-status{font-size:12px;margin-top:4px}
+.admin-status.ok{color:var(--green)}
+.admin-status.err{color:var(--red)}
+
+/* ── FORM ELEMENTS ── */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:500px){.info-grid{grid-template-columns:1fr}}
 .info-field{display:flex;flex-direction:column;gap:5px}
@@ -86,7 +121,14 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .field-input::placeholder{color:var(--text-faint)}
 .field-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
 select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
+.combo-wrap{display:flex;flex-direction:column;gap:0}
+.combo-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 0 0;padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;border-bottom:none}
+.combo-select:focus{outline:none;border-color:var(--orange-border)}
+.combo-manual{background:var(--surface2);border:1px solid var(--border);border-radius:0 0 9px 9px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);width:100%;border-top:1px solid var(--border2)}
+.combo-manual::placeholder{color:var(--text-faint)}
+.combo-manual:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
 
+/* ── LIFTS ── */
 .lifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:540px){.lifts-grid{grid-template-columns:1fr}}
 .lift-row{display:flex;flex-direction:column;gap:5px;position:relative}
@@ -100,7 +142,6 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .lift-remove{position:absolute;top:-1px;right:0;font-size:14px;line-height:1;color:var(--text-dim);background:none;border:none;cursor:pointer;padding:1px 5px;border-radius:4px;opacity:0;transition:opacity 0.15s;font-family:inherit}
 .lift-row:hover .lift-remove{opacity:1}
 .lift-remove:hover{color:var(--red)}
-
 .add-lift-row{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
 .custom-lift-input{flex:1;min-width:140px;background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
 .custom-lift-input::placeholder{color:var(--text-faint)}
@@ -108,24 +149,25 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .add-btn{font-size:13px;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;padding:9px 15px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap;font-weight:500}
 .add-btn:hover{background:rgba(249,115,22,0.2)}
 
+/* ── CHIPS & TOGGLES ── */
 .unit-toggle{display:flex;gap:6px}
 .unit-btn{font-size:13px;font-weight:600;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 18px;cursor:pointer;transition:all 0.15s;font-family:inherit}
 .unit-btn.active{background:var(--orange-dim);border-color:var(--orange-border);color:var(--orange)}
-
 textarea{width:100%;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 15px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);resize:vertical;line-height:1.7;transition:border-color 0.15s;min-height:72px}
 textarea::placeholder{color:var(--text-faint)}
 textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
-
 .chip-row{display:flex;gap:7px;flex-wrap:wrap;margin-top:4px}
 .chip{font-size:12px;font-weight:500;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:6px 14px;cursor:pointer;transition:all 0.15s;user-select:none;font-family:inherit}
 .chip:hover{border-color:var(--border2);color:var(--text-muted)}
 .chip.active{background:var(--orange-dim);border-color:var(--orange-border);color:#fb923c}
+.exp-desc{font-size:12px;color:var(--text-dim);margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--orange-border);line-height:1.6;display:none}
+.exp-desc.visible{display:block}
 
+/* ── BUTTONS ── */
 .calc-btn{width:100%;padding:16px;background:var(--orange);color:#fff;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:0.25rem}
 .calc-btn:hover{opacity:0.88}
 .calc-btn:active{transform:scale(0.99)}
 .calc-btn:disabled{opacity:0.28;cursor:not-allowed;transform:none}
-
 .error{color:var(--red);font-size:13px;margin-top:10px;font-weight:500}
 .loading{display:none;align-items:center;gap:10px;color:var(--text-dim);font-size:14px;margin-top:14px}
 .dot{width:5px;height:5px;border-radius:50%;background:var(--orange);animation:pulse 1.2s infinite}
@@ -133,20 +175,19 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .dot:nth-child(3){animation-delay:0.4s}
 @keyframes pulse{0%,80%,100%{opacity:0.12}40%{opacity:1}}
 
+/* ── RESULTS ── */
 .results-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-top:1rem}
-.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem}
-.results-actions{display:flex;gap:7px}
+.results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
+.results-actions{display:flex;gap:7px;flex-wrap:wrap}
 .action-btn{font-size:12px;font-weight:500;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:6px 13px;cursor:pointer;font-family:inherit;transition:all 0.15s}
 .action-btn:hover{color:var(--text-muted);border-color:var(--border2)}
 .action-btn.done{color:var(--orange);border-color:var(--orange-border)}
-
 .maxes-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:8px;margin-bottom:1.5rem}
 .max-card{background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:1rem}
 .max-lift-name{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:4px}
 .max-value{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:700;color:var(--orange);line-height:1}
 .max-unit{font-size:12px;color:var(--text-dim);margin-top:3px}
 .max-reps{font-size:11px;color:var(--text-faint);margin-top:2px}
-
 .plan-section{border-top:1px solid var(--border);padding-top:1.5rem}
 .plan-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);margin-bottom:1rem}
 .plan-text{font-size:14px;color:#c0c4d0;line-height:1.85}
@@ -158,58 +199,9 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .plan-text strong{color:var(--text);font-weight:600}
 .results-footer{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:12px;color:var(--text-faint)}
 
-/* Quick Max Calculator */
-.qmc-hero{text-align:center;padding:3.5rem 1rem 2rem}
-.qmc-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:#fff;margin-bottom:0.5rem}
-.qmc-hero p{font-size:15px;color:var(--text-muted);max-width:380px;margin:0 auto}
-
-.qmc-big-input{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
-.qmc-big-input>div{display:flex;flex-direction:column;gap:6px;flex:1;min-width:80px}
-.qmc-big-input input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);transition:border-color 0.15s;width:100%}
-.qmc-big-input input::placeholder{color:var(--text-faint)}
-.qmc-big-input input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
-.qmc-sep{font-size:22px;color:var(--text-dim);padding-bottom:14px;font-weight:300}
-
-.qmc-result{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center;margin-top:1rem}
-.qmc-result-num{font-family:'Barlow Condensed',sans-serif;font-size:80px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:0.01em}
-.qmc-result-unit{font-size:14px;color:var(--text-muted);margin-top:4px}
-.qmc-result-sub{font-size:13px;color:var(--text-dim);margin-top:10px}
-
-.reps-table{width:100%;border-collapse:collapse}
-.reps-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
-.reps-table td{font-size:13px;color:var(--text-muted);padding:8px 12px;border-bottom:1px solid var(--border)}
-.reps-table tr:last-child td{border-bottom:none}
-.reps-table tr:hover td{background:rgba(249,115,22,0.04)}
-.reps-table td:last-child{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--orange);font-weight:700}
-
-.formula-note{font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px}
-
-/* ── Admin unlock ── */
-.admin-row{display:flex;gap:8px;margin-top:8px;align-items:center}
-.admin-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
-.admin-input::placeholder{color:var(--text-faint)}
-.admin-input:focus{outline:none;border-color:var(--orange-border)}
-.admin-btn{font-size:12px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s}
-.admin-btn:hover{background:rgba(249,115,22,0.2)}
-.admin-status{font-size:12px;margin-top:4px}
-.admin-status.ok{color:var(--green)}
-.admin-status.err{color:var(--red)}
-
-/* ── Combo field (dropdown + manual input) ── */
-.combo-wrap{position:relative;display:flex;flex-direction:column;gap:5px}
-.combo-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 0 0;padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;border-bottom:none}
-.combo-select:focus{outline:none;border-color:var(--orange-border)}
-.combo-manual{background:var(--surface2);border:1px solid var(--border);border-radius:0 0 9px 9px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);width:100%;border-top:1px solid var(--border2)}
-.combo-manual::placeholder{color:var(--text-faint)}
-.combo-manual:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
-
-/* ── Experience descriptions ── */
-.exp-desc{font-size:12px;color:var(--text-dim);margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--orange-border);line-height:1.6;display:none}
-.exp-desc.visible{display:block}
-
-/* ── Q&A section ── */
+/* ── Q&A ── */
 .qa-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:0.25rem}
-.qa-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);margin-bottom:0.75rem}
+.qa-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);margin-bottom:0.5rem}
 .qa-limit{font-size:12px;color:var(--text-dim);margin-bottom:1rem}
 .qa-limit b{color:var(--text-muted)}
 .qa-messages{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
@@ -227,9 +219,55 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .qa-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text)}
 .qa-input::placeholder{color:var(--text-faint)}
 .qa-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
-.qa-send{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.15s}
+.qa-send{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:opacity 0.15s}
 .qa-send:hover{opacity:0.88}
 .qa-send:disabled{opacity:0.3;cursor:not-allowed}
+
+/* ── PROGRESS TRACKER ── */
+.prog-hero{text-align:center;padding:3rem 1rem 2rem}
+.prog-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:#fff;margin-bottom:0.5rem}
+.prog-hero p{font-size:15px;color:var(--text-muted);max-width:380px;margin:0 auto}
+.log-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
+.log-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:100px}
+.log-input{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%}
+.log-input::placeholder{color:var(--text-faint)}
+.log-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+.log-btn{background:var(--orange);color:#fff;border:none;border-radius:9px;padding:10px 18px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.15s;align-self:flex-end}
+.log-btn:hover{opacity:0.88}
+.lift-selector{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 30px 10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;width:100%}
+.lift-selector:focus{outline:none;border-color:var(--orange-border)}
+.chart-wrap{position:relative;height:260px;margin-top:1rem}
+.log-entries{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-top:1rem}
+.log-entry{display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px}
+.log-entry-left{color:var(--text-muted)}
+.log-entry-right{display:flex;align-items:center;gap:10px}
+.log-entry-max{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--orange)}
+.log-entry-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;padding:2px 4px;opacity:0.5;transition:opacity 0.15s}
+.log-entry-del:hover{opacity:1;color:var(--red)}
+.pr-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--green);background:var(--green-dim);border:1px solid var(--green-border);border-radius:100px;padding:2px 7px;letter-spacing:0.04em}
+.empty-state{text-align:center;color:var(--text-dim);font-size:14px;padding:2rem;background:var(--surface2);border-radius:12px;border:1px dashed var(--border2)}
+
+/* ── QMC ── */
+.qmc-hero{text-align:center;padding:3.5rem 1rem 2rem}
+.qmc-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:#fff;margin-bottom:0.5rem}
+.qmc-hero p{font-size:15px;color:var(--text-muted);max-width:380px;margin:0 auto}
+.qmc-big-input{display:flex;gap:8px;align-items:flex-end;flex-wrap:wrap}
+.qmc-big-input>div{display:flex;flex-direction:column;gap:6px;flex:1;min-width:80px}
+.qmc-big-input input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;font-family:'DM Sans',sans-serif;font-size:16px;color:var(--text);transition:border-color 0.15s;width:100%}
+.qmc-big-input input::placeholder{color:var(--text-faint)}
+.qmc-big-input input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+.qmc-sep{font-size:22px;color:var(--text-dim);padding-bottom:14px;font-weight:300}
+.qmc-result{display:none;background:var(--surface2);border:1px solid var(--border);border-radius:14px;padding:2rem;text-align:center;margin-top:1rem}
+.qmc-result-num{font-family:'Barlow Condensed',sans-serif;font-size:80px;font-weight:900;color:var(--orange);line-height:1;letter-spacing:0.01em}
+.qmc-result-unit{font-size:14px;color:var(--text-muted);margin-top:4px}
+.qmc-result-sub{font-size:13px;color:var(--text-dim);margin-top:10px}
+.reps-table{width:100%;border-collapse:collapse}
+.reps-table th{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);padding:8px 12px;text-align:left;border-bottom:1px solid var(--border)}
+.reps-table td{font-size:13px;color:var(--text-muted);padding:8px 12px;border-bottom:1px solid var(--border)}
+.reps-table tr:last-child td{border-bottom:none}
+.reps-table tr:hover td{background:rgba(249,115,22,0.04)}
+.reps-table td:last-child{font-family:'Barlow Condensed',sans-serif;font-size:16px;color:var(--orange);font-weight:700}
+.formula-note{font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px}
 
 footer{text-align:center;font-size:12px;color:#1e2228;padding:2.5rem;border-top:1px solid var(--border);margin-top:2rem}
 footer a{color:#2a2e38;text-decoration:none;margin:0 8px;transition:color 0.15s}
@@ -237,6 +275,27 @@ footer a:hover{color:var(--text-muted)}
 </style>
 </head>
 <body>
+
+<!-- SIGNUP MODAL -->
+<div class="modal-overlay" id="signupModal" onclick="closeModal('signupModal')">
+<div class="modal" onclick="event.stopPropagation()">
+  <button class="modal-close" onclick="closeModal('signupModal')">×</button>
+  <div class="modal-badge badge-blue">Coming soon</div>
+  <h2>Create your account</h2>
+  <p>Accounts are free and unlock everything — your data follows you across every device, forever.</p>
+  <div class="signup-features">
+    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Sync across devices</strong> — your lifts and plans on every phone, tablet, and computer</span></div>
+    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Unlimited progress history</strong> — track every lift forever, not just what fits in your browser</span></div>
+    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Priority features</strong> — early access to periodization planning, coaching notes, and more</span></div>
+    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Locked-in free pricing</strong> — early users keep free access when paid plans launch</span></div>
+  </div>
+  <div class="signup-form">
+    <input class="signup-input" id="signupEmail" type="email" placeholder="your@email.com">
+    <button class="signup-submit" onclick="submitSignup()">Join the waitlist</button>
+    <p class="signup-note" id="signupNote">No spam. No credit card. Just LiftLab.</p>
+  </div>
+</div>
+</div>
 
 <!-- HOW IT WORKS -->
 <div class="modal-overlay" id="howModal" onclick="closeModal('howModal')">
@@ -246,11 +305,10 @@ footer a:hover{color:var(--text-muted)}
   <h2>Track lifts. Hit goals.</h2>
   <p>LiftLab uses your real gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic programs.</p>
   <div class="how-steps">
-    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Add your age, bodyweight, training schedule, and current lift numbers.</span></div></div>
+    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Age, bodyweight, training schedule, and current numbers.</span></div></div>
     <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Strength, size, endurance, or something specific — tell us exactly what you're chasing.</span></div></div>
-    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan</strong><span>See your 1RM instantly, plus an AI-built weekly program matched to your schedule and goal. Everything saves automatically.</span></div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan + track progress</strong><span>See your 1RM, get an AI plan, ask follow-up questions, export a PDF, and log workouts over time.</span></div></div>
   </div>
-  <p style="margin-top:1rem;font-size:13px;color:var(--text-dim)">Use <strong style="color:var(--text-muted)">Quick Max Calculator</strong> to estimate any 1RM in seconds — no AI, no waiting, just math.</p>
 </div>
 </div>
 
@@ -260,9 +318,10 @@ footer a:hover{color:var(--text-muted)}
   <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
   <div class="modal-badge badge-green">Free during beta</div>
   <h2>Completely free right now</h2>
-  <p>LiftLab is in early access — no account, no credit card. The Quick Max Calculator is always free. AI training plans are free during beta with a generous limit.</p>
-  <p>As LiftLab grows, a paid tier will likely be introduced for features like saved workout history, progress tracking over time, and advanced periodization. Core tools will remain free.</p>
-  <p style="color:var(--text-faint);font-size:13px">Pricing hasn't been set. Early beta users get the best deal when it launches.</p>
+  <p>LiftLab is in early access — no account, no credit card. The Quick Max Calculator and Progress Tracker are always free. AI training plans are free during beta with a limit.</p>
+  <p>When paid plans launch, they'll add: unlimited AI plans, device sync, coaching notes, advanced periodization, and more. Core tools stay free forever.</p>
+  <p style="color:var(--text-faint);font-size:13px">Join the waitlist to lock in early pricing before it's set.</p>
+  <button class="signup-submit" onclick="closeModal('pricingModal');openModal('signupModal')" style="margin-top:1rem;width:100%">Join the waitlist</button>
 </div>
 </div>
 
@@ -273,37 +332,40 @@ footer a:hover{color:var(--text-muted)}
   <div class="modal-badge badge-yellow">Terms of service</div>
   <h2>Terms of Service</h2>
   <p>By using LiftLab you agree to these terms. Last updated April 2026.</p>
-  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing is medical or professional training advice. Consult a qualified professional before starting any new program, especially with injuries or health conditions. You train at your own risk.</p></div>
-  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>1RM calculations use a weighted average of multiple established formulas (Brzycki, Lander, Epley, Mayhew) selected by rep range for best accuracy. These are still estimates — actual maxes vary by person and conditions. Never attempt a true one-rep max without a spotter. Use these numbers as a guide only.</p></div>
-  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. LiftLab is not liable for any injury, loss, or damage from following advice generated by this tool.</p></div>
-  <div class="tos-section"><h3>4. Privacy and data</h3><p>Your personal data is saved only in your own browser using localStorage — it never leaves your device. We collect only basic usage counts for rate limiting. We do not store or sell personal data.</p></div>
-  <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not spam or abuse the service. We reserve the right to block access for misuse.</p></div>
-  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is with no guarantees of accuracy or availability. The service may introduce paid features in the future.</p></div>
-  <div class="tos-section"><h3>7. Liability</h3><p>To the fullest extent permitted by law, LiftLab is not liable for indirect or consequential damages. Total liability is capped at what you have paid (zero during free beta).</p></div>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing is medical or professional training advice. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
+  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>1RM calculations use a weighted average of Brzycki, Lander, Epley, and Mayhew formulas. These are estimates — never attempt a true 1RM without a spotter.</p></div>
+  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. LiftLab is not liable for any injury or damage from following generated advice.</p></div>
+  <div class="tos-section"><h3>4. Privacy and data</h3><p>Your data is saved in your browser's localStorage — it never leaves your device. Waitlist emails are stored securely and never sold. We collect only basic rate-limit data server-side.</p></div>
+  <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not abuse or spam the service. We reserve the right to block access for misuse.</p></div>
+  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is. The service may change or introduce paid features in the future.</p></div>
+  <div class="tos-section"><h3>7. Liability</h3><p>Total liability is capped at what you have paid us (zero during free beta).</p></div>
 </div>
 </div>
 
 <header>
   <div class="logo">Lift<span>Lab</span></div>
-  <nav>
-    <a href="#" onclick="openModal('howModal');return false">How it works</a>
-    <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
-  </nav>
+  <div class="header-right">
+    <nav>
+      <a href="#" onclick="openModal('howModal');return false">How it works</a>
+      <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
+    </nav>
+    <button class="signup-btn" onclick="openModal('signupModal')">Create account</button>
+  </div>
 </header>
 
 <div class="tab-bar">
   <div class="tab active" id="tabPlanner" onclick="switchTab('planner')">Training Planner</div>
-  <div class="tab" id="tabQmc" onclick="switchTab('qmc')">Quick Max Calculator</div>
+  <div class="tab" id="tabProgress" onclick="switchTab('progress')">Progress Tracker</div>
+  <div class="tab" id="tabQmc" onclick="switchTab('qmc')">Quick Max Calc</div>
 </div>
 
-<!-- ═══════════════ TAB 1: TRAINING PLANNER ═══════════════ -->
+<!-- ═══ TAB 1: TRAINING PLANNER ═══ -->
 <div class="tab-panel active" id="tab-planner">
 <div class="hero">
   <div class="hero-badge">AI-powered training</div>
   <h1>Know your max.<br><em>Hit your goals.</em></h1>
-  <p>Enter your lifts, set your goal, and get a personalized training plan built around your actual numbers.</p>
+  <p>Enter your lifts, set your goal, get a personalized plan built around your actual numbers.</p>
 </div>
-
 <div class="main">
 
   <div class="saved-banner" id="savedBanner">
@@ -346,8 +408,7 @@ footer a:hover{color:var(--text-muted)}
             <option>18</option><option>19</option><option>20</option><option>21</option><option>22</option>
             <option>23</option><option>24</option><option>25</option><option>26</option><option>27</option>
             <option>28</option><option>29</option><option>30</option><option>32</option><option>35</option>
-            <option>38</option><option>40</option><option>45</option><option>50</option><option>55</option>
-            <option>60</option><option>65</option><option>70</option>
+            <option>38</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option>
           </select>
           <input class="combo-manual" id="userAge" type="number" min="13" max="99" placeholder="Or type age manually" oninput="autosave()">
         </div>
@@ -359,8 +420,7 @@ footer a:hover{color:var(--text-muted)}
             <option>100</option><option>110</option><option>120</option><option>130</option><option>140</option>
             <option>150</option><option>160</option><option>170</option><option>175</option><option>180</option>
             <option>185</option><option>190</option><option>195</option><option>200</option><option>210</option>
-            <option>220</option><option>230</option><option>240</option><option>250</option><option>260</option>
-            <option>275</option><option>300</option><option>320</option><option>350</option>
+            <option>220</option><option>230</option><option>240</option><option>250</option><option>275</option><option>300</option>
           </select>
           <input class="combo-manual" id="userWeight" type="number" min="50" max="700" placeholder="Or type weight manually" oninput="autosave()">
         </div>
@@ -381,7 +441,7 @@ footer a:hover{color:var(--text-muted)}
             <option>5'10"</option><option>5'11"</option><option>6'0"</option><option>6'1"</option><option>6'2"</option>
             <option>6'3"</option><option>6'4"</option><option>6'5"</option>
           </select>
-          <input class="combo-manual" id="userHeight" type="text" placeholder='Or type manually (e.g. 180cm)' oninput="autosave()">
+          <input class="combo-manual" id="userHeight" type="text" placeholder="Or type (e.g. 180cm)" oninput="autosave()">
         </div>
       </div>
     </div>
@@ -410,7 +470,7 @@ footer a:hover{color:var(--text-muted)}
         <div class="chip" onclick="selectSplit(this,'bro_split')">Bro split</div>
         <div class="chip" onclick="selectSplit(this,'custom')">Custom</div>
       </div>
-      <textarea id="splitCustom" rows="1" placeholder="Describe your split if custom, or any schedule notes..." style="margin-top:10px;min-height:50px" oninput="autosave()"></textarea>
+      <textarea id="splitCustom" rows="1" placeholder="Describe your split or any schedule notes..." style="margin-top:10px;min-height:50px" oninput="autosave()"></textarea>
     </div>
   </div>
 
@@ -443,7 +503,7 @@ footer a:hover{color:var(--text-muted)}
       <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
     </div>
     <div class="exp-desc visible" id="expDesc">
-      <strong>Beginner (0–2 years)</strong> — Still learning movement patterns and adding weight to the bar consistently every session. Linear progression works well. Most people starting out or returning after a long break.
+      <strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.
     </div>
   </div>
 
@@ -458,6 +518,7 @@ footer a:hover{color:var(--text-muted)}
     <div class="results-header">
       <span class="card-label">Your results</span>
       <div class="results-actions">
+        <button class="action-btn" id="exportPdfBtn" onclick="exportPDF()">Export PDF</button>
         <button class="action-btn" id="copyBtn" onclick="copyResults()">Copy plan</button>
       </div>
     </div>
@@ -467,14 +528,12 @@ footer a:hover{color:var(--text-muted)}
       <div class="plan-text" id="planText"></div>
     </div>
     <div class="results-footer" id="resultsFooter"></div>
-
-    <!-- Q&A -->
     <div class="qa-section" id="qaSection" style="display:none">
       <div class="qa-label">Ask about your plan</div>
       <div class="qa-limit" id="qaLimit"><b>2 questions</b> remaining for this plan</div>
       <div class="qa-messages" id="qaMessages"></div>
       <div class="qa-input-row">
-        <input class="qa-input" id="qaInput" placeholder="e.g. Can I substitute the RDL for a leg curl?" onkeydown="if(event.key==='Enter')askQuestion()">
+        <input class="qa-input" id="qaInput" placeholder="e.g. Can I swap RDL for leg curl?" onkeydown="if(event.key==='Enter')askQuestion()">
         <button class="qa-send" id="qaSend" onclick="askQuestion()">Ask</button>
       </div>
     </div>
@@ -483,15 +542,71 @@ footer a:hover{color:var(--text-muted)}
 </div>
 </div><!-- end tab-planner -->
 
-<!-- ═══════════════ TAB 2: QUICK MAX CALCULATOR ═══════════════ -->
+<!-- ═══ TAB 2: PROGRESS TRACKER ═══ -->
+<div class="tab-panel" id="tab-progress">
+<div class="prog-hero">
+  <h2>Progress Tracker</h2>
+  <p>Log every workout and watch your strength grow over time.</p>
+</div>
+<div class="main" style="max-width:720px">
+
+  <div class="card">
+    <div class="card-header"><span class="card-label">Log a workout</span></div>
+    <div class="log-form">
+      <div class="log-field" style="flex:2;min-width:130px">
+        <span class="field-label">Exercise</span>
+        <input class="log-input" id="logExercise" list="exerciseSuggestions" placeholder="e.g. Bench press">
+        <datalist id="exerciseSuggestions">
+          <option>Bench press</option><option>Squat</option><option>Deadlift</option>
+          <option>Overhead press</option><option>Barbell row</option><option>Pull-up</option>
+          <option>Dumbbell curl</option><option>Tricep pushdown</option>
+        </datalist>
+      </div>
+      <div class="log-field">
+        <span class="field-label">Weight</span>
+        <input class="log-input" id="logWeight" type="number" min="0" step="any" placeholder="225">
+      </div>
+      <div class="log-field">
+        <span class="field-label">Reps</span>
+        <input class="log-input" id="logReps" type="number" min="1" max="50" placeholder="5">
+      </div>
+      <div class="log-field" style="flex:0">
+        <span class="field-label">&nbsp;</span>
+        <button class="log-btn" onclick="logWorkout()">Log</button>
+      </div>
+    </div>
+    <div id="logSuccess" style="display:none;font-size:13px;color:var(--green);margin-top:8px;font-weight:500"></div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Progress chart</span>
+      <select class="lift-selector" id="chartLift" onchange="renderChart()" style="max-width:200px"></select>
+    </div>
+    <div id="chartEmpty" class="empty-state">Log at least 2 sessions for the same exercise to see a progress chart.</div>
+    <div class="chart-wrap" id="chartWrap" style="display:none">
+      <canvas id="progressChart"></canvas>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <span class="card-label">Workout history</span>
+      <select class="lift-selector" id="historyFilter" onchange="renderHistory()" style="max-width:200px"></select>
+    </div>
+    <div id="historyList"></div>
+  </div>
+
+</div>
+</div><!-- end tab-progress -->
+
+<!-- ═══ TAB 3: QUICK MAX CALCULATOR ═══ -->
 <div class="tab-panel" id="tab-qmc">
 <div class="qmc-hero">
   <h2>Quick Max Calculator</h2>
-  <p>Plug in any weight and rep count — get your estimated 1RM instantly. No AI, no waiting.</p>
+  <p>Plug in any weight and rep count — get your estimated 1RM instantly.</p>
 </div>
-
 <div class="main" style="max-width:620px">
-
   <div class="card">
     <div class="card-header"><span class="card-label">Units</span></div>
     <div class="unit-toggle">
@@ -499,7 +614,6 @@ footer a:hover{color:var(--text-muted)}
       <button class="unit-btn" id="qmcKgBtn" onclick="setQmcUnit('kg')">kg</button>
     </div>
   </div>
-
   <div class="card">
     <div class="card-header"><span class="card-label">Your lift</span></div>
     <div class="info-field" style="margin-bottom:1.25rem">
@@ -507,26 +621,18 @@ footer a:hover{color:var(--text-muted)}
       <input class="field-input" id="qmcName" type="text" placeholder="e.g. Bench press" oninput="calcQmc()">
     </div>
     <div class="qmc-big-input">
-      <div>
-        <span class="field-label">Weight</span>
-        <input id="qmcWeight" type="number" min="0" step="any" placeholder="225" oninput="calcQmc()">
-      </div>
+      <div><span class="field-label">Weight</span><input id="qmcWeight" type="number" min="0" step="any" placeholder="225" oninput="calcQmc()"></div>
       <div class="qmc-sep">×</div>
-      <div>
-        <span class="field-label">Reps</span>
-        <input id="qmcReps" type="number" min="1" max="50" step="1" placeholder="5" oninput="calcQmc()">
-      </div>
+      <div><span class="field-label">Reps</span><input id="qmcReps" type="number" min="1" max="50" step="1" placeholder="5" oninput="calcQmc()"></div>
     </div>
-
     <div class="qmc-result" id="qmcResult">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);margin-bottom:8px" id="qmcLiftName">Estimated 1RM</div>
       <div class="qmc-result-num" id="qmcMax"></div>
       <div class="qmc-result-unit" id="qmcMaxUnit">lbs</div>
       <div class="qmc-result-sub" id="qmcSub"></div>
     </div>
-    <div class="formula-note" style="margin-top:14px">Weighted average of Brzycki, Lander, Epley & Mayhew formulas — accuracy varies by rep range</div>
+    <div class="formula-note" style="margin-top:14px">Weighted average of Brzycki, Lander, Epley & Mayhew — accuracy varies by rep range</div>
   </div>
-
   <div class="card" id="qmcTableCard" style="display:none">
     <div class="card-header"><span class="card-label">Training percentages</span><span class="card-meta">based on your 1RM</span></div>
     <table class="reps-table">
@@ -534,7 +640,6 @@ footer a:hover{color:var(--text-muted)}
       <tbody id="qmcTableBody"></tbody>
     </table>
   </div>
-
 </div>
 </div><!-- end tab-qmc -->
 
@@ -547,529 +652,408 @@ footer a:hover{color:var(--text-muted)}
 </footer>
 
 <script>
-const SAVE_KEY  = 'liftlab_v5';
-const USAGE_KEY = 'liftlab_plans_used';
-const QA_KEY    = 'liftlab_qa_used';
-const FREE_LIMIT= 5;
-const QA_LIMIT  = 2;
+const SAVE_KEY   = 'liftlab_v6';
+const USAGE_KEY  = 'liftlab_plans_used';
+const LOG_KEY    = 'liftlab_progress_log';
+const FREE_LIMIT = 5;
+const QA_LIMIT   = 2;
 const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
 
-let unit         = 'lbs';
-let qmcUnit      = 'lbs';
-let selectedGoal = 'strength';
-let selectedExp  = 'beginner';
-let selectedDays = '4';
-let selectedSplit= 'full_body';
+let unit='lbs', qmcUnit='lbs';
+let selectedGoal='strength', selectedExp='beginner', selectedDays='4', selectedSplit='full_body';
+let currentPlanContext=null, qaUsedThisPlan=0, savedPlanText=null;
+let chartInstance=null;
 
-// ── Tabs ──────────────────────────────────────────────────────────────────────
+// ── TABS ──────────────────────────────────────────────────────────────────────
 function switchTab(name){
-  document.getElementById('tabPlanner').classList.toggle('active', name==='planner');
-  document.getElementById('tabQmc').classList.toggle('active', name==='qmc');
-  document.getElementById('tab-planner').classList.toggle('active', name==='planner');
-  document.getElementById('tab-qmc').classList.toggle('active', name==='qmc');
+  ['planner','progress','qmc'].forEach(t=>{
+    document.getElementById('tab-'+t).classList.toggle('active',t===name);
+  });
+  document.getElementById('tabPlanner').classList.toggle('active',name==='planner');
+  document.getElementById('tabProgress').classList.toggle('active',name==='progress');
+  document.getElementById('tabQmc').classList.toggle('active',name==='qmc');
+  if(name==='progress'){ renderHistory(); renderChart(); }
 }
 
-// ── Admin unlock ──────────────────────────────────────────────────────────────
-let adminCode = localStorage.getItem('liftlab_admin') || '';
-let isAdmin   = false;
+// ── MODALS ────────────────────────────────────────────────────────────────────
+function openModal(id){ document.getElementById(id).classList.add('open'); }
+function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
+
+async function submitSignup(){
+  const email = document.getElementById('signupEmail').value.trim();
+  const note  = document.getElementById('signupNote');
+  if(!email || !email.includes('@')){ note.textContent='Please enter a valid email.'; note.style.color='var(--red)'; return; }
+  try{
+    await fetch('/api/waitlist',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
+  } catch(e){}
+  note.textContent="You're on the list! We'll be in touch.";
+  note.style.color='var(--green)';
+  document.getElementById('signupEmail').value='';
+}
+
+// ── ADMIN ─────────────────────────────────────────────────────────────────────
+let adminCode='', isAdmin=false;
 
 function updateUsageBanner(){
-  const used = getUsage();
+  const used=getUsage();
   if(isAdmin){
-    document.getElementById('usageLabel').textContent = 'Unlimited — admin mode';
-    document.getElementById('usageBarFill').style.width='100%';
-    document.getElementById('usageBarFill').style.background='var(--green)';
+    document.getElementById('usageLabel').textContent='Unlimited — admin mode';
+    document.getElementById('usageBarFill').style.cssText='width:100%;background:var(--green)';
     return;
   }
-  const pct = Math.min(100, Math.round(used/FREE_LIMIT*100));
-  document.getElementById('usageLabel').textContent = `${used} / ${FREE_LIMIT} free plans used`;
+  const pct=Math.min(100,Math.round(used/FREE_LIMIT*100));
+  document.getElementById('usageLabel').textContent=`${used} / ${FREE_LIMIT} free plans used`;
   const fill=document.getElementById('usageBarFill');
   fill.style.width=pct+'%';
   fill.style.background=pct>=80?'var(--red)':pct>=50?'var(--yellow)':'var(--orange)';
-  if(used>=FREE_LIMIT){
-    const b=document.getElementById('usageBanner');
-    b.style.borderColor='rgba(248,113,113,0.35)';
-    b.style.background='rgba(248,113,113,0.06)';
-    document.getElementById('adminSection').style.display='block';
-  }
+  if(used>=FREE_LIMIT){ document.getElementById('adminSection').style.display='block'; }
 }
+function getUsage(){ try{ return parseInt(localStorage.getItem(USAGE_KEY)||'0'); }catch(e){ return 0; } }
+function incrementUsage(){ try{ localStorage.setItem(USAGE_KEY,String(getUsage()+1)); }catch(e){} updateUsageBanner(); }
 
 async function verifyAdmin(){
-  const code = document.getElementById('adminCodeInput').value.trim();
+  const code=document.getElementById('adminCodeInput').value.trim();
   if(!code) return;
-  const status = document.getElementById('adminStatus');
-  status.textContent = 'Checking...';
-  status.className = 'admin-status';
+  const st=document.getElementById('adminStatus');
+  st.textContent='Checking...'; st.className='admin-status';
   try{
-    const res = await fetch('/api/verify-admin',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({code})
-    });
-    const data = await res.json();
-    if(data.valid){
-      isAdmin = true;
-      adminCode = code;
-      localStorage.setItem('liftlab_admin', code);
-      status.textContent = 'Unlocked — unlimited plans active';
-      status.className = 'admin-status ok';
-      document.getElementById('adminCodeInput').value='';
-      updateUsageBanner();
-    } else {
-      status.textContent = 'Invalid code.';
-      status.className = 'admin-status err';
-      adminCode='';
-      localStorage.removeItem('liftlab_admin');
-    }
-  } catch(e){
-    status.textContent = 'Error. Try again.';
-    status.className = 'admin-status err';
-  }
+    const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const d=await res.json();
+    if(d.valid){ isAdmin=true; adminCode=code; localStorage.setItem('liftlab_admin',code); st.textContent='Unlocked — unlimited plans active'; st.className='admin-status ok'; document.getElementById('adminCodeInput').value=''; updateUsageBanner(); }
+    else { st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('liftlab_admin'); }
+  }catch(e){ st.textContent='Error. Try again.'; st.className='admin-status err'; }
 }
-
-// Restore admin on load
 async function tryRestoreAdmin(){
-  const stored = localStorage.getItem('liftlab_admin');
+  const stored=localStorage.getItem('liftlab_admin');
   if(!stored) return;
   try{
-    const res = await fetch('/api/verify-admin',{
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({code: stored})
-    });
-    const data = await res.json();
-    if(data.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); }
-    else { localStorage.removeItem('liftlab_admin'); }
-  } catch(e){}
+    const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:stored})});
+    const d=await res.json();
+    if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); }
+    else localStorage.removeItem('liftlab_admin');
+  }catch(e){}
 }
 
-// ── Usage counter ─────────────────────────────────────────────────────────────
-function getUsage(){ try{ return parseInt(localStorage.getItem(USAGE_KEY)||'0'); }catch(e){ return 0; } }
-function incrementUsage(){ try{ localStorage.setItem(USAGE_KEY, String(getUsage()+1)); }catch(e){} updateUsageBanner(); }
+// ── 1RM FORMULA ───────────────────────────────────────────────────────────────
+function calc1RM(weight,reps){
+  if(reps===1) return weight;
+  if(reps>20) return Math.round(weight*(1+reps/30));
+  const ep=weight*(1+reps/30), br=weight*(36/(37-reps)), la=(100*weight)/(101.3-2.67123*reps),
+        lo=weight*Math.pow(reps,0.10), ma=(100*weight)/(52.2+41.9*Math.exp(-0.055*reps)), oc=weight*(1+reps/40);
+  let r;
+  if(reps<=5) r=br*0.4+la*0.4+ep*0.2;
+  else if(reps<=10) r=(br+la+ma+ep)/4;
+  else r=ep*0.4+ma*0.35+oc*0.15+lo*0.1;
+  return Math.round(r);
+}
 
-// ── Markdown ──────────────────────────────────────────────────────────────────
+// ── MARKDOWN ──────────────────────────────────────────────────────────────────
 function renderMarkdown(text){
-  const div = document.createElement('div');
-  div.className = 'plan-text';
-  const lines = text.split('\n');
-  let html = '', inList = false, listType = '';
-  lines.forEach(line => {
-    let l = line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
-    if(/^#{1,3}\s/.test(l)){
-      if(inList){ html+=`</${listType}>`; inList=false; }
-      html += `<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`;
-    } else if(/^[-*•]\s/.test(l)){
-      if(!inList||listType!=='ul'){ if(inList)html+=`</${listType}>`; html+='<ul>'; inList=true; listType='ul'; }
-      html += `<li>${l.replace(/^[-*•]\s/,'')}</li>`;
-    } else if(/^\d+\.\s/.test(l)){
-      if(!inList||listType!=='ol'){ if(inList)html+=`</${listType}>`; html+='<ol>'; inList=true; listType='ol'; }
-      html += `<li>${l.replace(/^\d+\.\s/,'')}</li>`;
-    } else {
-      if(inList){ html+=`</${listType}>`; inList=false; }
-      if(l.trim()) html += `<p>${l}</p>`;
-    }
+  const div=document.createElement('div'); div.className='plan-text';
+  const lines=text.split('\n'); let html='',inList=false,listType='';
+  lines.forEach(line=>{
+    let l=line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
+    if(/^#{1,3}\s/.test(l)){ if(inList){html+=`</${listType}>`;inList=false;} html+=`<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`; }
+    else if(/^[-*•]\s/.test(l)){ if(!inList||listType!=='ul'){if(inList)html+=`</${listType}>`;html+='<ul>';inList=true;listType='ul';} html+=`<li>${l.replace(/^[-*•]\s/,'')}</li>`; }
+    else if(/^\d+\.\s/.test(l)){ if(!inList||listType!=='ol'){if(inList)html+=`</${listType}>`;html+='<ol>';inList=true;listType='ol';} html+=`<li>${l.replace(/^\d+\.\s/,'')}</li>`; }
+    else{ if(inList){html+=`</${listType}>`;inList=false;} if(l.trim())html+=`<p>${l}</p>`; }
   });
-  if(inList) html+=`</${listType}>`;
-  div.innerHTML = html;
-  return div;
+  if(inList)html+=`</${listType}>`;
+  div.innerHTML=html; return div;
 }
 
-// ── Chips ─────────────────────────────────────────────────────────────────────
-function selectChipIn(rowId, el){
-  document.getElementById(rowId).querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-}
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function selectChipIn(rowId,el){ document.getElementById(rowId).querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
 function selectGoal(el,v){ selectChipIn('goalRow',el); selectedGoal=v; autosave(); }
-function selectExp(el,v){
-  selectChipIn('expRow',el); selectedExp=v; autosave();
-  const descs = {
-    beginner:     '<strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session. Most people just starting out, or returning after a long break.',
-    intermediate: '<strong>Intermediate (2–5 years)</strong> — Linear progression has slowed. You need weekly or monthly progression cycles. Technique is solid on main lifts and you understand programming basics.',
-    advanced:     '<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming, manage fatigue actively, and are close to your genetic potential on main lifts.'
-  };
-  const desc = document.getElementById('expDesc');
-  desc.innerHTML = descs[v] || '';
-  desc.classList.add('visible');
-}
 function selectDays(el,v){ selectChipIn('daysRow',el); selectedDays=v; autosave(); }
 function selectSplit(el,v){ selectChipIn('splitRow',el); selectedSplit=v; autosave(); }
-
-// ── Combo dropdown sync ───────────────────────────────────────────────────────
-function comboSync(selectId, inputId){
-  const val = document.getElementById(selectId).value;
-  if(val) document.getElementById(inputId).value = val;
+function selectExp(el,v){
+  selectChipIn('expRow',el); selectedExp=v; autosave();
+  const descs={
+    beginner:'<strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.',
+    intermediate:'<strong>Intermediate (2–5 years)</strong> — Linear progression has slowed. You need weekly or monthly cycles. Technique is solid and you understand programming basics.',
+    advanced:'<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming near your genetic potential.'
+  };
+  const desc=document.getElementById('expDesc'); desc.innerHTML=descs[v]||''; desc.classList.add('visible');
 }
+function comboSync(selectId,inputId){ const v=document.getElementById(selectId).value; if(v) document.getElementById(inputId).value=v; }
 
-// ── Units ─────────────────────────────────────────────────────────────────────
-function setUnit(u){
-  unit=u;
-  document.getElementById('lbsBtn').classList.toggle('active',u==='lbs');
-  document.getElementById('kgBtn').classList.toggle('active',u==='kg');
-  document.querySelectorAll('.unit-display').forEach(el=>el.textContent=u);
-  autosave();
-}
-function setQmcUnit(u){
-  qmcUnit=u;
-  document.getElementById('qmcLbsBtn').classList.toggle('active',u==='lbs');
-  document.getElementById('qmcKgBtn').classList.toggle('active',u==='kg');
-  document.getElementById('qmcMaxUnit').textContent=u;
-  calcQmc();
-}
+// ── UNITS ─────────────────────────────────────────────────────────────────────
+function setUnit(u){ unit=u; document.getElementById('lbsBtn').classList.toggle('active',u==='lbs'); document.getElementById('kgBtn').classList.toggle('active',u==='kg'); document.querySelectorAll('.unit-display').forEach(el=>el.textContent=u); autosave(); }
+function setQmcUnit(u){ qmcUnit=u; document.getElementById('qmcLbsBtn').classList.toggle('active',u==='lbs'); document.getElementById('qmcKgBtn').classList.toggle('active',u==='kg'); document.getElementById('qmcMaxUnit').textContent=u; calcQmc(); }
 
-// ── Lifts ─────────────────────────────────────────────────────────────────────
-function makeLiftRow(name, weight='', reps=''){
-  const div = document.createElement('div');
-  div.className = 'lift-row';
-  div.innerHTML = `
-    <span class="lift-name">${name}</span>
-    <button class="lift-remove" onclick="this.closest('.lift-row').remove();autosave()" title="Remove">×</button>
-    <div class="lift-inputs">
-      <input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${weight}" oninput="autosave()">
-      <span class="lift-sep">×</span>
-      <input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${reps}" oninput="autosave()">
-      <span class="lift-unit unit-display">${unit}</span>
-    </div>`;
+// ── LIFTS ─────────────────────────────────────────────────────────────────────
+function makeLiftRow(name,weight='',reps=''){
+  const div=document.createElement('div'); div.className='lift-row';
+  div.innerHTML=`<span class="lift-name">${name}</span><button class="lift-remove" onclick="this.closest('.lift-row').remove();autosave()" title="Remove">×</button><div class="lift-inputs"><input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${weight}" oninput="autosave()"><span class="lift-sep">×</span><input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${reps}" oninput="autosave()"><span class="lift-unit unit-display">${unit}</span></div>`;
   return div;
 }
-function initLifts(savedLifts){
-  const grid = document.getElementById('liftsGrid');
-  grid.innerHTML = '';
-  if(savedLifts && savedLifts.length) savedLifts.forEach(l=>grid.appendChild(makeLiftRow(l.name,l.weight,l.reps)));
-  else PRESET_LIFTS.forEach(n=>grid.appendChild(makeLiftRow(n)));
-}
-function addCustomLift(){
-  const inp = document.getElementById('customLiftName');
-  const name = inp.value.trim();
-  if(!name) return;
-  document.getElementById('liftsGrid').appendChild(makeLiftRow(name));
-  inp.value=''; autosave();
-}
+function initLifts(saved){ const g=document.getElementById('liftsGrid'); g.innerHTML=''; if(saved&&saved.length) saved.forEach(l=>g.appendChild(makeLiftRow(l.name,l.weight,l.reps))); else PRESET_LIFTS.forEach(n=>g.appendChild(makeLiftRow(n))); }
+function addCustomLift(){ const inp=document.getElementById('customLiftName'); const name=inp.value.trim(); if(!name)return; document.getElementById('liftsGrid').appendChild(makeLiftRow(name)); inp.value=''; autosave(); }
+function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{ const name=row.querySelector('.lift-name').textContent; const w=parseFloat(row.querySelector('.lift-weight').value); const r=parseInt(row.querySelector('.lift-reps').value); if(w>0&&r>0)lifts.push({name,weight:w,reps:r,max:calc1RM(w,r)}); }); return lifts; }
 
-// ── Multi-formula 1RM estimator ───────────────────────────────────────────────
-// Uses different formulas per rep range for better accuracy.
-// Brzycki is best for 2-5 reps, averaged formulas for 6-10, Epley/Mayhew for 11+
-function calc1RM(weight, reps){
-  if(reps===1) return weight;
-  if(reps>20)  return Math.round(weight*(1+reps/30));
-  const epley_   = weight*(1+reps/30);
-  const brzycki  = weight*(36/(37-reps));
-  const lander   = (100*weight)/(101.3-2.67123*reps);
-  const lombardi = weight*Math.pow(reps,0.10);
-  const mayhew   = (100*weight)/(52.2+41.9*Math.exp(-0.055*reps));
-  const oconner  = weight*(1+reps/40);
-  let result;
-  if(reps<=5)       result = brzycki*0.4 + lander*0.4 + epley_*0.2;
-  else if(reps<=10) result = (brzycki+lander+mayhew+epley_)/4;
-  else              result = epley_*0.4 + mayhew*0.35 + oconner*0.15 + lombardi*0.1;
-  return Math.round(result);
-}
-function epley(weight,reps){ return calc1RM(weight,reps); }
-
-function getLifts(){
-  const lifts=[];
-  document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{
-    const name=row.querySelector('.lift-name').textContent;
-    const w=parseFloat(row.querySelector('.lift-weight').value);
-    const r=parseInt(row.querySelector('.lift-reps').value);
-    if(w>0&&r>0) lifts.push({name,weight:w,reps:r,max:epley(w,r)});
-  });
-  return lifts;
-}
-
-// ── Quick Max ─────────────────────────────────────────────────────────────────
-function calcQmc(){
-  const w=parseFloat(document.getElementById('qmcWeight').value);
-  const r=parseInt(document.getElementById('qmcReps').value);
-  const name=document.getElementById('qmcName').value.trim();
-  const resultEl=document.getElementById('qmcResult');
-  const tableCard=document.getElementById('qmcTableCard');
-  if(!w||!r||w<=0||r<=0){ resultEl.style.display='none'; tableCard.style.display='none'; return; }
-  const max=epley(w,r);
-  document.getElementById('qmcLiftName').textContent=name?`Estimated 1RM — ${name}`:'Estimated 1RM';
-  document.getElementById('qmcMax').textContent=max;
-  document.getElementById('qmcMaxUnit').textContent=qmcUnit;
-  document.getElementById('qmcSub').textContent=r===1
-    ?`That's your actual lift — 1 rep = your max`
-    :`${w} ${qmcUnit} × ${r} reps — best-fit formula for ${r} rep${r>1?'s':''}`;
-  resultEl.style.display='block';
-  const rows=[
-    [100,'True 1RM','1'],[95,'Heavy singles','1–2'],[90,'Strength','3–4'],
-    [85,'Strength/power','4–6'],[80,'Hypertrophy','5–8'],[75,'Hypertrophy','8–10'],
-    [70,'Volume','10–12'],[65,'Endurance','12–15'],[60,'Warm-up','15–20']
-  ];
-  document.getElementById('qmcTableBody').innerHTML = rows.map(([pct,use,rep])=>
-    `<tr><td>${pct}%</td><td>${use}</td><td>${rep}</td><td>${Math.round(max*pct/100)} ${qmcUnit}</td></tr>`
-  ).join('');
-  tableCard.style.display='block';
-}
-
-// ── Save / Load ───────────────────────────────────────────────────────────────
-let savedPlanText = null;
-
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────────
 function autosave(planToSave){
   const lifts=[];
-  document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{
-    lifts.push({
-      name:   row.querySelector('.lift-name').textContent,
-      weight: row.querySelector('.lift-weight').value,
-      reps:   row.querySelector('.lift-reps').value
-    });
-  });
-  if(planToSave !== undefined) savedPlanText = planToSave;
-  const data={
-    v:5, unit, selectedGoal, selectedExp, selectedDays, selectedSplit,
-    age:        document.getElementById('userAge').value,
-    bodyweight: document.getElementById('userWeight').value,
-    sex:        document.getElementById('userSex').value,
-    height:     document.getElementById('userHeight').value,
-    goalDetail: document.getElementById('goalDetail').value,
-    splitCustom:document.getElementById('splitCustom').value,
-    plan:       savedPlanText || null,
-    lifts
-  };
-  try{ localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }
-  catch(e){ console.warn('autosave failed:', e); }
+  document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
+  if(planToSave!==undefined) savedPlanText=planToSave;
+  const data={v:6,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
+    age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
+    sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
+    goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
+    plan:savedPlanText||null,lifts};
+  try{ localStorage.setItem(SAVE_KEY,JSON.stringify(data)); }catch(e){}
 }
 
 function loadSaved(){
   try{
-    const raw=localStorage.getItem(SAVE_KEY);
-    if(!raw) return false;
-    const d=JSON.parse(raw);
-    if(!d||d.v!==5) return false;
-
+    const raw=localStorage.getItem(SAVE_KEY); if(!raw)return false;
+    const d=JSON.parse(raw); if(!d||d.v!==6)return false;
     setUnit(d.unit||'lbs');
-    if(d.age)        document.getElementById('userAge').value    =d.age;
-    if(d.bodyweight) document.getElementById('userWeight').value =d.bodyweight;
-    if(d.sex)        document.getElementById('userSex').value    =d.sex;
-    if(d.height)     document.getElementById('userHeight').value =d.height;
-    if(d.goalDetail) document.getElementById('goalDetail').value =d.goalDetail;
-    if(d.splitCustom)document.getElementById('splitCustom').value=d.splitCustom;
-
-    [['goalRow','selectedGoal',d.selectedGoal],
-     ['expRow','selectedExp',d.selectedExp],
-     ['daysRow','selectedDays',d.selectedDays],
-     ['splitRow','selectedSplit',d.selectedSplit]
-    ].forEach(([rowId,key,val])=>{
-      if(!val) return;
-      const chip=document.querySelector(`#${rowId} .chip[onclick*="'${val}'"]`);
-      if(chip){
-        selectChipIn(rowId,chip);
-        if(key==='selectedGoal') selectedGoal=val;
-        if(key==='selectedExp')  { selectedExp=val; selectExp(chip,val); }
-        if(key==='selectedDays') selectedDays=val;
-        if(key==='selectedSplit')selectedSplit=val;
-      }
+    if(d.age) document.getElementById('userAge').value=d.age;
+    if(d.bodyweight) document.getElementById('userWeight').value=d.bodyweight;
+    if(d.sex) document.getElementById('userSex').value=d.sex;
+    if(d.height) document.getElementById('userHeight').value=d.height;
+    if(d.goalDetail) document.getElementById('goalDetail').value=d.goalDetail;
+    if(d.splitCustom) document.getElementById('splitCustom').value=d.splitCustom;
+    [['goalRow','selectedGoal',d.selectedGoal],['expRow','selectedExp',d.selectedExp],['daysRow','selectedDays',d.selectedDays],['splitRow','selectedSplit',d.selectedSplit]].forEach(([rowId,key,val])=>{
+      if(!val)return; const chip=document.querySelector(`#${rowId} .chip[onclick*="'${val}'"]`);
+      if(chip){ selectChipIn(rowId,chip); if(key==='selectedGoal')selectedGoal=val; if(key==='selectedExp'){selectedExp=val;selectExp(chip,val);} if(key==='selectedDays')selectedDays=val; if(key==='selectedSplit')selectedSplit=val; }
     });
-
     initLifts(d.lifts&&d.lifts.length?d.lifts:null);
-
-    // Restore saved plan if present
     if(d.plan){
-      savedPlanText = d.plan;
-      currentPlanContext = d.plan;
-      // Rebuild maxes from saved lifts
-      if(d.lifts && d.lifts.length){
-        const grid=document.getElementById('maxesGrid');
-        grid.innerHTML='';
-        d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{
-          const max=calc1RM(parseFloat(l.weight),parseInt(l.reps));
-          const c=document.createElement('div');
-          c.className='max-card';
-          c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${max}</div><div class="max-unit">${d.unit||'lbs'} estimated 1RM</div><div class="max-reps">${l.weight} ${d.unit||'lbs'} × ${l.reps} reps</div>`;
-          grid.appendChild(c);
-        });
-      }
+      savedPlanText=d.plan; currentPlanContext=d.plan;
+      if(d.lifts&&d.lifts.length){ const g=document.getElementById('maxesGrid'); g.innerHTML=''; d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{ const max=calc1RM(parseFloat(l.weight),parseInt(l.reps)); const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${max}</div><div class="max-unit">${d.unit||'lbs'} estimated 1RM</div><div class="max-reps">${l.weight} ${d.unit||'lbs'} × ${l.reps} reps</div>`; g.appendChild(c); }); }
       document.getElementById('planText').replaceChildren(renderMarkdown(d.plan));
       document.getElementById('resultsCard').style.display='block';
-      qaUsedThisPlan=0;
-      updateQaLimit();
-      document.getElementById('qaSection').style.display='block';
+      qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
     }
-
     return true;
-  }catch(e){ console.warn('loadSaved error:',e); return false; }
+  }catch(e){ return false; }
 }
 
-function clearSaved(){
-  try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
-  savedPlanText = null;
-  document.getElementById('savedBanner').style.display='none';
-  document.getElementById('resultsCard').style.display='none';
-  ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value='');
-  document.getElementById('userSex').value='';
-  initLifts(null);
-}
+function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; initLifts(null); }
 
-// ── Calculate ─────────────────────────────────────────────────────────────────
-let currentPlanContext = null; // stores plan text for Q&A context
-let qaUsedThisPlan = 0;
-
-function setLoading(on, text='Building your training plan...'){
-  document.getElementById('loadingText').textContent=text;
-  document.getElementById('loading').style.display=on?'flex':'none';
-  document.getElementById('calcBtn').disabled=on;
-}
+// ── CALCULATE ─────────────────────────────────────────────────────────────────
+function setLoading(on,text='Building your training plan...'){ document.getElementById('loadingText').textContent=text; document.getElementById('loading').style.display=on?'flex':'none'; document.getElementById('calcBtn').disabled=on; }
 
 async function calculate(){
-  const lifts=getLifts();
-  const err=document.getElementById('error');
-  err.textContent='';
+  const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
-
-  // Enforce plan limit (skip if admin)
-  if(!isAdmin && getUsage() >= FREE_LIMIT){
-    err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or check back when paid plans launch.`;
-    document.getElementById('adminSection').style.display='block';
-    return;
-  }
-
-  // show maxes immediately
-  const grid=document.getElementById('maxesGrid');
-  grid.innerHTML='';
-  lifts.forEach(l=>{
-    const c=document.createElement('div');
-    c.className='max-card';
-    c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div><div class="max-reps">${l.weight} ${unit} × ${l.reps} reps</div>`;
-    grid.appendChild(c);
-  });
-
-  document.getElementById('resultsCard').style.display='block';
-  document.getElementById('planText').innerHTML='';
-  document.getElementById('resultsFooter').textContent='';
-  document.getElementById('qaSection').style.display='none';
-  document.getElementById('qaMessages').innerHTML='';
-  qaUsedThisPlan=0;
-  setLoading(true);
+  if(!isAdmin&&getUsage()>=FREE_LIMIT){ err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or join the waitlist.`; document.getElementById('adminSection').style.display='block'; return; }
+  const g=document.getElementById('maxesGrid'); g.innerHTML='';
+  lifts.forEach(l=>{ const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div><div class="max-reps">${l.weight} ${unit} × ${l.reps} reps</div>`; g.appendChild(c); });
+  document.getElementById('resultsCard').style.display='block'; document.getElementById('planText').innerHTML=''; document.getElementById('resultsFooter').textContent=''; document.getElementById('qaSection').style.display='none'; document.getElementById('qaMessages').innerHTML=''; qaUsedThisPlan=0; setLoading(true);
   document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
-
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
   const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
-  const goalDetail=document.getElementById('goalDetail').value.trim();
-  const splitCustom=document.getElementById('splitCustom').value.trim();
-
+  const goalDetail=document.getElementById('goalDetail').value.trim(); const splitCustom=document.getElementById('splitCustom').value.trim();
   try{
-    const res=await fetch('/api/plan',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({
-        lifts, unit,
-        goal:       goalDetail ? `${goalLabels[selectedGoal]} — specifically: ${goalDetail}` : goalLabels[selectedGoal],
-        experience: selectedExp,
-        days:       selectedDays,
-        split:      splitLabels[selectedSplit]+(splitCustom?` (${splitCustom})`:''),
-        age:        document.getElementById('userAge').value||null,
-        bodyweight: document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
-        sex:        document.getElementById('userSex').value||null,
-        height:     document.getElementById('userHeight').value||null,
-        adminCode:  adminCode || undefined,
-      })
-    });
-    const data=await res.json();
-    if(data.error) throw new Error(data.error);
+    const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+      lifts,unit,goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
+      experience:selectedExp,days:selectedDays,split:splitLabels[selectedSplit]+(splitCustom?` (${splitCustom})`:''),
+      age:document.getElementById('userAge').value||null,
+      bodyweight:document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
+      sex:document.getElementById('userSex').value||null,height:document.getElementById('userHeight').value||null,
+      adminCode:adminCode||undefined
+    })});
+    const data=await res.json(); if(data.error)throw new Error(data.error);
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
-    currentPlanContext = data.plan;
-    autosave(data.plan); // save plan to localStorage
-    if(!isAdmin) incrementUsage();
+    currentPlanContext=data.plan; autosave(data.plan); if(!isAdmin)incrementUsage();
+    qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
+  }catch(e){ err.textContent=e.message||'Something went wrong. Try again.'; document.getElementById('resultsCard').style.display='none'; }
+  finally{ setLoading(false); }
+}
 
-    // Show Q&A section
-    qaUsedThisPlan = 0;
-    updateQaLimit();
-    document.getElementById('qaSection').style.display='block';
-  }catch(e){
-    err.textContent=e.message||'Something went wrong. Try again.';
-    document.getElementById('resultsCard').style.display='none';
-  }finally{
-    setLoading(false);
+// ── PDF EXPORT ────────────────────────────────────────────────────────────────
+function exportPDF(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=doc.internal.pageSize.getWidth(); const margin=20; const colW=W-margin*2;
+  let y=20;
+  doc.setFillColor(249,115,22); doc.rect(0,0,W,14,'F');
+  doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+  doc.text('LIFTLAB — TRAINING PLAN',margin,10);
+  doc.setFont('helvetica','normal'); doc.setFontSize(9);
+  doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),W-margin,10,{align:'right'});
+  y=24;
+  const maxCards=document.querySelectorAll('#maxesGrid .max-card');
+  if(maxCards.length){
+    doc.setTextColor(249,115,22); doc.setFont('helvetica','bold'); doc.setFontSize(10);
+    doc.text('YOUR 1RM ESTIMATES',margin,y); y+=6;
+    doc.setTextColor(30,32,38); doc.setFontSize(9);
+    let col=0; const colCount=Math.min(4,maxCards.length); const cw=(colW)/colCount;
+    maxCards.forEach((card,i)=>{
+      col=i%colCount; const x=margin+col*cw;
+      if(col===0&&i>0){ y+=14; }
+      const name=card.querySelector('.max-lift-name').textContent;
+      const val=card.querySelector('.max-value').textContent;
+      const sub=card.querySelector('.max-unit').textContent;
+      doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(249,115,22);
+      doc.text(val,x,y);
+      doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,105,115);
+      doc.text(name.toUpperCase(),x,y+4);
+      doc.text(sub,x,y+8);
+    });
+    y+=18;
+    doc.setDrawColor(30,32,38); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=6;
   }
+  const planEl=document.getElementById('planText');
+  const walk=(node,indent=0)=>{
+    if(node.nodeType===3){
+      const text=node.textContent.trim(); if(!text)return;
+      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65);
+      const lines=doc.splitTextToSize(text,colW-indent*4);
+      lines.forEach(line=>{ if(y>275){doc.addPage();y=20;} doc.text(line,margin+indent*4,y); y+=5; });
+    } else if(node.nodeType===1){
+      const tag=node.tagName.toLowerCase();
+      if(tag==='h3'){ if(y>270){doc.addPage();y=20;} y+=3; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(249,115,22); const lines=doc.splitTextToSize(node.textContent,colW); lines.forEach(l=>{doc.text(l,margin,y);y+=6;}); y+=1; }
+      else if(tag==='p'){ node.childNodes.forEach(c=>walk(c,indent)); y+=2; }
+      else if(tag==='li'){ if(y>275){doc.addPage();y=20;} doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65); doc.text('•',margin+indent*4,y); const lines=doc.splitTextToSize(node.textContent,colW-(indent+1)*4); lines.forEach((l,i)=>{ if(i>0&&y>275){doc.addPage();y=20;} doc.text(l,margin+(indent+1)*4,y); y+=5; }); }
+      else if(tag==='ul'||tag==='ol'){ node.childNodes.forEach(c=>walk(c,indent+1)); }
+      else if(tag==='strong'){ doc.setFont('helvetica','bold'); doc.setTextColor(30,35,45); node.childNodes.forEach(c=>walk(c,indent)); doc.setFont('helvetica','normal'); doc.setTextColor(50,55,65); }
+      else{ node.childNodes.forEach(c=>walk(c,indent)); }
+    }
+  };
+  planEl.childNodes.forEach(n=>walk(n));
+  y+=6; if(y>270){doc.addPage();y=20;}
+  doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=5;
+  doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(160,165,175);
+  doc.text('Generated by LiftLab · liftlab.app · Always train with proper form and appropriate supervision.',margin,y);
+  doc.save('liftlab-training-plan.pdf');
+  const btn=document.getElementById('exportPdfBtn'); btn.textContent='Exported!'; btn.classList.add('done');
+  setTimeout(()=>{btn.textContent='Export PDF';btn.classList.remove('done');},2000);
+}
+
+// ── COPY ──────────────────────────────────────────────────────────────────────
+function copyResults(){
+  const maxLines=[...document.querySelectorAll('#maxesGrid .max-card')].map(c=>`${c.querySelector('.max-lift-name').textContent}: ${c.querySelector('.max-value').textContent} ${unit} 1RM`).join('\n');
+  const plan=document.getElementById('planText').innerText;
+  navigator.clipboard.writeText(`MY LIFT MAXES\n${maxLines}\n\nTRAINING PLAN\n${plan}`).then(()=>{
+    const btn=document.getElementById('copyBtn'); btn.textContent='Copied!'; btn.classList.add('done');
+    setTimeout(()=>{btn.textContent='Copy plan';btn.classList.remove('done');},1500);
+  });
 }
 
 // ── Q&A ───────────────────────────────────────────────────────────────────────
 function updateQaLimit(){
-  const remaining = QA_LIMIT - qaUsedThisPlan;
-  const el = document.getElementById('qaLimit');
-  if(remaining <= 0){
-    el.innerHTML = '<b>No questions remaining</b> for this plan — generate a new plan to ask more.';
-    document.getElementById('qaInput').disabled = true;
-    document.getElementById('qaSend').disabled = true;
-  } else {
-    el.innerHTML = `<b>${remaining} question${remaining===1?'':'s'}</b> remaining for this plan`;
-    document.getElementById('qaInput').disabled = false;
-    document.getElementById('qaSend').disabled = false;
-  }
+  const rem=QA_LIMIT-qaUsedThisPlan; const el=document.getElementById('qaLimit');
+  if(rem<=0){ el.innerHTML='<b>No questions remaining</b> for this plan — generate a new plan to ask more.'; document.getElementById('qaInput').disabled=true; document.getElementById('qaSend').disabled=true; }
+  else{ el.innerHTML=`<b>${rem} question${rem===1?'':'s'}</b> remaining for this plan`; document.getElementById('qaInput').disabled=false; document.getElementById('qaSend').disabled=false; }
 }
-
-function addQaMessage(role, text){
-  const messages = document.getElementById('qaMessages');
-  const div = document.createElement('div');
-  div.className = `qa-msg ${role}`;
-  if(role === 'assistant'){
-    div.replaceChildren(renderMarkdown(text));
-    div.className = 'qa-msg assistant';
-  } else {
-    div.textContent = text;
-  }
-  messages.appendChild(div);
-  div.scrollIntoView({behavior:'smooth',block:'nearest'});
-}
-
+function addQaMessage(role,text){ const msgs=document.getElementById('qaMessages'); const div=document.createElement('div'); div.className=`qa-msg ${role}`; if(role==='assistant'){const inner=renderMarkdown(text);inner.className='';div.appendChild(inner);}else{div.textContent=text;} msgs.appendChild(div); div.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 async function askQuestion(){
-  const input = document.getElementById('qaInput');
-  const question = input.value.trim();
-  if(!question || !currentPlanContext) return;
-  if(qaUsedThisPlan >= QA_LIMIT) return;
-
-  input.value = '';
-  qaUsedThisPlan++;
-  updateQaLimit();
-  addQaMessage('user', question);
-
-  const sendBtn = document.getElementById('qaSend');
-  sendBtn.textContent = '...';
-  sendBtn.disabled = true;
-
-  try{
-    const res = await fetch('/api/question',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ plan: currentPlanContext, question })
-    });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error);
-    addQaMessage('assistant', data.answer);
-  }catch(e){
-    addQaMessage('assistant', 'Sorry, something went wrong. Try again.');
-    qaUsedThisPlan--; // refund on error
-    updateQaLimit();
-  }finally{
-    sendBtn.textContent = 'Ask';
-    if(qaUsedThisPlan < QA_LIMIT) sendBtn.disabled = false;
-  }
+  const input=document.getElementById('qaInput'); const q=input.value.trim(); if(!q||!currentPlanContext)return; if(qaUsedThisPlan>=QA_LIMIT)return;
+  input.value=''; qaUsedThisPlan++; updateQaLimit(); addQaMessage('user',q);
+  const send=document.getElementById('qaSend'); send.textContent='...'; send.disabled=true;
+  try{ const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:currentPlanContext,question:q})}); const data=await res.json(); if(data.error)throw new Error(data.error); addQaMessage('assistant',data.answer); }
+  catch(e){ addQaMessage('assistant','Sorry, something went wrong. Try again.'); qaUsedThisPlan--; updateQaLimit(); }
+  finally{ send.textContent='Ask'; if(qaUsedThisPlan<QA_LIMIT)send.disabled=false; }
 }
 
-function copyResults(){
-  const maxLines=[...document.querySelectorAll('#maxesGrid .max-card')].map(c=>
-    `${c.querySelector('.max-lift-name').textContent}: ${c.querySelector('.max-value').textContent} ${unit} 1RM`
-  ).join('\n');
-  const plan=document.getElementById('planText').innerText;
-  navigator.clipboard.writeText(`MY LIFT MAXES\n${maxLines}\n\nTRAINING PLAN\n${plan}`).then(()=>{
-    const btn=document.getElementById('copyBtn');
-    btn.textContent='Copied!'; btn.classList.add('done');
-    setTimeout(()=>{ btn.textContent='Copy plan'; btn.classList.remove('done'); },1500);
+// ── PROGRESS TRACKER ──────────────────────────────────────────────────────────
+function getLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ return []; } }
+function saveLog(log){ try{ localStorage.setItem(LOG_KEY,JSON.stringify(log)); }catch(e){} }
+
+function logWorkout(){
+  const ex=document.getElementById('logExercise').value.trim();
+  const w=parseFloat(document.getElementById('logWeight').value);
+  const r=parseInt(document.getElementById('logReps').value);
+  if(!ex||!w||!r){ return; }
+  const log=getLog();
+  const entry={id:Date.now(),exercise:ex,weight:w,reps:r,estimated1rm:calc1RM(w,r),date:new Date().toISOString(),unit};
+  log.push(entry); saveLog(log);
+  document.getElementById('logExercise').value=''; document.getElementById('logWeight').value=''; document.getElementById('logReps').value='';
+  const suc=document.getElementById('logSuccess');
+  const isPR=checkPR(log,entry);
+  suc.textContent=isPR?`PR! ${ex} — ${calc1RM(w,r)} ${unit} estimated 1RM 🏆`:`Logged! ${ex} — ${calc1RM(w,r)} ${unit} estimated 1RM`;
+  suc.style.color=isPR?'var(--yellow)':'var(--green)'; suc.style.display='block';
+  setTimeout(()=>suc.style.display='none',3000);
+  renderHistory(); renderChart(); updateExerciseSelectors();
+}
+
+function checkPR(log,entry){
+  const prev=log.filter(e=>e.exercise===entry.exercise&&e.id!==entry.id);
+  if(!prev.length)return true;
+  return entry.estimated1rm>Math.max(...prev.map(e=>e.estimated1rm));
+}
+
+function getExercises(log){ return [...new Set(log.map(e=>e.exercise))].sort(); }
+
+function updateExerciseSelectors(){
+  const log=getLog(); const exercises=getExercises(log);
+  ['chartLift','historyFilter'].forEach(id=>{
+    const sel=document.getElementById(id); const cur=sel.value;
+    sel.innerHTML='<option value="">All exercises</option>'+exercises.map(e=>`<option value="${e}"${e===cur?' selected':''}>${e}</option>`).join('');
   });
 }
 
-// ── Modals ─────────────────────────────────────────────────────────────────────
-function openModal(id){ document.getElementById(id).classList.add('open'); }
-function closeModal(id){ document.getElementById(id).classList.remove('open'); }
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
-document.getElementById('customLiftName').addEventListener('keydown',e=>{ if(e.key==='Enter') addCustomLift(); });
+function renderHistory(){
+  const log=getLog(); const filter=document.getElementById('historyFilter').value;
+  const filtered=filter?log.filter(e=>e.exercise===filter):log;
+  const list=document.getElementById('historyList');
+  if(!filtered.length){ list.innerHTML='<div class="empty-state">No workouts logged yet. Start tracking your lifts above.</div>'; return; }
+  const sorted=[...filtered].reverse();
+  list.innerHTML='';
+  const container=document.createElement('div'); container.className='log-entries';
+  sorted.slice(0,50).forEach(entry=>{
+    const allForEx=log.filter(e=>e.exercise===entry.exercise);
+    const isPR=checkPR(allForEx,entry)&&allForEx[allForEx.length-1].id===entry.id;
+    const date=new Date(entry.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const div=document.createElement('div'); div.className='log-entry';
+    div.innerHTML=`<div class="log-entry-left"><strong style="color:var(--text)">${entry.exercise}</strong> · ${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps · <span style="color:var(--text-dim)">${date}</span></div><div class="log-entry-right">${isPR?'<span class="pr-badge">PR</span>':''}<span class="log-entry-max">${entry.estimated1rm} ${entry.unit||'lbs'}</span><button class="log-entry-del" onclick="deleteLog(${entry.id})">×</button></div>`;
+    container.appendChild(div);
+  });
+  list.appendChild(container);
+}
 
-// ── Init ───────────────────────────────────────────────────────────────────────
+function deleteLog(id){ const log=getLog().filter(e=>e.id!==id); saveLog(log); renderHistory(); renderChart(); updateExerciseSelectors(); }
+
+function renderChart(){
+  const log=getLog(); const selectedEx=document.getElementById('chartLift').value;
+  const wrap=document.getElementById('chartWrap'); const empty=document.getElementById('chartEmpty');
+  if(!selectedEx){ wrap.style.display='none'; empty.textContent='Select an exercise to view your progress chart.'; empty.style.display='block'; return; }
+  const entries=log.filter(e=>e.exercise===selectedEx).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  if(entries.length<2){ wrap.style.display='none'; empty.textContent=`Log at least 2 sessions for ${selectedEx} to see a progress chart.`; empty.style.display='block'; return; }
+  empty.style.display='none'; wrap.style.display='block';
+  const labels=entries.map(e=>new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  const data1rm=entries.map(e=>e.estimated1rm);
+  if(chartInstance){ chartInstance.destroy(); }
+  const ctx=document.getElementById('progressChart').getContext('2d');
+  chartInstance=new Chart(ctx,{
+    type:'line',
+    data:{ labels, datasets:[{ label:`${selectedEx} — Estimated 1RM (${entries[0].unit||'lbs'})`, data:data1rm, borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.08)', borderWidth:2, pointBackgroundColor:'#f97316', pointRadius:4, tension:0.3, fill:true }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#888', font:{size:12} } } }, scales:{ x:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} }, y:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} } } }
+  });
+}
+
+// ── QMC ───────────────────────────────────────────────────────────────────────
+function calcQmc(){
+  const w=parseFloat(document.getElementById('qmcWeight').value); const r=parseInt(document.getElementById('qmcReps').value); const name=document.getElementById('qmcName').value.trim();
+  const resultEl=document.getElementById('qmcResult'); const tableCard=document.getElementById('qmcTableCard');
+  if(!w||!r||w<=0||r<=0){ resultEl.style.display='none'; tableCard.style.display='none'; return; }
+  const max=calc1RM(w,r);
+  document.getElementById('qmcLiftName').textContent=name?`Estimated 1RM — ${name}`:'Estimated 1RM';
+  document.getElementById('qmcMax').textContent=max; document.getElementById('qmcMaxUnit').textContent=qmcUnit;
+  document.getElementById('qmcSub').textContent=r===1?`That's your actual lift — 1 rep = your max`:`${w} ${qmcUnit} × ${r} reps — best-fit formula for ${r} rep${r>1?'s':''}`;
+  resultEl.style.display='block';
+  const rows=[[100,'True 1RM','1'],[95,'Heavy singles','1–2'],[90,'Strength','3–4'],[85,'Strength/power','4–6'],[80,'Hypertrophy','5–8'],[75,'Hypertrophy','8–10'],[70,'Volume','10–12'],[65,'Endurance','12–15'],[60,'Warm-up','15–20']];
+  document.getElementById('qmcTableBody').innerHTML=rows.map(([pct,use,rep])=>`<tr><td>${pct}%</td><td>${use}</td><td>${rep}</td><td>${Math.round(max*pct/100)} ${qmcUnit}</td></tr>`).join('');
+  tableCard.style.display='block';
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('customLiftName').addEventListener('keydown',e=>{ if(e.key==='Enter')addCustomLift(); });
+
 const hadSaved=loadSaved();
 if(!hadSaved) initLifts(null);
-document.getElementById('savedBanner').style.display = hadSaved ? 'flex' : 'none';
+document.getElementById('savedBanner').style.display=hadSaved?'flex':'none';
 updateUsageBanner();
 tryRestoreAdmin();
+updateExerciseSelectors();
+renderHistory();
 </script>
 </body>
 </html>
