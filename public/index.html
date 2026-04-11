@@ -184,6 +184,42 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 
 .formula-note{font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px}
 
+/* ── Combo field (dropdown + manual input) ── */
+.combo-wrap{position:relative;display:flex;flex-direction:column;gap:5px}
+.combo-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 0 0;padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;border-bottom:none}
+.combo-select:focus{outline:none;border-color:var(--orange-border)}
+.combo-manual{background:var(--surface2);border:1px solid var(--border);border-radius:0 0 9px 9px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);width:100%;border-top:1px solid var(--border2)}
+.combo-manual::placeholder{color:var(--text-faint)}
+.combo-manual:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+
+/* ── Experience descriptions ── */
+.exp-desc{font-size:12px;color:var(--text-dim);margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--orange-border);line-height:1.6;display:none}
+.exp-desc.visible{display:block}
+
+/* ── Q&A section ── */
+.qa-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:0.25rem}
+.qa-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);margin-bottom:0.75rem}
+.qa-limit{font-size:12px;color:var(--text-dim);margin-bottom:1rem}
+.qa-limit b{color:var(--text-muted)}
+.qa-messages{display:flex;flex-direction:column;gap:10px;margin-bottom:1rem}
+.qa-msg{padding:10px 14px;border-radius:10px;font-size:14px;line-height:1.7}
+.qa-msg.user{background:var(--orange-dim);border:1px solid var(--orange-border);color:var(--text);text-align:right}
+.qa-msg.assistant{background:var(--surface2);border:1px solid var(--border);color:#c0c4d0}
+.qa-msg.assistant h3{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:#fff;margin:0.75rem 0 0.25rem}
+.qa-msg.assistant h3:first-child{margin-top:0}
+.qa-msg.assistant p{margin-bottom:0.5rem}
+.qa-msg.assistant p:last-child{margin-bottom:0}
+.qa-msg.assistant ul{padding-left:1.25rem;margin-bottom:0.5rem}
+.qa-msg.assistant li{margin-bottom:3px}
+.qa-msg.assistant strong{color:var(--text);font-weight:600}
+.qa-input-row{display:flex;gap:8px}
+.qa-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:11px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text)}
+.qa-input::placeholder{color:var(--text-faint)}
+.qa-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+.qa-send{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:11px 18px;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;cursor:pointer;white-space:nowrap;transition:opacity 0.15s}
+.qa-send:hover{opacity:0.88}
+.qa-send:disabled{opacity:0.3;cursor:not-allowed}
+
 footer{text-align:center;font-size:12px;color:#1e2228;padding:2.5rem;border-top:1px solid var(--border);margin-top:2rem}
 footer a{color:#2a2e38;text-decoration:none;margin:0 8px;transition:color 0.15s}
 footer a:hover{color:var(--text-muted)}
@@ -283,17 +319,51 @@ footer a:hover{color:var(--text-muted)}
     <div class="card-header"><span class="card-label">About you</span><span class="card-meta">optional — improves your plan</span></div>
     <div class="info-grid">
       <div class="info-field"><span class="field-label">Age</span>
-        <input class="field-input" id="userAge" type="number" min="13" max="99" placeholder="e.g. 22" oninput="autosave()"></div>
+        <div class="combo-wrap">
+          <select class="combo-select" id="userAgeSelect" onchange="comboSync('userAgeSelect','userAge');autosave()">
+            <option value="">Select age...</option>
+            <option>13</option><option>14</option><option>15</option><option>16</option><option>17</option>
+            <option>18</option><option>19</option><option>20</option><option>21</option><option>22</option>
+            <option>23</option><option>24</option><option>25</option><option>26</option><option>27</option>
+            <option>28</option><option>29</option><option>30</option><option>32</option><option>35</option>
+            <option>38</option><option>40</option><option>45</option><option>50</option><option>55</option>
+            <option>60</option><option>65</option><option>70</option>
+          </select>
+          <input class="combo-manual" id="userAge" type="number" min="13" max="99" placeholder="Or type age manually" oninput="autosave()">
+        </div>
+      </div>
       <div class="info-field"><span class="field-label">Bodyweight</span>
-        <input class="field-input" id="userWeight" type="number" min="50" max="700" placeholder="e.g. 185" oninput="autosave()"></div>
+        <div class="combo-wrap">
+          <select class="combo-select" id="userWeightSelect" onchange="comboSync('userWeightSelect','userWeight');autosave()">
+            <option value="">Select weight...</option>
+            <option>100</option><option>110</option><option>120</option><option>130</option><option>140</option>
+            <option>150</option><option>160</option><option>170</option><option>175</option><option>180</option>
+            <option>185</option><option>190</option><option>195</option><option>200</option><option>210</option>
+            <option>220</option><option>230</option><option>240</option><option>250</option><option>260</option>
+            <option>275</option><option>300</option><option>320</option><option>350</option>
+          </select>
+          <input class="combo-manual" id="userWeight" type="number" min="50" max="700" placeholder="Or type weight manually" oninput="autosave()">
+        </div>
+      </div>
       <div class="info-field"><span class="field-label">Sex</span>
         <select class="field-input" id="userSex" onchange="autosave()">
           <option value="">Prefer not to say</option>
           <option value="male">Male</option>
           <option value="female">Female</option>
-        </select></div>
+        </select>
+      </div>
       <div class="info-field"><span class="field-label">Height</span>
-        <input class="field-input" id="userHeight" type="text" placeholder='e.g. 5&apos;11" or 180cm' oninput="autosave()"></div>
+        <div class="combo-wrap">
+          <select class="combo-select" id="userHeightSelect" onchange="comboSync('userHeightSelect','userHeight');autosave()">
+            <option value="">Select height...</option>
+            <option>5'0"</option><option>5'1"</option><option>5'2"</option><option>5'3"</option><option>5'4"</option>
+            <option>5'5"</option><option>5'6"</option><option>5'7"</option><option>5'8"</option><option>5'9"</option>
+            <option>5'10"</option><option>5'11"</option><option>6'0"</option><option>6'1"</option><option>6'2"</option>
+            <option>6'3"</option><option>6'4"</option><option>6'5"</option>
+          </select>
+          <input class="combo-manual" id="userHeight" type="text" placeholder='Or type manually (e.g. 180cm)' oninput="autosave()">
+        </div>
+      </div>
     </div>
   </div>
 
@@ -302,11 +372,13 @@ footer a:hover{color:var(--text-muted)}
     <div style="margin-bottom:1rem">
       <div class="field-label" style="margin-bottom:8px">Days per week</div>
       <div class="chip-row" id="daysRow">
+        <div class="chip" onclick="selectDays(this,'1')">1 day</div>
         <div class="chip" onclick="selectDays(this,'2')">2 days</div>
         <div class="chip" onclick="selectDays(this,'3')">3 days</div>
         <div class="chip active" onclick="selectDays(this,'4')">4 days</div>
         <div class="chip" onclick="selectDays(this,'5')">5 days</div>
         <div class="chip" onclick="selectDays(this,'6')">6 days</div>
+        <div class="chip" onclick="selectDays(this,'7')">7 days</div>
       </div>
     </div>
     <div>
@@ -350,6 +422,9 @@ footer a:hover{color:var(--text-muted)}
       <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
       <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
     </div>
+    <div class="exp-desc visible" id="expDesc">
+      <strong>Beginner (0–2 years)</strong> — Still learning movement patterns and adding weight to the bar consistently every session. Linear progression works well. Most people starting out or returning after a long break.
+    </div>
   </div>
 
   <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate My Max + Build My Plan</button>
@@ -372,6 +447,17 @@ footer a:hover{color:var(--text-muted)}
       <div class="plan-text" id="planText"></div>
     </div>
     <div class="results-footer" id="resultsFooter"></div>
+
+    <!-- Q&A -->
+    <div class="qa-section" id="qaSection" style="display:none">
+      <div class="qa-label">Ask about your plan</div>
+      <div class="qa-limit" id="qaLimit"><b>2 questions</b> remaining for this plan</div>
+      <div class="qa-messages" id="qaMessages"></div>
+      <div class="qa-input-row">
+        <input class="qa-input" id="qaInput" placeholder="e.g. Can I substitute the RDL for a leg curl?" onkeydown="if(event.key==='Enter')askQuestion()">
+        <button class="qa-send" id="qaSend" onclick="askQuestion()">Ask</button>
+      </div>
+    </div>
   </div>
 
 </div>
@@ -441,9 +527,11 @@ footer a:hover{color:var(--text-muted)}
 </footer>
 
 <script>
-const SAVE_KEY  = 'liftlab_v4';
+const SAVE_KEY  = 'liftlab_v5';
 const USAGE_KEY = 'liftlab_plans_used';
-const FREE_LIMIT= 10;
+const QA_KEY    = 'liftlab_qa_used';
+const FREE_LIMIT= 5;
+const QA_LIMIT  = 2;
 const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
 
 let unit         = 'lbs';
@@ -511,9 +599,25 @@ function selectChipIn(rowId, el){
   el.classList.add('active');
 }
 function selectGoal(el,v){ selectChipIn('goalRow',el); selectedGoal=v; autosave(); }
-function selectExp(el,v) { selectChipIn('expRow',el);  selectedExp=v;  autosave(); }
+function selectExp(el,v){
+  selectChipIn('expRow',el); selectedExp=v; autosave();
+  const descs = {
+    beginner:     '<strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session. Most people just starting out, or returning after a long break.',
+    intermediate: '<strong>Intermediate (2–5 years)</strong> — Linear progression has slowed. You need weekly or monthly progression cycles. Technique is solid on main lifts and you understand programming basics.',
+    advanced:     '<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming, manage fatigue actively, and are close to your genetic potential on main lifts.'
+  };
+  const desc = document.getElementById('expDesc');
+  desc.innerHTML = descs[v] || '';
+  desc.classList.add('visible');
+}
 function selectDays(el,v){ selectChipIn('daysRow',el); selectedDays=v; autosave(); }
 function selectSplit(el,v){ selectChipIn('splitRow',el); selectedSplit=v; autosave(); }
+
+// ── Combo dropdown sync ───────────────────────────────────────────────────────
+function comboSync(selectId, inputId){
+  const val = document.getElementById(selectId).value;
+  if(val) document.getElementById(inputId).value = val;
+}
 
 // ── Units ─────────────────────────────────────────────────────────────────────
 function setUnit(u){
@@ -629,7 +733,7 @@ function autosave(){
     });
   });
   const data={
-    v:4, unit, selectedGoal, selectedExp, selectedDays, selectedSplit,
+    v:5, unit, selectedGoal, selectedExp, selectedDays, selectedSplit,
     age:        document.getElementById('userAge').value,
     bodyweight: document.getElementById('userWeight').value,
     sex:        document.getElementById('userSex').value,
@@ -647,7 +751,7 @@ function loadSaved(){
     const raw=localStorage.getItem(SAVE_KEY);
     if(!raw) return false;
     const d=JSON.parse(raw);
-    if(!d||d.v!==4) return false;
+    if(!d||d.v!==5) return false;
 
     setUnit(d.unit||'lbs');
     if(d.age)        document.getElementById('userAge').value    =d.age;
@@ -687,6 +791,9 @@ function clearSaved(){
 }
 
 // ── Calculate ─────────────────────────────────────────────────────────────────
+let currentPlanContext = null; // stores plan text for Q&A context
+let qaUsedThisPlan = 0;
+
 function setLoading(on, text='Building your training plan...'){
   document.getElementById('loadingText').textContent=text;
   document.getElementById('loading').style.display=on?'flex':'none';
@@ -698,6 +805,13 @@ async function calculate(){
   const err=document.getElementById('error');
   err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
+
+  // Enforce plan limit
+  if(getUsage() >= FREE_LIMIT){
+    err.textContent=`You've used all ${FREE_LIMIT} free plans. Paid plans coming soon.`;
+    openModal('pricingModal');
+    return;
+  }
 
   // show maxes immediately
   const grid=document.getElementById('maxesGrid');
@@ -712,12 +826,14 @@ async function calculate(){
   document.getElementById('resultsCard').style.display='block';
   document.getElementById('planText').innerHTML='';
   document.getElementById('resultsFooter').textContent='';
+  document.getElementById('qaSection').style.display='none';
+  document.getElementById('qaMessages').innerHTML='';
+  qaUsedThisPlan=0;
   setLoading(true);
   document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
 
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
   const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
-
   const goalDetail=document.getElementById('goalDetail').value.trim();
   const splitCustom=document.getElementById('splitCustom').value.trim();
 
@@ -741,12 +857,81 @@ async function calculate(){
     if(data.error) throw new Error(data.error);
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
+    currentPlanContext = data.plan;
     incrementUsage();
+
+    // Show Q&A section
+    qaUsedThisPlan = 0;
+    updateQaLimit();
+    document.getElementById('qaSection').style.display='block';
   }catch(e){
     err.textContent=e.message||'Something went wrong. Try again.';
     document.getElementById('resultsCard').style.display='none';
   }finally{
     setLoading(false);
+  }
+}
+
+// ── Q&A ───────────────────────────────────────────────────────────────────────
+function updateQaLimit(){
+  const remaining = QA_LIMIT - qaUsedThisPlan;
+  const el = document.getElementById('qaLimit');
+  if(remaining <= 0){
+    el.innerHTML = '<b>No questions remaining</b> for this plan — generate a new plan to ask more.';
+    document.getElementById('qaInput').disabled = true;
+    document.getElementById('qaSend').disabled = true;
+  } else {
+    el.innerHTML = `<b>${remaining} question${remaining===1?'':'s'}</b> remaining for this plan`;
+    document.getElementById('qaInput').disabled = false;
+    document.getElementById('qaSend').disabled = false;
+  }
+}
+
+function addQaMessage(role, text){
+  const messages = document.getElementById('qaMessages');
+  const div = document.createElement('div');
+  div.className = `qa-msg ${role}`;
+  if(role === 'assistant'){
+    div.replaceChildren(renderMarkdown(text));
+    div.className = 'qa-msg assistant';
+  } else {
+    div.textContent = text;
+  }
+  messages.appendChild(div);
+  div.scrollIntoView({behavior:'smooth',block:'nearest'});
+}
+
+async function askQuestion(){
+  const input = document.getElementById('qaInput');
+  const question = input.value.trim();
+  if(!question || !currentPlanContext) return;
+  if(qaUsedThisPlan >= QA_LIMIT) return;
+
+  input.value = '';
+  qaUsedThisPlan++;
+  updateQaLimit();
+  addQaMessage('user', question);
+
+  const sendBtn = document.getElementById('qaSend');
+  sendBtn.textContent = '...';
+  sendBtn.disabled = true;
+
+  try{
+    const res = await fetch('/api/question',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ plan: currentPlanContext, question })
+    });
+    const data = await res.json();
+    if(data.error) throw new Error(data.error);
+    addQaMessage('assistant', data.answer);
+  }catch(e){
+    addQaMessage('assistant', 'Sorry, something went wrong. Try again.');
+    qaUsedThisPlan--; // refund on error
+    updateQaLimit();
+  }finally{
+    sendBtn.textContent = 'Ask';
+    if(qaUsedThisPlan < QA_LIMIT) sendBtn.disabled = false;
   }
 }
 
