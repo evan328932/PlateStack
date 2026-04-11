@@ -184,6 +184,17 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 
 .formula-note{font-size:12px;color:var(--text-faint);text-align:center;margin-top:10px}
 
+/* ── Admin unlock ── */
+.admin-row{display:flex;gap:8px;margin-top:8px;align-items:center}
+.admin-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
+.admin-input::placeholder{color:var(--text-faint)}
+.admin-input:focus{outline:none;border-color:var(--orange-border)}
+.admin-btn{font-size:12px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:8px;padding:7px 14px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all 0.15s}
+.admin-btn:hover{background:rgba(249,115,22,0.2)}
+.admin-status{font-size:12px;margin-top:4px}
+.admin-status.ok{color:var(--green)}
+.admin-status.err{color:var(--red)}
+
 /* ── Combo field (dropdown + manual input) ── */
 .combo-wrap{position:relative;display:flex;flex-direction:column;gap:5px}
 .combo-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 0 0;padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;border-bottom:none}
@@ -302,9 +313,18 @@ footer a:hover{color:var(--text-muted)}
   </div>
 
   <div class="usage-banner" id="usageBanner">
-    <span class="usage-label" id="usageLabel">0 / 10 free plans used</span>
+    <span class="usage-label" id="usageLabel">0 / 5 free plans used</span>
     <div class="usage-bar-track"><div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div></div>
     <button class="usage-cta" onclick="openModal('pricingModal')">Pricing →</button>
+  </div>
+
+  <div id="adminSection" style="display:none;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem;margin-bottom:1rem">
+    <div style="font-size:12px;color:var(--text-dim);margin-bottom:4px;font-weight:500">Unlock code</div>
+    <div class="admin-row">
+      <input class="admin-input" id="adminCodeInput" type="password" placeholder="Enter your code...">
+      <button class="admin-btn" onclick="verifyAdmin()">Unlock</button>
+    </div>
+    <div class="admin-status" id="adminStatus"></div>
   </div>
 
   <div class="card">
@@ -549,22 +569,81 @@ function switchTab(name){
   document.getElementById('tab-qmc').classList.toggle('active', name==='qmc');
 }
 
+// ── Admin unlock ──────────────────────────────────────────────────────────────
+let adminCode = localStorage.getItem('liftlab_admin') || '';
+let isAdmin   = false;
+
+function updateUsageBanner(){
+  const used = getUsage();
+  if(isAdmin){
+    document.getElementById('usageLabel').textContent = 'Unlimited — admin mode';
+    document.getElementById('usageBarFill').style.width='100%';
+    document.getElementById('usageBarFill').style.background='var(--green)';
+    return;
+  }
+  const pct = Math.min(100, Math.round(used/FREE_LIMIT*100));
+  document.getElementById('usageLabel').textContent = `${used} / ${FREE_LIMIT} free plans used`;
+  const fill=document.getElementById('usageBarFill');
+  fill.style.width=pct+'%';
+  fill.style.background=pct>=80?'var(--red)':pct>=50?'var(--yellow)':'var(--orange)';
+  if(used>=FREE_LIMIT){
+    const b=document.getElementById('usageBanner');
+    b.style.borderColor='rgba(248,113,113,0.35)';
+    b.style.background='rgba(248,113,113,0.06)';
+    document.getElementById('adminSection').style.display='block';
+  }
+}
+
+async function verifyAdmin(){
+  const code = document.getElementById('adminCodeInput').value.trim();
+  if(!code) return;
+  const status = document.getElementById('adminStatus');
+  status.textContent = 'Checking...';
+  status.className = 'admin-status';
+  try{
+    const res = await fetch('/api/verify-admin',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code})
+    });
+    const data = await res.json();
+    if(data.valid){
+      isAdmin = true;
+      adminCode = code;
+      localStorage.setItem('liftlab_admin', code);
+      status.textContent = 'Unlocked — unlimited plans active';
+      status.className = 'admin-status ok';
+      document.getElementById('adminCodeInput').value='';
+      updateUsageBanner();
+    } else {
+      status.textContent = 'Invalid code.';
+      status.className = 'admin-status err';
+      adminCode='';
+      localStorage.removeItem('liftlab_admin');
+    }
+  } catch(e){
+    status.textContent = 'Error. Try again.';
+    status.className = 'admin-status err';
+  }
+}
+
+// Restore admin on load
+async function tryRestoreAdmin(){
+  const stored = localStorage.getItem('liftlab_admin');
+  if(!stored) return;
+  try{
+    const res = await fetch('/api/verify-admin',{
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({code: stored})
+    });
+    const data = await res.json();
+    if(data.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); }
+    else { localStorage.removeItem('liftlab_admin'); }
+  } catch(e){}
+}
+
 // ── Usage counter ─────────────────────────────────────────────────────────────
 function getUsage(){ try{ return parseInt(localStorage.getItem(USAGE_KEY)||'0'); }catch(e){ return 0; } }
 function incrementUsage(){ try{ localStorage.setItem(USAGE_KEY, String(getUsage()+1)); }catch(e){} updateUsageBanner(); }
-function updateUsageBanner(){
-  const used = getUsage();
-  const pct  = Math.min(100, Math.round(used/FREE_LIMIT*100));
-  document.getElementById('usageLabel').textContent = `${used} / ${FREE_LIMIT} free plans used`;
-  const fill = document.getElementById('usageBarFill');
-  fill.style.width = pct+'%';
-  fill.style.background = pct>=90 ? 'var(--red)' : pct>=60 ? 'var(--yellow)' : 'var(--orange)';
-  if(used >= FREE_LIMIT){
-    const b = document.getElementById('usageBanner');
-    b.style.borderColor = 'rgba(248,113,113,0.35)';
-    b.style.background  = 'rgba(248,113,113,0.06)';
-  }
-}
 
 // ── Markdown ──────────────────────────────────────────────────────────────────
 function renderMarkdown(text){
@@ -723,7 +802,9 @@ function calcQmc(){
 }
 
 // ── Save / Load ───────────────────────────────────────────────────────────────
-function autosave(){
+let savedPlanText = null;
+
+function autosave(planToSave){
   const lifts=[];
   document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{
     lifts.push({
@@ -732,6 +813,7 @@ function autosave(){
       reps:   row.querySelector('.lift-reps').value
     });
   });
+  if(planToSave !== undefined) savedPlanText = planToSave;
   const data={
     v:5, unit, selectedGoal, selectedExp, selectedDays, selectedSplit,
     age:        document.getElementById('userAge').value,
@@ -740,6 +822,7 @@ function autosave(){
     height:     document.getElementById('userHeight').value,
     goalDetail: document.getElementById('goalDetail').value,
     splitCustom:document.getElementById('splitCustom').value,
+    plan:       savedPlanText || null,
     lifts
   };
   try{ localStorage.setItem(SAVE_KEY, JSON.stringify(data)); }
@@ -771,20 +854,46 @@ function loadSaved(){
       if(chip){
         selectChipIn(rowId,chip);
         if(key==='selectedGoal') selectedGoal=val;
-        if(key==='selectedExp')  selectedExp=val;
+        if(key==='selectedExp')  { selectedExp=val; selectExp(chip,val); }
         if(key==='selectedDays') selectedDays=val;
         if(key==='selectedSplit')selectedSplit=val;
       }
     });
 
     initLifts(d.lifts&&d.lifts.length?d.lifts:null);
+
+    // Restore saved plan if present
+    if(d.plan){
+      savedPlanText = d.plan;
+      currentPlanContext = d.plan;
+      // Rebuild maxes from saved lifts
+      if(d.lifts && d.lifts.length){
+        const grid=document.getElementById('maxesGrid');
+        grid.innerHTML='';
+        d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{
+          const max=calc1RM(parseFloat(l.weight),parseInt(l.reps));
+          const c=document.createElement('div');
+          c.className='max-card';
+          c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${max}</div><div class="max-unit">${d.unit||'lbs'} estimated 1RM</div><div class="max-reps">${l.weight} ${d.unit||'lbs'} × ${l.reps} reps</div>`;
+          grid.appendChild(c);
+        });
+      }
+      document.getElementById('planText').replaceChildren(renderMarkdown(d.plan));
+      document.getElementById('resultsCard').style.display='block';
+      qaUsedThisPlan=0;
+      updateQaLimit();
+      document.getElementById('qaSection').style.display='block';
+    }
+
     return true;
   }catch(e){ console.warn('loadSaved error:',e); return false; }
 }
 
 function clearSaved(){
   try{ localStorage.removeItem(SAVE_KEY); }catch(e){}
+  savedPlanText = null;
   document.getElementById('savedBanner').style.display='none';
+  document.getElementById('resultsCard').style.display='none';
   ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value='');
   document.getElementById('userSex').value='';
   initLifts(null);
@@ -806,10 +915,10 @@ async function calculate(){
   err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
 
-  // Enforce plan limit
-  if(getUsage() >= FREE_LIMIT){
-    err.textContent=`You've used all ${FREE_LIMIT} free plans. Paid plans coming soon.`;
-    openModal('pricingModal');
+  // Enforce plan limit (skip if admin)
+  if(!isAdmin && getUsage() >= FREE_LIMIT){
+    err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or check back when paid plans launch.`;
+    document.getElementById('adminSection').style.display='block';
     return;
   }
 
@@ -851,6 +960,7 @@ async function calculate(){
         bodyweight: document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
         sex:        document.getElementById('userSex').value||null,
         height:     document.getElementById('userHeight').value||null,
+        adminCode:  adminCode || undefined,
       })
     });
     const data=await res.json();
@@ -858,7 +968,8 @@ async function calculate(){
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
     currentPlanContext = data.plan;
-    incrementUsage();
+    autosave(data.plan); // save plan to localStorage
+    if(!isAdmin) incrementUsage();
 
     // Show Q&A section
     qaUsedThisPlan = 0;
@@ -958,6 +1069,7 @@ const hadSaved=loadSaved();
 if(!hadSaved) initLifts(null);
 document.getElementById('savedBanner').style.display = hadSaved ? 'flex' : 'none';
 updateUsageBanner();
+tryRestoreAdmin();
 </script>
 </body>
 </html>
