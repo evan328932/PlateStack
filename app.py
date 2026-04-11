@@ -266,6 +266,24 @@ def question():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/waitlist", methods=["POST"])
+def waitlist():
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"ok": False}), 400
+    email = sanitize(str(data.get("email", "")), 200)
+    if not email or "@" not in email:
+        return jsonify({"ok": False}), 400
+    # Store emails in a simple local file (or log them)
+    # For a real launch, swap this with a Mailchimp/ConvertKit API call
+    try:
+        with open("waitlist.txt", "a") as f:
+            f.write(f"{email}\n")
+    except Exception:
+        pass
+    return jsonify({"ok": True}), 200
+
+
 @app.route("/api/verify-admin", methods=["POST"])
 def verify_admin_route():
     """Lets the frontend verify an admin code without exposing the code itself."""
