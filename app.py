@@ -148,5 +148,55 @@ def plan():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route("/api/question", methods=["POST"])
+def question():
+    ip = get_ip()
+    if is_rate_limited(ip):
+        return jsonify({"error": "Too many requests. Please wait an hour and try again."}), 429
+
+    data = request.get_json(silent=True)
+    if not data:
+        return jsonify({"error": "Invalid request."}), 400
+
+    plan = sanitize(data.get("plan", ""), 4000)
+    q = sanitize(data.get("question", ""), 300)
+
+    if not plan or not q:
+        return jsonify({"error": "Missing plan or question."}), 400
+
+    system_prompt = (
+        "You are an expert strength coach. The user has been given a training plan and has a follow-up question. "
+        "Answer specifically and practically based on the plan provided. Be concise — 2-4 sentences or a short list. "
+        "Do not restate the entire plan. Just answer the question directly."
+    )
+    user_msg = f"Here is the training plan:\n\n{plan}\n\nQuestion: {q}"
+
+    try:
+        response = requests.post(
+            "https://api.anthropic.com/v1/messages",
+            headers={
+                "x-api-key": os.environ.get("ANTHROPIC_API_KEY"),
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": "claude-sonnet-4-20250514",
+                "max_tokens": 400,
+                "system": system_prompt,
+                "messages": [{"role": "user", "content": user_msg}],
+            },
+            timeout=20,
+        )
+        result = response.json()
+        if "error" in result:
+            return jsonify({"error": result["error"]["message"]}), 500
+        answer = "".join(block.get("text", "") for block in result.get("content", []))
+        return jsonify({"answer": answer})
+    except requests.exceptions.Timeout:
+        return jsonify({"error": "Request timed out. Try again."}), 504
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
     app.run(debug=False)
