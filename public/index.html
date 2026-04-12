@@ -20,17 +20,21 @@
 }
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min-height:100vh}
 
-/* ── HEADER ── */
+/* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;height:58px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
-.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:0.02em;color:#fff}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:0.02em;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none}
 .logo span{color:var(--orange)}
+.logo-icon{width:28px;height:28px}
 .header-right{display:flex;align-items:center;gap:8px}
 nav a{font-size:13px;color:var(--text-dim);text-decoration:none;padding:6px 12px;border-radius:8px;transition:all 0.15s;font-weight:500}
 nav a:hover{color:var(--text);background:var(--surface2)}
-.signup-btn{font-size:13px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap}
-.signup-btn:hover{background:rgba(249,115,22,0.2)}
+.account-btn{font-size:13px;font-weight:600;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;padding:7px 14px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap}
+.account-btn:hover{background:rgba(249,115,22,0.2)}
+.user-chip{display:flex;align-items:center;gap:6px;font-size:13px;font-weight:600;color:var(--text-muted);background:var(--surface);border:1px solid var(--border);border-radius:9px;padding:6px 12px;cursor:pointer}
+.user-chip:hover{border-color:var(--border2)}
+.user-dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
 
-/* ── TABS ── */
+/* TABS */
 .tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:58px;z-index:90;padding:0 1.5rem;overflow-x:auto}
 .tab{font-size:13px;font-weight:600;color:var(--text-dim);padding:14px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s;white-space:nowrap;user-select:none}
 .tab:hover{color:var(--text-muted)}
@@ -38,10 +42,10 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .tab-panel{display:none}
 .tab-panel.active{display:block}
 
-/* ── MODALS ── */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center;padding:1rem}
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:200;align-items:center;justify-content:center;padding:1rem}
 .modal-overlay.open{display:flex}
-.modal{background:#111317;border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:520px;width:100%;position:relative;max-height:88vh;overflow-y:auto}
+.modal{background:#111317;border:1px solid var(--border2);border-radius:20px;padding:2rem;max-width:520px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
 .modal-close{position:absolute;top:1rem;right:1rem;background:none;border:none;color:var(--text-dim);font-size:20px;cursor:pointer;padding:4px 8px;border-radius:6px;line-height:1}
 .modal-close:hover{color:var(--text);background:var(--surface2)}
 .modal h2{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:700;color:#fff;margin-bottom:0.5rem}
@@ -52,44 +56,48 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .badge-green{color:var(--green);background:var(--green-dim);border:1px solid var(--green-border)}
 .badge-yellow{color:var(--yellow);background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
 .badge-blue{color:var(--blue);background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2)}
+.tos-section{margin-bottom:1.25rem}
+.tos-section h3{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
+.tos-section p{font-size:13px;color:#555;line-height:1.7;margin-bottom:0}
 .how-steps{display:flex;flex-direction:column;gap:14px;margin-top:1rem}
 .how-step{display:flex;gap:12px;align-items:flex-start}
 .how-num{width:26px;height:26px;border-radius:50%;background:var(--orange-dim);color:var(--orange);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .how-step-text strong{display:block;font-size:14px;font-weight:600;color:var(--text);margin-bottom:2px}
 .how-step-text span{font-size:13px;color:var(--text-dim)}
-.tos-section{margin-bottom:1.25rem}
-.tos-section h3{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
-.tos-section p{font-size:13px;color:#555;line-height:1.7;margin-bottom:0}
 
-/* ── SIGNUP MODAL ── */
-.signup-features{display:flex;flex-direction:column;gap:10px;margin:1rem 0}
-.signup-feature{display:flex;align-items:flex-start;gap:10px;font-size:14px;color:var(--text-muted)}
-.signup-feature-icon{width:20px;height:20px;border-radius:50%;background:var(--green-dim);color:var(--green);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
-.signup-form{display:flex;flex-direction:column;gap:10px;margin-top:1.25rem}
-.signup-input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%}
-.signup-input::placeholder{color:var(--text-faint)}
-.signup-input:focus{outline:none;border-color:var(--orange-border)}
-.signup-submit{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:13px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:opacity 0.15s}
-.signup-submit:hover{opacity:0.88}
-.signup-note{font-size:12px;color:var(--text-dim);text-align:center;margin-top:8px}
+/* AUTH MODAL */
+.auth-tabs{display:flex;gap:0;margin-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.auth-tab{font-size:14px;font-weight:600;color:var(--text-dim);padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;transition:all 0.15s}
+.auth-tab.active{color:var(--orange);border-bottom-color:var(--orange)}
+.auth-form{display:flex;flex-direction:column;gap:10px}
+.auth-input{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:13px 14px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%;transition:border-color .15s}
+.auth-input::placeholder{color:var(--text-faint)}
+.auth-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+.auth-submit{background:var(--orange);color:#fff;border:none;border-radius:10px;padding:14px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;cursor:pointer;letter-spacing:0.03em;transition:opacity .15s;margin-top:4px}
+.auth-submit:hover{opacity:0.88}
+.auth-submit:disabled{opacity:0.4;cursor:not-allowed}
+.auth-msg{font-size:13px;text-align:center;min-height:18px;margin-top:2px}
+.auth-features{display:flex;flex-direction:column;gap:8px;margin:1rem 0 0.5rem}
+.auth-feature{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--text-muted)}
+.auth-feature-icon{width:18px;height:18px;border-radius:50%;background:var(--green-dim);color:var(--green);font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 
-/* ── HERO ── */
+/* HERO */
 .hero{text-align:center;padding:4rem 1rem 2.5rem}
 .hero-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:100px;padding:5px 14px;margin-bottom:1.25rem}
 .hero h1{font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;letter-spacing:0.01em;line-height:1;color:#fff;margin-bottom:1rem}
 .hero h1 em{font-style:normal;color:var(--orange)}
 .hero p{font-size:16px;color:var(--text-muted);max-width:400px;margin:0 auto 2rem;line-height:1.65}
 
-/* ── MAIN ── */
+/* MAIN */
 .main{max-width:820px;margin:0 auto;padding:1.5rem 1.5rem 6rem}
 
-/* ── CARDS ── */
+/* CARDS */
 .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-bottom:0.875rem}
 .card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
 .card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--orange)}
 .card-meta{font-size:12px;color:var(--text-faint)}
 
-/* ── BANNERS ── */
+/* BANNERS */
 .saved-banner{display:none;align-items:center;gap:8px;background:rgba(249,115,22,0.06);border:1px solid var(--orange-border);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--text-muted)}
 .saved-banner b{color:var(--orange)}
 .clear-btn{margin-left:auto;font-size:12px;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:7px;padding:3px 10px;cursor:pointer;font-family:inherit;transition:all 0.15s}
@@ -101,7 +109,7 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .usage-cta{font-size:12px;font-weight:600;color:var(--orange);white-space:nowrap;cursor:pointer;background:none;border:none;font-family:inherit;padding:0}
 .usage-cta:hover{text-decoration:underline}
 
-/* ── ADMIN ── */
+/* ADMIN */
 .admin-row{display:flex;gap:8px;margin-top:8px}
 .admin-input{flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
 .admin-input::placeholder{color:var(--text-faint)}
@@ -112,7 +120,7 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .admin-status.ok{color:var(--green)}
 .admin-status.err{color:var(--red)}
 
-/* ── FORM ELEMENTS ── */
+/* FORM ELEMENTS */
 .info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:500px){.info-grid{grid-template-columns:1fr}}
 .info-field{display:flex;flex-direction:column;gap:5px}
@@ -128,7 +136,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .combo-manual::placeholder{color:var(--text-faint)}
 .combo-manual:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
 
-/* ── LIFTS ── */
+/* LIFTS */
 .lifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:540px){.lifts-grid{grid-template-columns:1fr}}
 .lift-row{display:flex;flex-direction:column;gap:5px;position:relative}
@@ -149,7 +157,7 @@ select.field-input{cursor:pointer;appearance:none;background-image:url("data:ima
 .add-btn{font-size:13px;color:var(--orange);background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;padding:9px 15px;cursor:pointer;font-family:inherit;transition:all 0.15s;white-space:nowrap;font-weight:500}
 .add-btn:hover{background:rgba(249,115,22,0.2)}
 
-/* ── CHIPS & TOGGLES ── */
+/* CHIPS & TOGGLES */
 .unit-toggle{display:flex;gap:6px}
 .unit-btn{font-size:13px;font-weight:600;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px 18px;cursor:pointer;transition:all 0.15s;font-family:inherit}
 .unit-btn.active{background:var(--orange-dim);border-color:var(--orange-border);color:var(--orange)}
@@ -163,7 +171,7 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .exp-desc{font-size:12px;color:var(--text-dim);margin-top:8px;padding:8px 12px;background:var(--surface2);border-radius:8px;border-left:2px solid var(--orange-border);line-height:1.6;display:none}
 .exp-desc.visible{display:block}
 
-/* ── BUTTONS ── */
+/* BUTTONS */
 .calc-btn{width:100%;padding:16px;background:var(--orange);color:#fff;border:none;border-radius:14px;font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;letter-spacing:0.04em;cursor:pointer;transition:opacity 0.15s,transform 0.1s;margin-top:0.25rem}
 .calc-btn:hover{opacity:0.88}
 .calc-btn:active{transform:scale(0.99)}
@@ -175,7 +183,7 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .dot:nth-child(3){animation-delay:0.4s}
 @keyframes pulse{0%,80%,100%{opacity:0.12}40%{opacity:1}}
 
-/* ── RESULTS ── */
+/* RESULTS */
 .results-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-top:1rem}
 .results-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:1.5rem;flex-wrap:wrap;gap:8px}
 .results-actions{display:flex;gap:7px;flex-wrap:wrap}
@@ -197,9 +205,12 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .plan-text ul,.plan-text ol{padding-left:1.25rem;margin-bottom:0.75rem}
 .plan-text li{margin-bottom:4px}
 .plan-text strong{color:var(--text);font-weight:600}
+/* clickable lift links in plan */
+.plan-lift-link{color:var(--orange);cursor:pointer;text-decoration:underline;text-decoration-style:dotted;font-weight:600}
+.plan-lift-link:hover{text-decoration-style:solid}
 .results-footer{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--border);font-size:12px;color:var(--text-faint)}
 
-/* ── Q&A ── */
+/* Q&A */
 .qa-section{border-top:1px solid var(--border);padding-top:1.5rem;margin-top:0.25rem}
 .qa-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange);margin-bottom:0.5rem}
 .qa-limit{font-size:12px;color:var(--text-dim);margin-bottom:1rem}
@@ -223,12 +234,12 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .qa-send:hover{opacity:0.88}
 .qa-send:disabled{opacity:0.3;cursor:not-allowed}
 
-/* ── PROGRESS TRACKER ── */
+/* PROGRESS TRACKER */
 .prog-hero{text-align:center;padding:3rem 1rem 2rem}
 .prog-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:40px;font-weight:900;color:#fff;margin-bottom:0.5rem}
 .prog-hero p{font-size:15px;color:var(--text-muted);max-width:380px;margin:0 auto}
 .log-form{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end}
-.log-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:100px}
+.log-field{display:flex;flex-direction:column;gap:5px;flex:1;min-width:90px}
 .log-input{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);width:100%}
 .log-input::placeholder{color:var(--text-faint)}
 .log-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
@@ -237,17 +248,59 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .lift-selector{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:10px 30px 10px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;width:100%}
 .lift-selector:focus{outline:none;border-color:var(--orange-border)}
 .chart-wrap{position:relative;height:260px;margin-top:1rem}
-.log-entries{display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-top:1rem}
-.log-entry{display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:8px 12px;font-size:13px}
-.log-entry-left{color:var(--text-muted)}
-.log-entry-right{display:flex;align-items:center;gap:10px}
+.log-entries{display:flex;flex-direction:column;gap:6px;max-height:300px;overflow-y:auto;margin-top:1rem}
+.log-entry{display:flex;justify-content:space-between;align-items:flex-start;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:10px 12px;font-size:13px;gap:8px}
+.log-entry-left{display:flex;flex-direction:column;gap:3px;flex:1;min-width:0}
+.log-entry-title{color:var(--text);font-weight:600}
+.log-entry-meta{color:var(--text-muted);font-size:12px}
+.log-entry-note{color:var(--text-dim);font-size:12px;font-style:italic;margin-top:2px}
+.log-entry-right{display:flex;align-items:center;gap:8px;flex-shrink:0}
 .log-entry-max{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;color:var(--orange)}
 .log-entry-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;padding:2px 4px;opacity:0.5;transition:opacity 0.15s}
 .log-entry-del:hover{opacity:1;color:var(--red)}
+.log-entry-edit{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:11px;padding:2px 6px;opacity:0.5;transition:opacity 0.15s;border:1px solid var(--border);border-radius:4px;font-family:inherit}
+.log-entry-edit:hover{opacity:1;color:var(--text-muted)}
 .pr-badge{display:inline-flex;align-items:center;font-size:10px;font-weight:700;color:var(--green);background:var(--green-dim);border:1px solid var(--green-border);border-radius:100px;padding:2px 7px;letter-spacing:0.04em}
 .empty-state{text-align:center;color:var(--text-dim);font-size:14px;padding:2rem;background:var(--surface2);border-radius:12px;border:1px dashed var(--border2)}
 
-/* ── QMC ── */
+/* account nudge banner */
+.account-nudge{display:flex;align-items:center;justify-content:space-between;gap:12px;background:rgba(96,165,250,0.06);border:1px solid rgba(96,165,250,0.2);border-radius:12px;padding:12px 16px;margin-bottom:1rem;font-size:13px;color:var(--text-muted);flex-wrap:wrap}
+.account-nudge b{color:var(--blue)}
+.nudge-btn{font-size:12px;font-weight:600;color:var(--blue);background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.25);border-radius:7px;padding:5px 12px;cursor:pointer;font-family:inherit;white-space:nowrap;transition:all .15s}
+.nudge-btn:hover{background:rgba(96,165,250,0.18)}
+
+/* CATALOG */
+.catalog-hero{text-align:center;padding:3rem 1rem 2rem}
+.catalog-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:#fff;margin-bottom:0.5rem}
+.catalog-hero p{font-size:15px;color:var(--text-muted);max-width:460px;margin:0 auto}
+.catalog-search-wrap{max-width:820px;margin:0 auto;padding:0 1.5rem 1rem}
+.catalog-search{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:13px 16px;font-family:'DM Sans',sans-serif;font-size:15px;color:var(--text)}
+.catalog-search::placeholder{color:var(--text-dim)}
+.catalog-search:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+.catalog-filters{display:flex;gap:8px;flex-wrap:wrap;max-width:820px;margin:0 auto;padding:0 1.5rem 1.5rem}
+.cat-filter{font-size:12px;font-weight:500;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:100px;padding:5px 13px;cursor:pointer;transition:all 0.15s;user-select:none;font-family:inherit}
+.cat-filter:hover{border-color:var(--border2);color:var(--text-muted)}
+.cat-filter.active{background:var(--orange-dim);border-color:var(--orange-border);color:#fb923c}
+.catalog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;max-width:820px;margin:0 auto;padding:0 1.5rem 6rem}
+.catalog-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.25rem;cursor:pointer;transition:border-color 0.2s,transform 0.15s}
+.catalog-card:hover{border-color:var(--orange-border);transform:translateY(-1px)}
+.catalog-card-top{display:flex;gap:14px;align-items:flex-start}
+.catalog-svg-wrap{width:72px;height:72px;flex-shrink:0;background:var(--surface2);border-radius:10px;display:flex;align-items:center;justify-content:center;border:1px solid var(--border)}
+.catalog-card-info{flex:1;min-width:0}
+.catalog-card-name{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;color:#fff;margin-bottom:4px}
+.catalog-card-muscles{font-size:12px;color:var(--orange);font-weight:600;margin-bottom:6px}
+.catalog-card-desc{font-size:13px;color:var(--text-dim);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.catalog-tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:0.05em;color:var(--text-dim);background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:2px 7px;margin-top:8px;margin-right:4px}
+
+/* CATALOG DETAIL MODAL */
+.catalog-detail{max-width:600px}
+.catalog-detail-svg{width:100%;max-width:220px;margin:1rem auto;display:block}
+.catalog-tips{margin-top:1rem}
+.catalog-tips h4{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:0.07em;color:var(--orange);margin-bottom:8px}
+.catalog-tip{display:flex;gap:8px;font-size:13px;color:var(--text-muted);margin-bottom:7px;line-height:1.5}
+.catalog-tip::before{content:'→';color:var(--orange);flex-shrink:0;font-weight:700}
+
+/* QMC */
 .qmc-hero{text-align:center;padding:3.5rem 1rem 2rem}
 .qmc-hero h2{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:900;color:#fff;margin-bottom:0.5rem}
 .qmc-hero p{font-size:15px;color:var(--text-muted);max-width:380px;margin:0 auto}
@@ -276,24 +329,44 @@ footer a:hover{color:var(--text-muted)}
 </head>
 <body>
 
-<!-- SIGNUP MODAL -->
-<div class="modal-overlay" id="signupModal" onclick="closeModal('signupModal')">
+<!-- AUTH MODAL -->
+<div class="modal-overlay" id="authModal" onclick="closeModal('authModal')">
 <div class="modal" onclick="event.stopPropagation()">
-  <button class="modal-close" onclick="closeModal('signupModal')">×</button>
-  <div class="modal-badge badge-blue">Coming soon</div>
-  <h2>Create your account</h2>
-  <p>Accounts are free and unlock everything — your data follows you across every device, forever.</p>
-  <div class="signup-features">
-    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Sync across devices</strong> — your lifts and plans on every phone, tablet, and computer</span></div>
-    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Unlimited progress history</strong> — track every lift forever, not just what fits in your browser</span></div>
-    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Priority features</strong> — early access to periodization planning, coaching notes, and more</span></div>
-    <div class="signup-feature"><div class="signup-feature-icon">✓</div><span><strong style="color:var(--text)">Locked-in free pricing</strong> — early users keep free access when paid plans launch</span></div>
+  <button class="modal-close" onclick="closeModal('authModal')">×</button>
+  <div class="auth-tabs">
+    <div class="auth-tab active" id="authTabSignup" onclick="switchAuthTab('signup')">Create account</div>
+    <div class="auth-tab" id="authTabLogin" onclick="switchAuthTab('login')">Sign in</div>
   </div>
-  <div class="signup-form">
-    <input class="signup-input" id="signupEmail" type="email" placeholder="your@email.com">
-    <button class="signup-submit" onclick="submitSignup()">Join the waitlist</button>
-    <p class="signup-note" id="signupNote">No spam. No credit card. Just LiftLab.</p>
+  <div id="authSignupPanel">
+    <p style="font-size:14px;color:var(--text-muted);margin-bottom:0.75rem">Free account — your progress syncs across all your devices.</p>
+    <div class="auth-features">
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div><span>Sync progress across devices</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div><span>Unlimited workout history</span></div>
+      <div class="auth-feature"><div class="auth-feature-icon">✓</div><span>Never lose your data</span></div>
+    </div>
+    <div class="auth-form" style="margin-top:1rem">
+      <input class="auth-input" id="signupEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="signupPassword" type="password" placeholder="Password (min 6 characters)">
+      <button class="auth-submit" onclick="doRegister()">Create free account</button>
+      <div class="auth-msg" id="signupMsg" style="color:var(--red)"></div>
+    </div>
   </div>
+  <div id="authLoginPanel" style="display:none">
+    <div class="auth-form" style="margin-top:0.5rem">
+      <input class="auth-input" id="loginEmail" type="email" placeholder="Email address">
+      <input class="auth-input" id="loginPassword" type="password" placeholder="Password">
+      <button class="auth-submit" onclick="doLogin()">Sign in</button>
+      <div class="auth-msg" id="loginMsg" style="color:var(--red)"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- CATALOG DETAIL MODAL -->
+<div class="modal-overlay" id="catalogDetailModal" onclick="closeModal('catalogDetailModal')">
+<div class="modal catalog-detail" onclick="event.stopPropagation()">
+  <button class="modal-close" onclick="closeModal('catalogDetailModal')">×</button>
+  <div id="catalogDetailContent"></div>
 </div>
 </div>
 
@@ -307,7 +380,7 @@ footer a:hover{color:var(--text-muted)}
   <div class="how-steps">
     <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Age, bodyweight, training schedule, and current numbers.</span></div></div>
     <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Strength, size, endurance, or something specific — tell us exactly what you're chasing.</span></div></div>
-    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan + track progress</strong><span>See your 1RM, get an AI plan, ask follow-up questions, export a PDF, and log workouts over time.</span></div></div>
+    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan + track progress</strong><span>See your 1RM, get an AI plan, ask questions, export PDF, and log every workout over time.</span></div></div>
   </div>
 </div>
 </div>
@@ -318,10 +391,9 @@ footer a:hover{color:var(--text-muted)}
   <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
   <div class="modal-badge badge-green">Free during beta</div>
   <h2>Completely free right now</h2>
-  <p>LiftLab is in early access — no account, no credit card. The Quick Max Calculator and Progress Tracker are always free. AI training plans are free during beta with a limit.</p>
-  <p>When paid plans launch, they'll add: unlimited AI plans, device sync, coaching notes, advanced periodization, and more. Core tools stay free forever.</p>
-  <p style="color:var(--text-faint);font-size:13px">Join the waitlist to lock in early pricing before it's set.</p>
-  <button class="signup-submit" onclick="closeModal('pricingModal');openModal('signupModal')" style="margin-top:1rem;width:100%">Join the waitlist</button>
+  <p>LiftLab is in early access — create a free account to sync everything across devices. AI plans are free with a limit.</p>
+  <p>A paid tier may launch in future for unlimited plans, advanced periodization, and coaching tools. Core features stay free forever.</p>
+  <button class="auth-submit" onclick="closeModal('pricingModal');openModal('authModal')" style="margin-top:1rem;width:100%">Create free account</button>
 </div>
 </div>
 
@@ -332,34 +404,46 @@ footer a:hover{color:var(--text-muted)}
   <div class="modal-badge badge-yellow">Terms of service</div>
   <h2>Terms of Service</h2>
   <p>By using LiftLab you agree to these terms. Last updated April 2026.</p>
-  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Nothing is medical or professional training advice. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
   <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>1RM calculations use a weighted average of Brzycki, Lander, Epley, and Mayhew formulas. These are estimates — never attempt a true 1RM without a spotter.</p></div>
   <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. LiftLab is not liable for any injury or damage from following generated advice.</p></div>
-  <div class="tos-section"><h3>4. Privacy and data</h3><p>Your data is saved in your browser's localStorage — it never leaves your device. Waitlist emails are stored securely and never sold. We collect only basic rate-limit data server-side.</p></div>
+  <div class="tos-section"><h3>4. Privacy and data</h3><p>Account data is stored securely on our servers. Browser-only data stays in localStorage. We do not sell any data.</p></div>
   <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not abuse or spam the service. We reserve the right to block access for misuse.</p></div>
-  <div class="tos-section"><h3>6. No guarantees</h3><p>LiftLab is provided as-is. The service may change or introduce paid features in the future.</p></div>
-  <div class="tos-section"><h3>7. Liability</h3><p>Total liability is capped at what you have paid us (zero during free beta).</p></div>
+  <div class="tos-section"><h3>6. Liability</h3><p>Total liability is capped at what you have paid (zero during free beta).</p></div>
 </div>
 </div>
 
+<!-- HEADER -->
 <header>
-  <div class="logo">Lift<span>Lab</span></div>
+  <a class="logo" onclick="goHome()" href="#">
+    <svg class="logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <rect x="1" y="11" width="5" height="6" rx="1.5" fill="#f97316"/>
+      <rect x="22" y="11" width="5" height="6" rx="1.5" fill="#f97316"/>
+      <rect x="6" y="8" width="4" height="12" rx="1.5" fill="#f97316"/>
+      <rect x="18" y="8" width="4" height="12" rx="1.5" fill="#f97316"/>
+      <rect x="10" y="12" width="8" height="4" rx="1" fill="#fff"/>
+    </svg>
+    Lift<span>Lab</span>
+  </a>
   <div class="header-right">
     <nav>
       <a href="#" onclick="openModal('howModal');return false">How it works</a>
       <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
     </nav>
-    <button class="signup-btn" onclick="openModal('signupModal')">Create account</button>
+    <div id="headerAuthArea">
+      <button class="account-btn" onclick="openModal('authModal')">Create account</button>
+    </div>
   </div>
 </header>
 
 <div class="tab-bar">
   <div class="tab active" id="tabPlanner" onclick="switchTab('planner')">Training Planner</div>
   <div class="tab" id="tabProgress" onclick="switchTab('progress')">Progress Tracker</div>
+  <div class="tab" id="tabCatalog" onclick="switchTab('catalog')">Exercise Catalog</div>
   <div class="tab" id="tabQmc" onclick="switchTab('qmc')">Quick Max Calc</div>
 </div>
 
-<!-- ═══ TAB 1: TRAINING PLANNER ═══ -->
+<!-- ═══════════════════ TAB 1: TRAINING PLANNER ═══════════════════ -->
 <div class="tab-panel active" id="tab-planner">
 <div class="hero">
   <div class="hero-badge">AI-powered training</div>
@@ -502,9 +586,7 @@ footer a:hover{color:var(--text-muted)}
       <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
       <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
     </div>
-    <div class="exp-desc visible" id="expDesc">
-      <strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.
-    </div>
+    <div class="exp-desc visible" id="expDesc"><strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.</div>
   </div>
 
   <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate My Max + Build My Plan</button>
@@ -524,7 +606,7 @@ footer a:hover{color:var(--text-muted)}
     </div>
     <div class="maxes-grid" id="maxesGrid"></div>
     <div class="plan-section">
-      <div class="plan-label">Your training plan</div>
+      <div class="plan-label">Your training plan <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(click any exercise name to see how to do it)</span></div>
       <div class="plan-text" id="planText"></div>
     </div>
     <div class="results-footer" id="resultsFooter"></div>
@@ -542,13 +624,18 @@ footer a:hover{color:var(--text-muted)}
 </div>
 </div><!-- end tab-planner -->
 
-<!-- ═══ TAB 2: PROGRESS TRACKER ═══ -->
+<!-- ═══════════════════ TAB 2: PROGRESS TRACKER ═══════════════════ -->
 <div class="tab-panel" id="tab-progress">
 <div class="prog-hero">
   <h2>Progress Tracker</h2>
   <p>Log every workout and watch your strength grow over time.</p>
 </div>
 <div class="main" style="max-width:720px">
+
+  <div class="account-nudge" id="progressNudge" style="display:none">
+    <span><b>Sign in to sync</b> — your progress will be saved to your account and accessible everywhere.</span>
+    <button class="nudge-btn" onclick="openModal('authModal')">Sign in / Sign up</button>
+  </div>
 
   <div class="card">
     <div class="card-header"><span class="card-label">Log a workout</span></div>
@@ -559,14 +646,16 @@ footer a:hover{color:var(--text-muted)}
         <datalist id="exerciseSuggestions">
           <option>Bench press</option><option>Squat</option><option>Deadlift</option>
           <option>Overhead press</option><option>Barbell row</option><option>Pull-up</option>
-          <option>Dumbbell curl</option><option>Tricep pushdown</option>
+          <option>Romanian deadlift</option><option>Incline bench press</option>
+          <option>Dumbbell curl</option><option>Tricep pushdown</option><option>Leg press</option>
+          <option>Hip thrust</option><option>Cable row</option><option>Lat pulldown</option>
         </datalist>
       </div>
       <div class="log-field">
         <span class="field-label">Weight</span>
         <input class="log-input" id="logWeight" type="number" min="0" step="any" placeholder="225">
       </div>
-      <div class="log-field">
+      <div class="log-field" style="min-width:70px;max-width:90px">
         <span class="field-label">Reps</span>
         <input class="log-input" id="logReps" type="number" min="1" max="50" placeholder="5">
       </div>
@@ -574,6 +663,16 @@ footer a:hover{color:var(--text-muted)}
         <span class="field-label">&nbsp;</span>
         <button class="log-btn" onclick="logWorkout()">Log</button>
       </div>
+    </div>
+    <div style="margin-top:10px">
+      <div class="field-label" style="margin-bottom:5px;display:flex;justify-content:space-between;align-items:center">
+        <span>Date</span><span style="color:var(--text-faint);font-size:11px">defaults to today</span>
+      </div>
+      <input class="log-input" id="logDate" type="date" style="max-width:180px">
+    </div>
+    <div style="margin-top:10px">
+      <div class="field-label" style="margin-bottom:5px">Notes <span style="color:var(--text-faint);font-size:11px;font-weight:400">(optional)</span></div>
+      <input class="log-input" id="logNote" placeholder="e.g. felt strong, paused reps, close grip...">
     </div>
     <div id="logSuccess" style="display:none;font-size:13px;color:var(--green);margin-top:8px;font-weight:500"></div>
   </div>
@@ -600,7 +699,20 @@ footer a:hover{color:var(--text-muted)}
 </div>
 </div><!-- end tab-progress -->
 
-<!-- ═══ TAB 3: QUICK MAX CALCULATOR ═══ -->
+<!-- ═══════════════════ TAB 3: EXERCISE CATALOG ═══════════════════ -->
+<div class="tab-panel" id="tab-catalog">
+<div class="catalog-hero">
+  <h2>Exercise Catalog</h2>
+  <p>Every major lift — how to do it, what it works, and tips to do it right.</p>
+</div>
+<div class="catalog-search-wrap">
+  <input class="catalog-search" id="catalogSearch" placeholder="Search exercises..." oninput="filterCatalog()">
+</div>
+<div class="catalog-filters" id="catalogFilters"></div>
+<div class="catalog-grid" id="catalogGrid"></div>
+</div><!-- end tab-catalog -->
+
+<!-- ═══════════════════ TAB 4: QUICK MAX CALC ═══════════════════ -->
 <div class="tab-panel" id="tab-qmc">
 <div class="qmc-hero">
   <h2>Quick Max Calculator</h2>
@@ -652,7 +764,10 @@ footer a:hover{color:var(--text-muted)}
 </footer>
 
 <script>
-const SAVE_KEY   = 'liftlab_v6';
+// ═══════════════════════════════════════════════════════════
+// CONSTANTS & STATE
+// ═══════════════════════════════════════════════════════════
+const SAVE_KEY   = 'liftlab_v8';
 const USAGE_KEY  = 'liftlab_plans_used';
 const LOG_KEY    = 'liftlab_progress_log';
 const FREE_LIMIT = 5;
@@ -663,97 +778,304 @@ let unit='lbs', qmcUnit='lbs';
 let selectedGoal='strength', selectedExp='beginner', selectedDays='4', selectedSplit='full_body';
 let currentPlanContext=null, qaUsedThisPlan=0, savedPlanText=null;
 let chartInstance=null;
+let adminCode='', isAdmin=false;
+let currentUser=null; // {id, email, token}
+let catalogFilter='All';
 
-// ── TABS ──────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// EXERCISE CATALOG DATA
+// ═══════════════════════════════════════════════════════════
+const CATALOG = [
+  // CHEST
+  {name:'Bench Press',muscles:'Chest, Triceps, Front Delts',category:'Chest',
+   desc:'The king of upper body pressing. Lie flat on a bench, grip the bar slightly wider than shoulder-width, lower it to your chest, and press back up.',
+   tips:['Keep your shoulder blades pinched and back slightly arched','Lower the bar to your lower chest, not your neck','Drive your feet into the floor for leg drive and stability'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="18" r="8" fill="#f97316"/><rect x="30" y="28" width="20" height="22" rx="4" fill="#f97316"/><line x1="40" y1="50" x2="35" y2="65" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="50" x2="45" y2="65" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="32" y1="33" x2="18" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="33" x2="62" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="10" y="34" width="12" height="8" rx="2" fill="#ff9a52" opacity="0.5"/><rect x="58" y="34" width="12" height="8" rx="2" fill="#ff9a52" opacity="0.5"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">pecs active</text></svg>`},
+  {name:'Incline Bench Press',muscles:'Upper Chest, Triceps, Delts',category:'Chest',
+   desc:'Set the bench to 30–45°. Same mechanics as flat bench but targets the upper portion of the pectorals more directly.',
+   tips:['30–45° is the sweet spot — steeper becomes a shoulder press','Use a slightly narrower grip than flat bench','Control the descent — don\'t let gravity drop the bar'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="15" r="8" fill="#f97316"/><rect x="30" y="25" width="20" height="20" rx="4" fill="#f97316" transform="rotate(-20 40 35)"/><line x1="38" y1="47" x2="34" y2="62" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="43" y1="47" x2="48" y2="62" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="29" x2="14" y2="22" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="29" x2="66" y2="22" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="6" y="18" width="12" height="8" rx="2" fill="#ff9a52" opacity="0.5"/><rect x="62" y="18" width="12" height="8" rx="2" fill="#ff9a52" opacity="0.5"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">upper chest</text></svg>`},
+  {name:'Dumbbell Fly',muscles:'Chest, Front Delts',category:'Chest',
+   desc:'Lie on a flat bench with a dumbbell in each hand. With a slight bend in the elbows, arc the weights out and down, then squeeze them back together overhead.',
+   tips:['Think "hugging a tree" — wide arc, not a press','Keep a constant slight bend in the elbows throughout','Don\'t go too heavy — this is an isolation movement'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="18" r="8" fill="#f97316"/><rect x="31" y="28" width="18" height="20" rx="4" fill="#f97316"/><line x1="40" y1="48" x2="35" y2="63" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="48" x2="45" y2="63" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M31 36 Q20 28 12 36" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/><path d="M49 36 Q60 28 68 36" stroke="#f97316" stroke-width="3" fill="none" stroke-linecap="round"/><circle cx="12" cy="36" r="4" fill="#ff9a52"/><circle cx="68" cy="36" r="4" fill="#ff9a52"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">chest isolation</text></svg>`},
+  // BACK
+  {name:'Deadlift',muscles:'Hamstrings, Glutes, Back, Traps',category:'Back',
+   desc:'Stand with the bar over your mid-foot, hinge at the hips, grab the bar, then drive through the floor while keeping a neutral spine to stand fully upright.',
+   tips:['Bar stays in contact with your legs the whole way up','Hinge — don\'t squat. Your hips start higher than a squat','Brace your core hard before you pull'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><path d="M40 20 L40 42" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><path d="M40 30 L25 42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M40 30 L55 42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M40 42 L33 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M40 42 L47 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="15" y="55" width="50" height="6" rx="3" fill="#555"/><rect x="10" y="52" width="8" height="12" rx="3" fill="#777"/><rect x="62" y="52" width="8" height="12" rx="3" fill="#777"/><text x="40" y="76" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">posterior chain</text></svg>`},
+  {name:'Barbell Row',muscles:'Lats, Rhomboids, Biceps, Rear Delts',category:'Back',
+   desc:'Hinge to ~45°, grip the bar at shoulder-width, and row it to your lower stomach. Control it back down.',
+   tips:['Lead with your elbows, not your hands','Keep your back flat — don\'t round at the top','Row to your belly button, not your chest'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="22" cy="14" r="8" fill="#f97316"/><path d="M22 22 L22 40 L55 48" stroke="#f97316" stroke-width="3.5" stroke-linecap="round" fill="none"/><line x1="22" y1="40" x2="14" y2="56" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="22" y1="40" x2="30" y2="56" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="40" y="52" width="30" height="5" rx="2.5" fill="#555"/><rect x="35" y="50" width="6" height="9" rx="2" fill="#777"/><rect x="64" y="50" width="6" height="9" rx="2" fill="#777"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">upper back</text></svg>`},
+  {name:'Pull-up',muscles:'Lats, Biceps, Rear Delts',category:'Back',
+   desc:'Hang from a bar with palms facing away, pull yourself up until your chin clears the bar, then lower under control.',
+   tips:['Start from a dead hang — don\'t use a bent-arm start','Drive your elbows down and back, not just pull with your hands','Squeeze your lats at the top of each rep'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="8" width="70" height="5" rx="2.5" fill="#555"/><circle cx="40" cy="28" r="8" fill="#f97316"/><path d="M40 36 L40 54" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="42" x2="26" y2="34" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="42" x2="54" y2="34" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="26" y1="34" x2="22" y2="13" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 2"/><line x1="54" y1="34" x2="58" y2="13" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 2"/><line x1="40" y1="54" x2="34" y2="68" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="54" x2="46" y2="68" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="40" y="78" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">lats</text></svg>`},
+  {name:'Lat Pulldown',muscles:'Lats, Biceps, Rear Delts',category:'Back',
+   desc:'Sit at a cable machine, grip the bar wide, and pull it to your upper chest while leaning back slightly.',
+   tips:['Think about pulling your elbows to your hips, not just pulling the bar down','Don\'t lean back excessively — keep it slight','Full range of motion — arms fully extended at the top'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="5" width="60" height="5" rx="2" fill="#555"/><line x1="20" y1="10" x2="28" y2="28" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 2"/><line x1="60" y1="10" x2="52" y2="28" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 2"/><circle cx="40" cy="30" r="8" fill="#f97316"/><line x1="28" y1="28" x2="40" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="52" y1="28" x2="40" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="32" y="38" width="16" height="16" rx="4" fill="#f97316"/><line x1="40" y1="54" x2="35" y2="68" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="54" x2="45" y2="68" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="40" y="78" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">lats</text></svg>`},
+  {name:'Cable Row',muscles:'Rhomboids, Lats, Biceps',category:'Back',
+   desc:'Sit at a low cable row, grab the handle, and row it to your abdomen while keeping a neutral spine. Squeeze the shoulder blades together at the end.',
+   tips:['Sit tall — don\'t lean back and use momentum','Full extension at the start, full squeeze at the end','Keep elbows close to your body as you pull'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="35" width="10" height="30" rx="3" fill="#555"/><line x1="12" y1="50" x2="30" y2="45" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/><circle cx="40" cy="28" r="8" fill="#f97316"/><path d="M40 36 L40 52" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><line x1="40" y1="44" x2="30" y2="45" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="44" x2="54" y2="40" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="52" x2="34" y2="66" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="52" x2="46" y2="66" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="44" y="78" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">back</text></svg>`},
+  // LEGS
+  {name:'Squat',muscles:'Quads, Glutes, Hamstrings',category:'Legs',
+   desc:'Bar on upper back, feet shoulder-width, toes slightly out. Break at hips and knees simultaneously and descend until thighs are parallel or below, then drive back up.',
+   tips:['Knees track over your toes — push them out','Keep your chest up and core braced the entire way down','Drive through your whole foot, not just your heels'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><rect x="20" y="20" width="40" height="5" rx="2" fill="#555"/><path d="M40 25 L30 50 L22 68" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M40 25 L50 50 L58 68" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 40 L40 25 L48 40" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><line x1="22" y1="30" x2="15" y2="30" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><line x1="58" y1="30" x2="65" y2="30" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="78" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">quads + glutes</text></svg>`},
+  {name:'Romanian Deadlift',muscles:'Hamstrings, Glutes, Lower Back',category:'Legs',
+   desc:'Stand holding the bar. Hinge at the hips with a slight knee bend, lowering the bar along your legs until you feel a strong hamstring stretch, then drive your hips forward to return.',
+   tips:['This is a hinge — not a squat. Keep knees mostly straight','Feel the stretch in your hamstrings, not your lower back','Bar stays close to your body the whole time'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="25" cy="12" r="8" fill="#f97316"/><path d="M25 20 L25 38 L50 50" stroke="#f97316" stroke-width="3.5" stroke-linecap="round" fill="none"/><line x1="25" y1="38" x2="18" y2="55" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="25" y1="38" x2="32" y2="55" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="18" y1="20" x2="10" y2="36" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><rect x="38" y="52" width="28" height="5" rx="2.5" fill="#555"/><rect x="34" y="50" width="6" height="9" rx="2" fill="#777"/><rect x="62" y="50" width="6" height="9" rx="2" fill="#777"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">hamstrings</text></svg>`},
+  {name:'Leg Press',muscles:'Quads, Glutes, Hamstrings',category:'Legs',
+   desc:'Sit in the machine with feet shoulder-width on the platform. Lower the weight by bending your knees to about 90°, then press back to full extension.',
+   tips:['Don\'t lock out your knees at the top — keep slight tension','Foot position changes focus: high feet = more glutes, low feet = more quads','Never let your lower back come off the pad'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="55" width="70" height="10" rx="4" fill="#333"/><rect x="5" y="30" width="12" height="28" rx="4" fill="#444"/><circle cx="22" cy="35" r="8" fill="#f97316"/><path d="M22 43 L22 55" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><line x1="22" y1="43" x2="12" y2="43" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="22" y1="48" x2="36" y2="40" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="36" y1="40" x2="52" y2="48" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><circle cx="52" cy="48" r="3" fill="#ff9a52"/><text x="40" y="74" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">quads</text></svg>`},
+  {name:'Hip Thrust',muscles:'Glutes, Hamstrings',category:'Legs',
+   desc:'Upper back against a bench, bar across your hips. Drive through your heels to push your hips toward the ceiling, squeezing your glutes at the top.',
+   tips:['Squeeze at the top and hold for a second — really feel the glutes','Chin tucked, eyes forward — don\'t hyperextend your neck','Feet flat, knees at ~90° at the top position'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="38" width="16" height="22" rx="4" fill="#444"/><circle cx="22" cy="22" r="8" fill="#f97316"/><path d="M18 30 L10 42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M22 30 L25 42 L40 38 L55 44 L55 58" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="28" y="34" width="26" height="6" rx="3" fill="#555"/><rect x="22" y="32" width="6" height="10" rx="2" fill="#777"/><rect x="54" y="32" width="6" height="10" rx="2" fill="#777"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">glutes</text></svg>`},
+  {name:'Leg Curl',muscles:'Hamstrings',category:'Legs',
+   desc:'Lying on the machine, curl your heels toward your glutes against the resistance, then lower under control.',
+   tips:['Don\'t let your hips rise off the pad — that\'s your lower back taking over','Slow controlled negative — lower in 2–3 seconds','Stretch fully at the bottom before each rep'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="45" width="70" height="8" rx="3" fill="#333"/><circle cx="22" cy="22" r="8" fill="#f97316"/><path d="M22 30 L22 46" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><path d="M22 46 L40 46 L50 32" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="50" cy="32" r="5" fill="#ff9a52"/><line x1="12" y1="35" x2="6" y2="35" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="66" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">hamstrings</text></svg>`},
+  {name:'Leg Extension',muscles:'Quadriceps',category:'Legs',
+   desc:'Seated in the machine, extend your legs to straighten them against the resistance, then lower under control.',
+   tips:['Full extension at the top — hold briefly for maximum quad squeeze','Control the weight down — don\'t let it crash','Point your toes slightly inward to hit more of the inner quad'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="20" width="20" height="45" rx="4" fill="#333"/><circle cx="35" cy="22" r="8" fill="#f97316"/><path d="M35 30 L25 42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M25 42 L25 58" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><path d="M25 52 L55 52 L62 38" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><circle cx="62" cy="38" r="5" fill="#ff9a52"/><text x="40" y="72" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">quads</text></svg>`},
+  // SHOULDERS
+  {name:'Overhead Press',muscles:'Front Delts, Triceps, Upper Traps',category:'Shoulders',
+   desc:'Stand with the bar at shoulder height. Press directly overhead until arms are locked out, then lower to just below chin.',
+   tips:['Keep your core braced — don\'t arch your lower back','Bar path should be straight up, not forward','Elbows slightly in front of the bar at the starting position'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><rect x="32" y="20" width="16" height="18" rx="4" fill="#f97316"/><rect x="12" y="34" width="56" height="5" rx="2" fill="#555"/><rect x="6" y="31" width="8" height="11" rx="2" fill="#777"/><rect x="66" y="31" width="8" height="11" rx="2" fill="#777"/><line x1="32" y1="27" x2="20" y2="35" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="27" x2="60" y2="35" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="38" x2="34" y2="55" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="38" x2="46" y2="55" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="40" y="68" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">shoulders</text></svg>`},
+  {name:'Lateral Raise',muscles:'Side Delts',category:'Shoulders',
+   desc:'Hold dumbbells at your sides. Raise them out to 90° with a slight bend in the elbows, leading with the back of the hand (pinky slightly higher than thumb), then lower slowly.',
+   tips:['Slight forward lean and slight elbow bend gives better delt activation','Go lighter than you think — form breaks down fast','Slow eccentrics (2–3 seconds down) make these much more effective'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="15" r="8" fill="#f97316"/><rect x="32" y="25" width="16" height="18" rx="4" fill="#f97316"/><line x1="32" y1="30" x2="12" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="30" x2="68" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><circle cx="10" cy="38" r="4" fill="#ff9a52"/><circle cx="70" cy="38" r="4" fill="#ff9a52"/><line x1="40" y1="43" x2="34" y2="60" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="40" y1="43" x2="46" y2="60" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="40" y="74" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">side delts</text></svg>`},
+  {name:'Face Pull',muscles:'Rear Delts, Rotator Cuff, Traps',category:'Shoulders',
+   desc:'Set a cable at face height. Pull the rope toward your face, flaring your elbows out and back, separating your hands at the end of the movement.',
+   tips:['Pull to your ears, not your nose — elbows should end behind the rope','Great injury prevention — do these even if you skip other shoulder work','External rotation at the end of the movement is key'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="25" width="10" height="30" rx="3" fill="#555"/><line x1="12" y1="35" x2="30" y2="35" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="4 2"/><circle cx="40" cy="28" r="8" fill="#f97316"/><line x1="30" y1="35" x2="36" y2="32" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="30" y1="35" x2="36" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M36 32 L52 22" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M36 38 L52 48" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><circle cx="53" cy="22" r="4" fill="#ff9a52"/><circle cx="53" cy="48" r="4" fill="#ff9a52"/><rect x="38" y="36" width="14" height="12" rx="3" fill="#f97316" opacity="0.7"/><line x1="40" y1="48" x2="35" y2="62" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="50" y1="48" x2="53" y2="62" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><text x="40" y="75" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">rear delts</text></svg>`},
+  // ARMS
+  {name:'Barbell Curl',muscles:'Biceps, Forearms',category:'Arms',
+   desc:'Stand holding a barbell with an underhand grip. Curl the bar up toward your shoulders, squeezing the biceps at the top, then lower under control.',
+   tips:['Keep your elbows pinned to your sides — don\'t let them drift forward','Full extension at the bottom to stretch the bicep','Supinate your wrists at the top for a stronger contraction'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><rect x="32" y="22" width="16" height="18" rx="4" fill="#f97316"/><line x1="32" y1="30" x2="22" y2="45" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="30" x2="58" y2="45" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M22 45 L20 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M58 45 L60 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="16" y="56" width="48" height="5" rx="2.5" fill="#555"/><rect x="10" y="53" width="7" height="11" rx="2" fill="#777"/><rect x="63" y="53" width="7" height="11" rx="2" fill="#777"/><text x="40" y="76" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">biceps</text></svg>`},
+  {name:'Tricep Pushdown',muscles:'Triceps',category:'Arms',
+   desc:'Stand at a high cable, grip the bar or rope, and extend your arms downward against the resistance. Keep your upper arms locked at your sides.',
+   tips:['Elbows stay pinned to your sides the whole time','Full extension at the bottom — squeeze hard','Lean slightly forward for a better angle and more stretch'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="2" width="20" height="8" rx="3" fill="#555"/><line x1="40" y1="10" x2="40" y2="22" stroke="#f97316" stroke-width="2.5" stroke-linecap="round" stroke-dasharray="3 2"/><circle cx="40" cy="28" r="8" fill="#f97316"/><rect x="32" y="36" width="16" height="14" rx="3" fill="#f97316"/><line x1="32" y1="42" x2="22" y2="42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="42" x2="58" y2="42" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="22" y1="42" x2="20" y2="58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="58" y1="42" x2="60" y2="58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="16" y="56" width="48" height="5" rx="2" fill="#333"/><text x="40" y="72" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">triceps</text></svg>`},
+  {name:'Hammer Curl',muscles:'Biceps, Brachialis, Forearms',category:'Arms',
+   desc:'Hold dumbbells with a neutral grip (palms facing each other). Curl them up without rotating your wrists.',
+   tips:['The brachialis under the bicep responds well to neutral grip','Alternate arms or do them together — both work','Controlled negative — don\'t let gravity do the work'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><rect x="32" y="22" width="16" height="18" rx="4" fill="#f97316"/><path d="M32 30 L18 42 L18 56" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M48 30 L62 42 L62 56" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><rect x="14" y="54" width="8" height="8" rx="2" fill="#ff9a52"/><rect x="58" y="54" width="8" height="8" rx="2" fill="#ff9a52"/><text x="40" y="76" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">biceps + brachialis</text></svg>`},
+  {name:'Skull Crusher',muscles:'Triceps (Long Head)',category:'Arms',
+   desc:'Lie on a bench. Hold a barbell or EZ bar above your chest, then bend only at the elbows to lower the weight toward your forehead before extending back up.',
+   tips:['Elbows point straight up — don\'t let them flare','Use an EZ bar to reduce wrist strain','Slight angle toward the forehead, not straight down'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="18" r="8" fill="#f97316"/><rect x="32" y="28" width="16" height="16" rx="4" fill="#f97316"/><line x1="32" y1="32" x2="20" y2="28" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="32" x2="60" y2="28" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="20" y1="28" x2="20" y2="16" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="60" y1="28" x2="60" y2="16" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="14" y="12" width="52" height="5" rx="2.5" fill="#555"/><rect x="8" y="10" width="7" height="9" rx="2" fill="#777"/><rect x="65" y="10" width="7" height="9" rx="2" fill="#777"/><text x="40" y="58" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">triceps long head</text></svg>`},
+  // CORE
+  {name:'Plank',muscles:'Core, Transverse Abdominis',category:'Core',
+   desc:'Forearms on the floor, toes on the floor, body in a straight line. Hold this position while breathing normally.',
+   tips:['Squeeze your glutes and abs simultaneously — don\'t just hang','Don\'t let your hips sag or rise — stay level','Breathe normally; holding your breath makes it much harder'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="18" cy="20" r="8" fill="#f97316"/><path d="M18 28 L18 40 L64 40" stroke="#f97316" stroke-width="3.5" stroke-linecap="round" fill="none"/><line x1="18" y1="40" x2="12" y2="52" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="18" y1="40" x2="24" y2="52" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="10" y1="28" x2="4" y2="38" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><line x1="60" y1="40" x2="55" y2="52" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><line x1="64" y1="40" x2="68" y2="52" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><line x1="4" y1="38" x2="68" y2="52" stroke="#555" stroke-width="2" stroke-linecap="round" stroke-dasharray="2 3"/><text x="40" y="66" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">core</text></svg>`},
+  {name:'Ab Wheel Rollout',muscles:'Core, Lats, Shoulders',category:'Core',
+   desc:'Kneel on the floor with the ab wheel in front of you. Roll forward as far as you can while keeping a straight back, then pull back to the start.',
+   tips:['Brace extremely hard before you roll out — this is no joke','Start with short range of motion and build up gradually','Hollow body position — ribs down, pelvis tucked slightly'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="26" cy="14" r="8" fill="#f97316"/><path d="M26 22 L34 36 L60 50" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><line x1="16" y1="30" x2="8" y2="40" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="22" x2="20" y2="36" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><circle cx="60" cy="53" r="6" fill="none" stroke="#f97316" stroke-width="2.5"/><line x1="54" y1="53" x2="66" y2="53" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><line x1="34" y1="36" x2="26" y2="46" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="72" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">core + lats</text></svg>`},
+  // COMPOUND VARIATIONS
+  {name:'Front Squat',muscles:'Quads, Upper Back, Core',category:'Legs',
+   desc:'Bar rests on the front of your shoulders (front rack position). More upright torso than a back squat, emphasizing the quads and demanding good mobility.',
+   tips:['Keep elbows high throughout — this is the key to front squats','More upright torso is both natural and required','Wrist and ankle mobility are often limiting factors'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><rect x="24" y="20" width="32" height="5" rx="2" fill="#555"/><rect x="20" y="17" width="6" height="11" rx="2" fill="#777"/><rect x="54" y="17" width="6" height="11" rx="2" fill="#777"/><path d="M32 25 L28 50 L20 66" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M48 25 L52 50 L60 66" stroke="#f97316" stroke-width="3" stroke-linecap="round" fill="none"/><path d="M32 38 L48 38" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><text x="40" y="76" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">quads + core</text></svg>`},
+  {name:'Sumo Deadlift',muscles:'Glutes, Adductors, Hamstrings',category:'Back',
+   desc:'Wide stance with toes out. Grip inside your legs. More upright torso than conventional. Drive your knees out and hips through to lockout.',
+   tips:['Push your knees out hard through the floor — they collapse on sumo deadlifts','Hip hinge more than knee bend — it\'s not a squat','Your stance width depends on your hip structure — experiment'],
+   svg:`<svg viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="12" r="8" fill="#f97316"/><path d="M40 20 L40 40" stroke="#f97316" stroke-width="4" stroke-linecap="round"/><path d="M40 30 L20 46" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M40 30 L60 46" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M20 46 L15 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><path d="M60 46 L65 58" stroke="#f97316" stroke-width="3" stroke-linecap="round"/><rect x="15" y="55" width="50" height="6" rx="3" fill="#555"/><rect x="10" y="52" width="6" height="12" rx="2" fill="#777"/><rect x="64" y="52" width="6" height="12" rx="2" fill="#777"/><text x="40" y="76" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif">glutes + adductors</text></svg>`},
+];
+
+const CATALOG_CATEGORIES = ['All', ...new Set(CATALOG.map(e=>e.category))];
+
+// ═══════════════════════════════════════════════════════════
+// TABS
+// ═══════════════════════════════════════════════════════════
 function switchTab(name){
-  ['planner','progress','qmc'].forEach(t=>{
+  ['planner','progress','catalog','qmc'].forEach(t=>{
     document.getElementById('tab-'+t).classList.toggle('active',t===name);
   });
-  document.getElementById('tabPlanner').classList.toggle('active',name==='planner');
-  document.getElementById('tabProgress').classList.toggle('active',name==='progress');
-  document.getElementById('tabQmc').classList.toggle('active',name==='qmc');
-  if(name==='progress'){ renderHistory(); renderChart(); }
+  ['tabPlanner','tabProgress','tabCatalog','tabQmc'].forEach((id,i)=>{
+    document.getElementById(id).classList.toggle('active',['planner','progress','catalog','qmc'][i]===name);
+  });
+  if(name==='progress'){ checkProgressNudge(); renderHistory(); renderChart(); }
+  if(name==='catalog'){ renderCatalog(); }
 }
 
-// ── MODALS ────────────────────────────────────────────────────────────────────
+function goHome(){
+  switchTab('planner');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ═══════════════════════════════════════════════════════════
+// MODALS
+// ═══════════════════════════════════════════════════════════
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
 
-async function submitSignup(){
-  const email = document.getElementById('signupEmail').value.trim();
-  const note  = document.getElementById('signupNote');
-  if(!email || !email.includes('@')){ note.textContent='Please enter a valid email.'; note.style.color='var(--red)'; return; }
-  try{
-    await fetch('/api/waitlist',{ method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({email}) });
-  } catch(e){}
-  note.textContent="You're on the list! We'll be in touch.";
-  note.style.color='var(--green)';
-  document.getElementById('signupEmail').value='';
+// ═══════════════════════════════════════════════════════════
+// AUTH
+// ═══════════════════════════════════════════════════════════
+function switchAuthTab(tab){
+  document.getElementById('authTabSignup').classList.toggle('active',tab==='signup');
+  document.getElementById('authTabLogin').classList.toggle('active',tab==='login');
+  document.getElementById('authSignupPanel').style.display=tab==='signup'?'block':'none';
+  document.getElementById('authLoginPanel').style.display=tab==='login'?'block':'none';
 }
 
-// ── ADMIN ─────────────────────────────────────────────────────────────────────
-let adminCode='', isAdmin=false;
+function getToken(){ try{ return localStorage.getItem('ll_token'); }catch(e){ return null; } }
+function setToken(t){ try{ if(t) localStorage.setItem('ll_token',t); else localStorage.removeItem('ll_token'); }catch(e){} }
 
+async function doRegister(){
+  const email=document.getElementById('signupEmail').value.trim();
+  const password=document.getElementById('signupPassword').value;
+  const msg=document.getElementById('signupMsg');
+  msg.textContent=''; msg.style.color='var(--red)';
+  if(!email||!email.includes('@')){ msg.textContent='Please enter a valid email.'; return; }
+  if(password.length<6){ msg.textContent='Password must be at least 6 characters.'; return; }
+  const btn=document.querySelector('#authSignupPanel .auth-submit');
+  btn.disabled=true; btn.textContent='Creating account...';
+  try{
+    const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const d=await res.json();
+    if(d.error){ msg.textContent=d.error; return; }
+    setToken(d.token);
+    currentUser={id:null,email:d.email,token:d.token};
+    updateHeaderAuth();
+    msg.style.color='var(--green)'; msg.textContent='Account created! Welcome to LiftLab.';
+    setTimeout(()=>closeModal('authModal'),1500);
+  }catch(e){ msg.textContent='Something went wrong. Try again.'; }
+  finally{ btn.disabled=false; btn.textContent='Create free account'; }
+}
+
+async function doLogin(){
+  const email=document.getElementById('loginEmail').value.trim();
+  const password=document.getElementById('loginPassword').value;
+  const msg=document.getElementById('loginMsg');
+  msg.textContent=''; msg.style.color='var(--red)';
+  if(!email||!password){ msg.textContent='Please enter your email and password.'; return; }
+  const btn=document.querySelector('#authLoginPanel .auth-submit');
+  btn.disabled=true; btn.textContent='Signing in...';
+  try{
+    const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+    const d=await res.json();
+    if(d.error){ msg.textContent=d.error; return; }
+    setToken(d.token);
+    currentUser={id:null,email:d.email,token:d.token};
+    updateHeaderAuth();
+    msg.style.color='var(--green)'; msg.textContent='Signed in!';
+    setTimeout(()=>{ closeModal('authModal'); renderHistory(); renderChart(); },1000);
+  }catch(e){ msg.textContent='Something went wrong. Try again.'; }
+  finally{ btn.disabled=false; btn.textContent='Sign in'; }
+}
+
+async function doLogout(){
+  const token=getToken();
+  if(token) await fetch('/api/auth/logout',{method:'POST',headers:{'X-Auth-Token':token}}).catch(()=>{});
+  setToken(null); currentUser=null; updateHeaderAuth();
+  renderHistory(); renderChart();
+}
+
+function updateHeaderAuth(){
+  const area=document.getElementById('headerAuthArea');
+  if(currentUser){
+    area.innerHTML=`<div class="user-chip" onclick="doLogout()" title="Click to sign out"><div class="user-dot"></div><span>${currentUser.email.split('@')[0]}</span></div>`;
+  } else {
+    area.innerHTML=`<button class="account-btn" onclick="openModal('authModal')">Create account</button>`;
+  }
+}
+
+async function checkAuth(){
+  const token=getToken();
+  if(!token){ updateHeaderAuth(); return; }
+  try{
+    const res=await fetch('/api/auth/me',{headers:{'X-Auth-Token':token}});
+    const d=await res.json();
+    if(d.user){ currentUser={...d.user,token}; }
+    else { setToken(null); currentUser=null; }
+  }catch(e){ currentUser=null; }
+  updateHeaderAuth();
+}
+
+function checkProgressNudge(){
+  const nudge=document.getElementById('progressNudge');
+  if(!currentUser) nudge.style.display='flex'; else nudge.style.display='none';
+}
+
+// ═══════════════════════════════════════════════════════════
+// ADMIN
+// ═══════════════════════════════════════════════════════════
 function updateUsageBanner(){
   const used=getUsage();
-  if(isAdmin){
-    document.getElementById('usageLabel').textContent='Unlimited — admin mode';
-    document.getElementById('usageBarFill').style.cssText='width:100%;background:var(--green)';
-    return;
-  }
+  if(isAdmin){ document.getElementById('usageLabel').textContent='Unlimited — admin mode'; document.getElementById('usageBarFill').style.cssText='width:100%;background:var(--green)'; return; }
   const pct=Math.min(100,Math.round(used/FREE_LIMIT*100));
   document.getElementById('usageLabel').textContent=`${used} / ${FREE_LIMIT} free plans used`;
-  const fill=document.getElementById('usageBarFill');
-  fill.style.width=pct+'%';
+  const fill=document.getElementById('usageBarFill'); fill.style.width=pct+'%';
   fill.style.background=pct>=80?'var(--red)':pct>=50?'var(--yellow)':'var(--orange)';
-  if(used>=FREE_LIMIT){ document.getElementById('adminSection').style.display='block'; }
+  if(used>=FREE_LIMIT) document.getElementById('adminSection').style.display='block';
 }
 function getUsage(){ try{ return parseInt(localStorage.getItem(USAGE_KEY)||'0'); }catch(e){ return 0; } }
 function incrementUsage(){ try{ localStorage.setItem(USAGE_KEY,String(getUsage()+1)); }catch(e){} updateUsageBanner(); }
 
 async function verifyAdmin(){
-  const code=document.getElementById('adminCodeInput').value.trim();
-  if(!code) return;
-  const st=document.getElementById('adminStatus');
-  st.textContent='Checking...'; st.className='admin-status';
+  const code=document.getElementById('adminCodeInput').value.trim(); if(!code)return;
+  const st=document.getElementById('adminStatus'); st.textContent='Checking...'; st.className='admin-status';
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
     const d=await res.json();
     if(d.valid){ isAdmin=true; adminCode=code; localStorage.setItem('liftlab_admin',code); st.textContent='Unlocked — unlimited plans active'; st.className='admin-status ok'; document.getElementById('adminCodeInput').value=''; updateUsageBanner(); }
-    else { st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('liftlab_admin'); }
+    else{ st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('liftlab_admin'); }
   }catch(e){ st.textContent='Error. Try again.'; st.className='admin-status err'; }
 }
 async function tryRestoreAdmin(){
-  const stored=localStorage.getItem('liftlab_admin');
-  if(!stored) return;
+  const stored=localStorage.getItem('liftlab_admin'); if(!stored)return;
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:stored})});
     const d=await res.json();
-    if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); }
-    else localStorage.removeItem('liftlab_admin');
+    if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); } else localStorage.removeItem('liftlab_admin');
   }catch(e){}
 }
 
-// ── 1RM FORMULA ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// 1RM FORMULA
+// ═══════════════════════════════════════════════════════════
 function calc1RM(weight,reps){
-  if(reps===1) return weight;
-  if(reps>20) return Math.round(weight*(1+reps/30));
-  const ep=weight*(1+reps/30), br=weight*(36/(37-reps)), la=(100*weight)/(101.3-2.67123*reps),
-        lo=weight*Math.pow(reps,0.10), ma=(100*weight)/(52.2+41.9*Math.exp(-0.055*reps)), oc=weight*(1+reps/40);
+  if(reps===1)return weight;
+  if(reps>20)return Math.round(weight*(1+reps/30));
+  const ep=weight*(1+reps/30),br=weight*(36/(37-reps)),la=(100*weight)/(101.3-2.67123*reps),
+        lo=weight*Math.pow(reps,0.10),ma=(100*weight)/(52.2+41.9*Math.exp(-0.055*reps)),oc=weight*(1+reps/40);
   let r;
-  if(reps<=5) r=br*0.4+la*0.4+ep*0.2;
-  else if(reps<=10) r=(br+la+ma+ep)/4;
+  if(reps<=5)r=br*0.4+la*0.4+ep*0.2;
+  else if(reps<=10)r=(br+la+ma+ep)/4;
   else r=ep*0.4+ma*0.35+oc*0.15+lo*0.1;
   return Math.round(r);
 }
 
-// ── MARKDOWN ──────────────────────────────────────────────────────────────────
-function renderMarkdown(text){
+// ═══════════════════════════════════════════════════════════
+// MARKDOWN
+// ═══════════════════════════════════════════════════════════
+function renderMarkdown(text, linkLifts=false){
   const div=document.createElement('div'); div.className='plan-text';
   const lines=text.split('\n'); let html='',inList=false,listType='';
   lines.forEach(line=>{
     let l=line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
+    if(linkLifts){
+      // make exercise names clickable
+      CATALOG.forEach(ex=>{
+        const regex=new RegExp(`\\b(${ex.name.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')})\\b`,'gi');
+        l=l.replace(regex,`<span class="plan-lift-link" onclick="openCatalogEntry('${ex.name}')">$1</span>`);
+      });
+    }
     if(/^#{1,3}\s/.test(l)){ if(inList){html+=`</${listType}>`;inList=false;} html+=`<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`; }
     else if(/^[-*•]\s/.test(l)){ if(!inList||listType!=='ul'){if(inList)html+=`</${listType}>`;html+='<ul>';inList=true;listType='ul';} html+=`<li>${l.replace(/^[-*•]\s/,'')}</li>`; }
     else if(/^\d+\.\s/.test(l)){ if(!inList||listType!=='ol'){if(inList)html+=`</${listType}>`;html+='<ol>';inList=true;listType='ol';} html+=`<li>${l.replace(/^\d+\.\s/,'')}</li>`; }
@@ -763,27 +1085,31 @@ function renderMarkdown(text){
   div.innerHTML=html; return div;
 }
 
-// ── CHIPS ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// CHIPS
+// ═══════════════════════════════════════════════════════════
 function selectChipIn(rowId,el){ document.getElementById(rowId).querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
 function selectGoal(el,v){ selectChipIn('goalRow',el); selectedGoal=v; autosave(); }
 function selectDays(el,v){ selectChipIn('daysRow',el); selectedDays=v; autosave(); }
 function selectSplit(el,v){ selectChipIn('splitRow',el); selectedSplit=v; autosave(); }
 function selectExp(el,v){
   selectChipIn('expRow',el); selectedExp=v; autosave();
-  const descs={
-    beginner:'<strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.',
-    intermediate:'<strong>Intermediate (2–5 years)</strong> — Linear progression has slowed. You need weekly or monthly cycles. Technique is solid and you understand programming basics.',
-    advanced:'<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming near your genetic potential.'
-  };
+  const descs={beginner:'<strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.',
+    intermediate:'<strong>Intermediate (2–5 years)</strong> — Linear progression has slowed. You need weekly or monthly cycles. Technique is solid.',
+    advanced:'<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming.'};
   const desc=document.getElementById('expDesc'); desc.innerHTML=descs[v]||''; desc.classList.add('visible');
 }
 function comboSync(selectId,inputId){ const v=document.getElementById(selectId).value; if(v) document.getElementById(inputId).value=v; }
 
-// ── UNITS ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// UNITS
+// ═══════════════════════════════════════════════════════════
 function setUnit(u){ unit=u; document.getElementById('lbsBtn').classList.toggle('active',u==='lbs'); document.getElementById('kgBtn').classList.toggle('active',u==='kg'); document.querySelectorAll('.unit-display').forEach(el=>el.textContent=u); autosave(); }
 function setQmcUnit(u){ qmcUnit=u; document.getElementById('qmcLbsBtn').classList.toggle('active',u==='lbs'); document.getElementById('qmcKgBtn').classList.toggle('active',u==='kg'); document.getElementById('qmcMaxUnit').textContent=u; calcQmc(); }
 
-// ── LIFTS ─────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// LIFTS
+// ═══════════════════════════════════════════════════════════
 function makeLiftRow(name,weight='',reps=''){
   const div=document.createElement('div'); div.className='lift-row';
   div.innerHTML=`<span class="lift-name">${name}</span><button class="lift-remove" onclick="this.closest('.lift-row').remove();autosave()" title="Remove">×</button><div class="lift-inputs"><input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${weight}" oninput="autosave()"><span class="lift-sep">×</span><input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${reps}" oninput="autosave()"><span class="lift-unit unit-display">${unit}</span></div>`;
@@ -793,23 +1119,23 @@ function initLifts(saved){ const g=document.getElementById('liftsGrid'); g.inner
 function addCustomLift(){ const inp=document.getElementById('customLiftName'); const name=inp.value.trim(); if(!name)return; document.getElementById('liftsGrid').appendChild(makeLiftRow(name)); inp.value=''; autosave(); }
 function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{ const name=row.querySelector('.lift-name').textContent; const w=parseFloat(row.querySelector('.lift-weight').value); const r=parseInt(row.querySelector('.lift-reps').value); if(w>0&&r>0)lifts.push({name,weight:w,reps:r,max:calc1RM(w,r)}); }); return lifts; }
 
-// ── SAVE / LOAD ───────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// SAVE / LOAD
+// ═══════════════════════════════════════════════════════════
 function autosave(planToSave){
-  const lifts=[];
-  document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
+  const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
   if(planToSave!==undefined) savedPlanText=planToSave;
-  const data={v:6,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
+  const data={v:8,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
     age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
     sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
     goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
     plan:savedPlanText||null,lifts};
   try{ localStorage.setItem(SAVE_KEY,JSON.stringify(data)); }catch(e){}
 }
-
 function loadSaved(){
   try{
     const raw=localStorage.getItem(SAVE_KEY); if(!raw)return false;
-    const d=JSON.parse(raw); if(!d||d.v!==6)return false;
+    const d=JSON.parse(raw); if(!d||d.v!==8)return false;
     setUnit(d.unit||'lbs');
     if(d.age) document.getElementById('userAge').value=d.age;
     if(d.bodyweight) document.getElementById('userWeight').value=d.bodyweight;
@@ -825,23 +1151,23 @@ function loadSaved(){
     if(d.plan){
       savedPlanText=d.plan; currentPlanContext=d.plan;
       if(d.lifts&&d.lifts.length){ const g=document.getElementById('maxesGrid'); g.innerHTML=''; d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{ const max=calc1RM(parseFloat(l.weight),parseInt(l.reps)); const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${max}</div><div class="max-unit">${d.unit||'lbs'} estimated 1RM</div><div class="max-reps">${l.weight} ${d.unit||'lbs'} × ${l.reps} reps</div>`; g.appendChild(c); }); }
-      document.getElementById('planText').replaceChildren(renderMarkdown(d.plan));
+      document.getElementById('planText').replaceChildren(renderMarkdown(d.plan,true));
       document.getElementById('resultsCard').style.display='block';
       qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
     }
     return true;
   }catch(e){ return false; }
 }
-
 function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; initLifts(null); }
 
-// ── CALCULATE ─────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// CALCULATE
+// ═══════════════════════════════════════════════════════════
 function setLoading(on,text='Building your training plan...'){ document.getElementById('loadingText').textContent=text; document.getElementById('loading').style.display=on?'flex':'none'; document.getElementById('calcBtn').disabled=on; }
-
 async function calculate(){
   const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
-  if(!isAdmin&&getUsage()>=FREE_LIMIT){ err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or join the waitlist.`; document.getElementById('adminSection').style.display='block'; return; }
+  if(!isAdmin&&getUsage()>=FREE_LIMIT){ err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or create a free account.`; document.getElementById('adminSection').style.display='block'; return; }
   const g=document.getElementById('maxesGrid'); g.innerHTML='';
   lifts.forEach(l=>{ const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div><div class="max-reps">${l.weight} ${unit} × ${l.reps} reps</div>`; g.appendChild(c); });
   document.getElementById('resultsCard').style.display='block'; document.getElementById('planText').innerHTML=''; document.getElementById('resultsFooter').textContent=''; document.getElementById('qaSection').style.display='none'; document.getElementById('qaMessages').innerHTML=''; qaUsedThisPlan=0; setLoading(true);
@@ -859,7 +1185,7 @@ async function calculate(){
       adminCode:adminCode||undefined
     })});
     const data=await res.json(); if(data.error)throw new Error(data.error);
-    document.getElementById('planText').replaceChildren(renderMarkdown(data.plan));
+    document.getElementById('planText').replaceChildren(renderMarkdown(data.plan,true));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
     currentPlanContext=data.plan; autosave(data.plan); if(!isAdmin)incrementUsage();
     qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
@@ -867,7 +1193,9 @@ async function calculate(){
   finally{ setLoading(false); }
 }
 
-// ── PDF EXPORT ────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// PDF EXPORT
+// ═══════════════════════════════════════════════════════════
 function exportPDF(){
   const {jsPDF}=window.jspdf;
   const doc=new jsPDF({unit:'mm',format:'a4'});
@@ -883,35 +1211,26 @@ function exportPDF(){
   if(maxCards.length){
     doc.setTextColor(249,115,22); doc.setFont('helvetica','bold'); doc.setFontSize(10);
     doc.text('YOUR 1RM ESTIMATES',margin,y); y+=6;
-    doc.setTextColor(30,32,38); doc.setFontSize(9);
-    let col=0; const colCount=Math.min(4,maxCards.length); const cw=(colW)/colCount;
+    let col=0; const colCount=Math.min(4,maxCards.length); const cw=colW/colCount;
     maxCards.forEach((card,i)=>{
       col=i%colCount; const x=margin+col*cw;
       if(col===0&&i>0){ y+=14; }
-      const name=card.querySelector('.max-lift-name').textContent;
-      const val=card.querySelector('.max-value').textContent;
-      const sub=card.querySelector('.max-unit').textContent;
       doc.setFont('helvetica','bold'); doc.setFontSize(11); doc.setTextColor(249,115,22);
-      doc.text(val,x,y);
+      doc.text(card.querySelector('.max-value').textContent,x,y);
       doc.setFont('helvetica','normal'); doc.setFontSize(8); doc.setTextColor(100,105,115);
-      doc.text(name.toUpperCase(),x,y+4);
-      doc.text(sub,x,y+8);
+      doc.text(card.querySelector('.max-lift-name').textContent.toUpperCase(),x,y+4);
+      doc.text(card.querySelector('.max-unit').textContent,x,y+8);
     });
-    y+=18;
-    doc.setDrawColor(30,32,38); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=6;
+    y+=18; doc.setDrawColor(30,32,38); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=6;
   }
   const planEl=document.getElementById('planText');
   const walk=(node,indent=0)=>{
-    if(node.nodeType===3){
-      const text=node.textContent.trim(); if(!text)return;
-      doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65);
-      const lines=doc.splitTextToSize(text,colW-indent*4);
-      lines.forEach(line=>{ if(y>275){doc.addPage();y=20;} doc.text(line,margin+indent*4,y); y+=5; });
-    } else if(node.nodeType===1){
+    if(node.nodeType===3){ const text=node.textContent.trim(); if(!text)return; doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65); const lines=doc.splitTextToSize(text,colW-indent*4); lines.forEach(line=>{ if(y>275){doc.addPage();y=20;} doc.text(line,margin+indent*4,y); y+=5; }); }
+    else if(node.nodeType===1){
       const tag=node.tagName.toLowerCase();
-      if(tag==='h3'){ if(y>270){doc.addPage();y=20;} y+=3; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(249,115,22); const lines=doc.splitTextToSize(node.textContent,colW); lines.forEach(l=>{doc.text(l,margin,y);y+=6;}); y+=1; }
+      if(tag==='h3'){ if(y>270){doc.addPage();y=20;} y+=3; doc.setFont('helvetica','bold'); doc.setFontSize(12); doc.setTextColor(249,115,22); doc.splitTextToSize(node.textContent,colW).forEach(l=>{doc.text(l,margin,y);y+=6;}); y+=1; }
       else if(tag==='p'){ node.childNodes.forEach(c=>walk(c,indent)); y+=2; }
-      else if(tag==='li'){ if(y>275){doc.addPage();y=20;} doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65); doc.text('•',margin+indent*4,y); const lines=doc.splitTextToSize(node.textContent,colW-(indent+1)*4); lines.forEach((l,i)=>{ if(i>0&&y>275){doc.addPage();y=20;} doc.text(l,margin+(indent+1)*4,y); y+=5; }); }
+      else if(tag==='li'){ if(y>275){doc.addPage();y=20;} doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65); doc.text('•',margin+indent*4,y); doc.splitTextToSize(node.textContent,colW-(indent+1)*4).forEach((l,i)=>{ if(i>0&&y>275){doc.addPage();y=20;} doc.text(l,margin+(indent+1)*4,y); y+=5; }); }
       else if(tag==='ul'||tag==='ol'){ node.childNodes.forEach(c=>walk(c,indent+1)); }
       else if(tag==='strong'){ doc.setFont('helvetica','bold'); doc.setTextColor(30,35,45); node.childNodes.forEach(c=>walk(c,indent)); doc.setFont('helvetica','normal'); doc.setTextColor(50,55,65); }
       else{ node.childNodes.forEach(c=>walk(c,indent)); }
@@ -921,13 +1240,15 @@ function exportPDF(){
   y+=6; if(y>270){doc.addPage();y=20;}
   doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=5;
   doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(160,165,175);
-  doc.text('Generated by LiftLab · liftlab.app · Always train with proper form and appropriate supervision.',margin,y);
+  doc.text('Generated by LiftLab · Always train with proper form and appropriate supervision.',margin,y);
   doc.save('liftlab-training-plan.pdf');
   const btn=document.getElementById('exportPdfBtn'); btn.textContent='Exported!'; btn.classList.add('done');
   setTimeout(()=>{btn.textContent='Export PDF';btn.classList.remove('done');},2000);
 }
 
-// ── COPY ──────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// COPY
+// ═══════════════════════════════════════════════════════════
 function copyResults(){
   const maxLines=[...document.querySelectorAll('#maxesGrid .max-card')].map(c=>`${c.querySelector('.max-lift-name').textContent}: ${c.querySelector('.max-value').textContent} ${unit} 1RM`).join('\n');
   const plan=document.getElementById('planText').innerText;
@@ -937,12 +1258,10 @@ function copyResults(){
   });
 }
 
-// ── Q&A ───────────────────────────────────────────────────────────────────────
-function updateQaLimit(){
-  const rem=QA_LIMIT-qaUsedThisPlan; const el=document.getElementById('qaLimit');
-  if(rem<=0){ el.innerHTML='<b>No questions remaining</b> for this plan — generate a new plan to ask more.'; document.getElementById('qaInput').disabled=true; document.getElementById('qaSend').disabled=true; }
-  else{ el.innerHTML=`<b>${rem} question${rem===1?'':'s'}</b> remaining for this plan`; document.getElementById('qaInput').disabled=false; document.getElementById('qaSend').disabled=false; }
-}
+// ═══════════════════════════════════════════════════════════
+// Q&A
+// ═══════════════════════════════════════════════════════════
+function updateQaLimit(){ const rem=QA_LIMIT-qaUsedThisPlan; const el=document.getElementById('qaLimit'); if(rem<=0){el.innerHTML='<b>No questions remaining</b> for this plan — generate a new plan to ask more.';document.getElementById('qaInput').disabled=true;document.getElementById('qaSend').disabled=true;}else{el.innerHTML=`<b>${rem} question${rem===1?'':'s'}</b> remaining for this plan`;document.getElementById('qaInput').disabled=false;document.getElementById('qaSend').disabled=false;} }
 function addQaMessage(role,text){ const msgs=document.getElementById('qaMessages'); const div=document.createElement('div'); div.className=`qa-msg ${role}`; if(role==='assistant'){const inner=renderMarkdown(text);inner.className='';div.appendChild(inner);}else{div.textContent=text;} msgs.appendChild(div); div.scrollIntoView({behavior:'smooth',block:'nearest'}); }
 async function askQuestion(){
   const input=document.getElementById('qaInput'); const q=input.value.trim(); if(!q||!currentPlanContext)return; if(qaUsedThisPlan>=QA_LIMIT)return;
@@ -953,83 +1272,201 @@ async function askQuestion(){
   finally{ send.textContent='Ask'; if(qaUsedThisPlan<QA_LIMIT)send.disabled=false; }
 }
 
-// ── PROGRESS TRACKER ──────────────────────────────────────────────────────────
-function getLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ return []; } }
-function saveLog(log){ try{ localStorage.setItem(LOG_KEY,JSON.stringify(log)); }catch(e){} }
+// ═══════════════════════════════════════════════════════════
+// PROGRESS TRACKER
+// ═══════════════════════════════════════════════════════════
+const authHeaders=()=>{ const t=getToken(); return t?{'Content-Type':'application/json','X-Auth-Token':t}:{'Content-Type':'application/json'}; };
 
-function logWorkout(){
+function getLocalLog(){ try{ return JSON.parse(localStorage.getItem(LOG_KEY)||'[]'); }catch(e){ return []; } }
+function saveLocalLog(log){ try{ localStorage.setItem(LOG_KEY,JSON.stringify(log)); }catch(e){} }
+
+async function getLog(){
+  if(currentUser){
+    try{
+      const res=await fetch('/api/log',{headers:authHeaders()});
+      const d=await res.json();
+      if(d.log) return d.log;
+    }catch(e){}
+  }
+  return getLocalLog();
+}
+
+// Set default date to today
+function setLogDateDefault(){
+  const today=new Date().toISOString().split('T')[0];
+  const el=document.getElementById('logDate');
+  if(!el.value) el.value=today;
+}
+
+async function logWorkout(){
   const ex=document.getElementById('logExercise').value.trim();
   const w=parseFloat(document.getElementById('logWeight').value);
   const r=parseInt(document.getElementById('logReps').value);
-  if(!ex||!w||!r){ return; }
-  const log=getLog();
-  const entry={id:Date.now(),exercise:ex,weight:w,reps:r,estimated1rm:calc1RM(w,r),date:new Date().toISOString(),unit};
-  log.push(entry); saveLog(log);
-  document.getElementById('logExercise').value=''; document.getElementById('logWeight').value=''; document.getElementById('logReps').value='';
+  const note=document.getElementById('logNote').value.trim();
+  const dateEl=document.getElementById('logDate');
+  const date=dateEl.value || new Date().toISOString().split('T')[0];
+  if(!ex||!w||!r)return;
+  const e1rm=calc1RM(w,r);
+  const entry={id:Date.now(),exercise:ex,weight:w,reps:r,estimated1rm:e1rm,date,unit,note:note||''};
+
+  if(currentUser){
+    try{
+      const res=await fetch('/api/log',{method:'POST',headers:authHeaders(),body:JSON.stringify({exercise:ex,weight:w,reps:r,estimated1rm:e1rm,unit,note,date})});
+      const d=await res.json();
+      if(d.id) entry.id=d.id;
+    }catch(e){}
+  } else {
+    const log=getLocalLog(); log.push(entry); saveLocalLog(log);
+  }
+
+  document.getElementById('logExercise').value='';
+  document.getElementById('logWeight').value='';
+  document.getElementById('logReps').value='';
+  document.getElementById('logNote').value='';
+  dateEl.value=new Date().toISOString().split('T')[0];
+
   const suc=document.getElementById('logSuccess');
-  const isPR=checkPR(log,entry);
-  suc.textContent=isPR?`PR! ${ex} — ${calc1RM(w,r)} ${unit} estimated 1RM 🏆`:`Logged! ${ex} — ${calc1RM(w,r)} ${unit} estimated 1RM`;
-  suc.style.color=isPR?'var(--yellow)':'var(--green)'; suc.style.display='block';
+  suc.textContent=`Logged! ${ex} — ${e1rm} ${unit} estimated 1RM`;
+  suc.style.color='var(--green)'; suc.style.display='block';
   setTimeout(()=>suc.style.display='none',3000);
   renderHistory(); renderChart(); updateExerciseSelectors();
 }
 
-function checkPR(log,entry){
-  const prev=log.filter(e=>e.exercise===entry.exercise&&e.id!==entry.id);
-  if(!prev.length)return true;
-  return entry.estimated1rm>Math.max(...prev.map(e=>e.estimated1rm));
-}
-
+function checkPR(allForEx,entry){ const prev=allForEx.filter(e=>e.id!==entry.id); if(!prev.length)return true; return entry.estimated1rm>Math.max(...prev.map(e=>e.estimated1rm)); }
 function getExercises(log){ return [...new Set(log.map(e=>e.exercise))].sort(); }
-
-function updateExerciseSelectors(){
-  const log=getLog(); const exercises=getExercises(log);
+function updateExerciseSelectors(log=null){
+  if(!log) log=getLocalLog();
+  const exercises=getExercises(log);
   ['chartLift','historyFilter'].forEach(id=>{
     const sel=document.getElementById(id); const cur=sel.value;
     sel.innerHTML='<option value="">All exercises</option>'+exercises.map(e=>`<option value="${e}"${e===cur?' selected':''}>${e}</option>`).join('');
   });
 }
 
-function renderHistory(){
-  const log=getLog(); const filter=document.getElementById('historyFilter').value;
+async function renderHistory(){
+  const log=await getLog();
+  updateExerciseSelectors(log);
+  const filter=document.getElementById('historyFilter').value;
   const filtered=filter?log.filter(e=>e.exercise===filter):log;
   const list=document.getElementById('historyList');
   if(!filtered.length){ list.innerHTML='<div class="empty-state">No workouts logged yet. Start tracking your lifts above.</div>'; return; }
-  const sorted=[...filtered].reverse();
+  const sorted=[...filtered].sort((a,b)=>new Date(b.date)-new Date(a.date)||b.id-a.id);
   list.innerHTML='';
   const container=document.createElement('div'); container.className='log-entries';
-  sorted.slice(0,50).forEach(entry=>{
+  sorted.slice(0,60).forEach(entry=>{
     const allForEx=log.filter(e=>e.exercise===entry.exercise);
-    const isPR=checkPR(allForEx,entry)&&allForEx[allForEx.length-1].id===entry.id;
-    const date=new Date(entry.date).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+    const isPR=checkPR(allForEx,entry)&&allForEx.sort((a,b)=>b.estimated1rm-a.estimated1rm)[0]?.id===entry.id;
+    const dateStr=new Date(entry.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
     const div=document.createElement('div'); div.className='log-entry';
-    div.innerHTML=`<div class="log-entry-left"><strong style="color:var(--text)">${entry.exercise}</strong> · ${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps · <span style="color:var(--text-dim)">${date}</span></div><div class="log-entry-right">${isPR?'<span class="pr-badge">PR</span>':''}<span class="log-entry-max">${entry.estimated1rm} ${entry.unit||'lbs'}</span><button class="log-entry-del" onclick="deleteLog(${entry.id})">×</button></div>`;
+    div.innerHTML=`
+      <div class="log-entry-left">
+        <div class="log-entry-title">${entry.exercise}${isPR?' <span class="pr-badge">PR</span>':''}</div>
+        <div class="log-entry-meta">${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps · ${dateStr}</div>
+        ${entry.note?`<div class="log-entry-note">${entry.note}</div>`:''}
+      </div>
+      <div class="log-entry-right">
+        <span class="log-entry-max">${entry.estimated1rm} ${entry.unit||'lbs'}</span>
+        <button class="log-entry-del" onclick="deleteLogEntry(${entry.id})" title="Delete">×</button>
+      </div>`;
     container.appendChild(div);
   });
   list.appendChild(container);
 }
 
-function deleteLog(id){ const log=getLog().filter(e=>e.id!==id); saveLog(log); renderHistory(); renderChart(); updateExerciseSelectors(); }
+async function deleteLogEntry(id){
+  if(currentUser){
+    try{ await fetch(`/api/log/${id}`,{method:'DELETE',headers:authHeaders()}); }catch(e){}
+  } else {
+    const log=getLocalLog().filter(e=>e.id!==id); saveLocalLog(log);
+  }
+  renderHistory(); renderChart();
+}
 
-function renderChart(){
-  const log=getLog(); const selectedEx=document.getElementById('chartLift').value;
+async function renderChart(){
+  const log=await getLog();
+  updateExerciseSelectors(log);
+  const selectedEx=document.getElementById('chartLift').value;
   const wrap=document.getElementById('chartWrap'); const empty=document.getElementById('chartEmpty');
   if(!selectedEx){ wrap.style.display='none'; empty.textContent='Select an exercise to view your progress chart.'; empty.style.display='block'; return; }
   const entries=log.filter(e=>e.exercise===selectedEx).sort((a,b)=>new Date(a.date)-new Date(b.date));
   if(entries.length<2){ wrap.style.display='none'; empty.textContent=`Log at least 2 sessions for ${selectedEx} to see a progress chart.`; empty.style.display='block'; return; }
   empty.style.display='none'; wrap.style.display='block';
-  const labels=entries.map(e=>new Date(e.date).toLocaleDateString('en-US',{month:'short',day:'numeric'}));
-  const data1rm=entries.map(e=>e.estimated1rm);
-  if(chartInstance){ chartInstance.destroy(); }
+  const labels=entries.map(e=>new Date(e.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'}));
+  if(chartInstance) chartInstance.destroy();
   const ctx=document.getElementById('progressChart').getContext('2d');
   chartInstance=new Chart(ctx,{
     type:'line',
-    data:{ labels, datasets:[{ label:`${selectedEx} — Estimated 1RM (${entries[0].unit||'lbs'})`, data:data1rm, borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.08)', borderWidth:2, pointBackgroundColor:'#f97316', pointRadius:4, tension:0.3, fill:true }] },
-    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#888', font:{size:12} } } }, scales:{ x:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} }, y:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} } } }
+    data:{ labels, datasets:[{ label:`${selectedEx} — Estimated 1RM (${entries[0].unit||'lbs'})`, data:entries.map(e=>e.estimated1rm), borderColor:'#f97316', backgroundColor:'rgba(249,115,22,0.08)', borderWidth:2, pointBackgroundColor:'#f97316', pointRadius:4, tension:0.3, fill:true }] },
+    options:{ responsive:true, maintainAspectRatio:false, plugins:{ legend:{ labels:{ color:'#888',font:{size:12} } } }, scales:{ x:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} }, y:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} } } }
   });
 }
 
-// ── QMC ───────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// CATALOG
+// ═══════════════════════════════════════════════════════════
+function renderCatalog(){
+  // Render filter chips
+  const filtersEl=document.getElementById('catalogFilters');
+  if(!filtersEl.children.length){
+    CATALOG_CATEGORIES.forEach(cat=>{
+      const btn=document.createElement('button');
+      btn.className='cat-filter'+(cat==='All'?' active':'');
+      btn.textContent=cat;
+      btn.onclick=()=>{ catalogFilter=cat; filtersEl.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); filterCatalog(); };
+      filtersEl.appendChild(btn);
+    });
+  }
+  filterCatalog();
+}
+
+function filterCatalog(){
+  const q=document.getElementById('catalogSearch').value.toLowerCase();
+  const grid=document.getElementById('catalogGrid');
+  grid.innerHTML='';
+  const items=CATALOG.filter(ex=>{
+    const matchCat=catalogFilter==='All'||ex.category===catalogFilter;
+    const matchQ=!q||ex.name.toLowerCase().includes(q)||ex.muscles.toLowerCase().includes(q)||ex.category.toLowerCase().includes(q);
+    return matchCat&&matchQ;
+  });
+  if(!items.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:3rem">No exercises found.</div>'; return; }
+  items.forEach(ex=>{
+    const card=document.createElement('div');
+    card.className='catalog-card';
+    card.onclick=()=>openCatalogEntry(ex.name);
+    card.innerHTML=`
+      <div class="catalog-card-top">
+        <div class="catalog-svg-wrap">${ex.svg}</div>
+        <div class="catalog-card-info">
+          <div class="catalog-card-name">${ex.name}</div>
+          <div class="catalog-card-muscles">${ex.muscles}</div>
+          <div class="catalog-card-desc">${ex.desc}</div>
+          <span class="catalog-tag">${ex.category}</span>
+        </div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function openCatalogEntry(name){
+  const ex=CATALOG.find(e=>e.name.toLowerCase()===name.toLowerCase());
+  if(!ex) return;
+  const content=document.getElementById('catalogDetailContent');
+  content.innerHTML=`
+    <div class="modal-badge badge-orange">${ex.category}</div>
+    <h2>${ex.name}</h2>
+    <p style="color:var(--orange);font-size:13px;font-weight:600;margin-bottom:0.75rem">${ex.muscles}</p>
+    <div style="text-align:center;background:var(--surface2);border-radius:12px;padding:1rem;margin:1rem 0;border:1px solid var(--border)">${ex.svg.replace('viewBox="0 0 80 80"','viewBox="0 0 80 80" style="width:140px;height:140px"')}</div>
+    <p style="font-size:14px;color:var(--text-muted);line-height:1.75">${ex.desc}</p>
+    <div class="catalog-tips">
+      <h4>Tips</h4>
+      ${ex.tips.map(t=>`<div class="catalog-tip">${t}</div>`).join('')}
+    </div>`;
+  openModal('catalogDetailModal');
+}
+
+// ═══════════════════════════════════════════════════════════
+// QMC
+// ═══════════════════════════════════════════════════════════
 function calcQmc(){
   const w=parseFloat(document.getElementById('qmcWeight').value); const r=parseInt(document.getElementById('qmcReps').value); const name=document.getElementById('qmcName').value.trim();
   const resultEl=document.getElementById('qmcResult'); const tableCard=document.getElementById('qmcTableCard');
@@ -1044,16 +1481,27 @@ function calcQmc(){
   tableCard.style.display='block';
 }
 
-// ── INIT ──────────────────────────────────────────────────────────────────────
+// ═══════════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════════
 document.getElementById('customLiftName').addEventListener('keydown',e=>{ if(e.key==='Enter')addCustomLift(); });
+document.getElementById('qaInput').addEventListener('keydown',e=>{ if(e.key==='Enter')askQuestion(); });
 
+// Set today's date in log form
+setLogDateDefault();
+
+// Restore saved state
 const hadSaved=loadSaved();
 if(!hadSaved) initLifts(null);
 document.getElementById('savedBanner').style.display=hadSaved?'flex':'none';
 updateUsageBanner();
 tryRestoreAdmin();
 updateExerciseSelectors();
-renderHistory();
+
+// Check auth on load
+checkAuth().then(()=>{
+  renderHistory();
+});
 </script>
 </body>
 </html>
