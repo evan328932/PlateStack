@@ -7,6 +7,7 @@ app = Flask(__name__, static_folder="public")
 
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ADMIN_CODE    = os.environ.get("ADMIN_CODE", "")
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # set in Railway env vars
 DB_PATH       = os.environ.get("DB_PATH", "liftlab.db")
 WAITLIST_FILE = "waitlist.txt"
 ANON_PLAN_LIMIT = 2    # no account
@@ -154,6 +155,11 @@ TEMPLATE TO FILL:
 
 ## Key Tips
 [2-3 tips tailored to their specific numbers]"""
+
+@app.route("/api/config", methods=["GET"])
+def config():
+    """Returns public config values — safe to expose to frontend."""
+    return jsonify({"contact_email": CONTACT_EMAIL}), 200
 
 @app.route("/")
 def index(): return send_from_directory("public","index.html")
