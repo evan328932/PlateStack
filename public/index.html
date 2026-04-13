@@ -45,6 +45,30 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .profile-stat-lbl{font-size:11px;color:var(--text-dim);margin-top:3px}
 .profile-signout{width:100%;padding:9px;background:none;border:1px solid var(--border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text-dim);cursor:pointer;transition:all .15s}
 .profile-signout:hover{border-color:var(--red);color:var(--red)}
+.profile-view-plans{width:100%;padding:9px;background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:9px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--orange);cursor:pointer;transition:all .15s;margin-bottom:6px;text-align:left}
+.profile-view-plans:hover{background:rgba(249,115,22,0.2)}
+
+/* EDIT ENTRY INLINE */
+.edit-overlay{background:var(--surface);border:1px solid var(--orange-border);border-radius:8px;padding:10px 12px;margin-top:4px;display:flex;flex-direction:column;gap:8px}
+.edit-overlay .edit-row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.edit-overlay input{flex:1;min-width:60px;background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:7px 10px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text)}
+.edit-overlay input:focus{outline:none;border-color:var(--orange-border)}
+.edit-overlay .edit-lbl{font-size:11px;color:var(--text-dim);white-space:nowrap}
+.edit-save{font-size:12px;font-weight:600;color:#fff;background:var(--orange);border:none;border-radius:7px;padding:6px 14px;cursor:pointer;font-family:inherit;transition:opacity .15s}
+.edit-save:hover{opacity:0.85}
+.edit-cancel{font-size:12px;color:var(--text-dim);background:none;border:1px solid var(--border);border-radius:7px;padding:6px 12px;cursor:pointer;font-family:inherit}
+
+/* SAVED PLANS MODAL */
+.saved-plan-item{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px 14px;margin-bottom:8px;cursor:pointer;transition:border-color .15s;display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.saved-plan-item:hover{border-color:var(--orange-border)}
+.saved-plan-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.saved-plan-date{font-size:11px;color:var(--text-dim)}
+.saved-plan-del{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:2px 4px;opacity:0.5;transition:opacity .15s;flex-shrink:0}
+.saved-plan-del:hover{opacity:1;color:var(--red)}
+
+/* CATALOG — muscle badge replaces SVG */
+.muscle-badge{width:72px;height:72px;flex-shrink:0;border-radius:10px;display:flex;flex-direction:column;align-items:center;justify-content:center;border:1px solid var(--border);font-size:28px;background:var(--surface2);gap:2px}
+.muscle-badge-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.04em;color:var(--orange)}
 
 /* TABS */
 .tab-bar{display:flex;border-bottom:1px solid var(--border);background:var(--bg);position:sticky;top:58px;z-index:90;padding:0 1.5rem;overflow-x:auto}
@@ -387,7 +411,23 @@ footer a:hover{color:var(--text-muted)}
 </div>
 </div>
 
-<!-- CATALOG DETAIL MODAL -->
+<!-- SAVED PLANS MODAL -->
+<div class="modal-overlay" id="savedPlansModal" onclick="closeModal('savedPlansModal')">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:580px">
+  <button class="modal-close" onclick="closeModal('savedPlansModal')">×</button>
+  <div class="modal-badge badge-orange">Your account</div>
+  <h2>Saved Training Plans</h2>
+  <div id="savedPlansList"><div style="text-align:center;color:var(--text-dim);padding:2rem">Loading...</div></div>
+</div>
+</div>
+
+<!-- PLAN DETAIL MODAL -->
+<div class="modal-overlay" id="planDetailModal" onclick="closeModal('planDetailModal')">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:680px">
+  <button class="modal-close" onclick="closeModal('planDetailModal')">×</button>
+  <div id="planDetailContent"></div>
+</div>
+</div>
 <div class="modal-overlay" id="catalogDetailModal" onclick="closeModal('catalogDetailModal')">
 <div class="modal catalog-detail" onclick="event.stopPropagation()">
   <button class="modal-close" onclick="closeModal('catalogDetailModal')">×</button>
@@ -484,7 +524,7 @@ footer a:hover{color:var(--text-muted)}
   </div>
 
   <div class="usage-banner" id="usageBanner">
-    <span class="usage-label" id="usageLabel">0 / 5 free plans used</span>
+    <span class="usage-label" id="usageLabel">0 / 2 free plans used</span>
     <div class="usage-bar-track"><div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div></div>
     <button class="usage-cta" onclick="openModal('pricingModal')">Pricing →</button>
   </div>
@@ -584,7 +624,12 @@ footer a:hover{color:var(--text-muted)}
   </div>
 
   <div class="card">
-    <div class="card-header"><span class="card-label">Your lifts</span><span class="card-meta">weight × reps</span></div>
+    <div class="card-header"><span class="card-label">Your lifts</span>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span class="card-meta">weight × reps</span>
+        <button class="action-btn" onclick="autoFillFromProgress()" title="Fill with your best logged lifts" style="font-size:11px;padding:4px 10px">Auto-fill from history</button>
+      </div>
+    </div>
     <div class="lifts-grid" id="liftsGrid"></div>
     <div class="add-lift-row">
       <input class="custom-lift-input" id="customLiftName" placeholder="Custom exercise name...">
@@ -792,11 +837,14 @@ footer a:hover{color:var(--text-muted)}
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════════════
-const SAVE_KEY   = 'liftlab_v9';
-const USAGE_KEY  = 'liftlab_plans_used';
+const SAVE_KEY   = 'liftlab_v10';
 const LOG_KEY    = 'liftlab_progress_log';
-const FREE_LIMIT = 5;
+const ANON_LIMIT = 2;
+const USER_LIMIT = 4;
+const FREE_LIMIT = 2;   // kept for compat
 const QA_LIMIT   = 2;
+let serverPlanCount = 0;
+let serverPlanLimit = 2;  // updated from server
 const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
 
 let unit='lbs', qmcUnit='lbs';
@@ -983,6 +1031,7 @@ async function doRegister(){
     setToken(d.token);
     currentUser={id:null,email:d.email,token:d.token};
     updateHeaderAuth();
+    fetchPlanUsage(); // show the account's plan limit
     msg.style.color='var(--green)'; msg.textContent='Account created! Welcome to LiftLab.';
     setTimeout(()=>closeModal('authModal'),1500);
   }catch(e){ msg.textContent='Something went wrong. Try again.'; }
@@ -1005,6 +1054,7 @@ async function doLogin(){
     currentUser={id:null,email:d.email,token:d.token};
     updateHeaderAuth();
     msg.style.color='var(--green)'; msg.textContent='Signed in!';
+    fetchPlanUsage(); // refresh plan count for this account
     setTimeout(()=>{ closeModal('authModal'); renderHistory(); renderChart(); },1000);
   }catch(e){ msg.textContent='Something went wrong. Try again.'; }
   finally{ btn.disabled=false; btn.textContent='Sign in'; }
@@ -1023,6 +1073,7 @@ function updateHeaderAuth(){
     area.innerHTML=`<div class="user-chip" onclick="toggleProfileDropdown(event)" title="View profile"><div class="user-dot"></div><span>${currentUser.email.split('@')[0]}</span><div class="profile-dropdown" id="profileDropdown">
       <div class="profile-email">${currentUser.email}</div>
       <div class="profile-stats" id="profileStats"><div class="profile-stat"><div class="profile-stat-val" id="statSessions">—</div><div class="profile-stat-lbl">Sessions</div></div><div class="profile-stat"><div class="profile-stat-val" id="statLifts">—</div><div class="profile-stat-lbl">Sets logged</div></div><div class="profile-stat"><div class="profile-stat-val" id="statExercises">—</div><div class="profile-stat-lbl">Exercises</div></div><div class="profile-stat"><div class="profile-stat-val" id="statStreak">—</div><div class="profile-stat-lbl">Week streak</div></div></div>
+      <button class="profile-view-plans" onclick="openSavedPlansModal();event.stopPropagation()">📋 View saved plans</button>
       <button class="profile-signout" onclick="doLogout();event.stopPropagation()">Sign out</button>
     </div></div>`;
     loadProfileStats();
@@ -1074,17 +1125,32 @@ function checkProgressNudge(){
 // ═══════════════════════════════════════════════════════════
 // ADMIN
 // ═══════════════════════════════════════════════════════════
-function updateUsageBanner(){
-  const used=getUsage();
-  if(isAdmin){ document.getElementById('usageLabel').textContent='Unlimited — admin mode'; document.getElementById('usageBarFill').style.cssText='width:100%;background:var(--green)'; return; }
-  const pct=Math.min(100,Math.round(used/FREE_LIMIT*100));
-  document.getElementById('usageLabel').textContent=`${used} / ${FREE_LIMIT} free plans used`;
-  const fill=document.getElementById('usageBarFill'); fill.style.width=pct+'%';
-  fill.style.background=pct>=80?'var(--red)':pct>=50?'var(--yellow)':'var(--orange)';
-  if(used>=FREE_LIMIT) document.getElementById('adminSection').style.display='block';
+// ── PLAN USAGE (server-side) ─────────────────────────────────────────────────
+async function fetchPlanUsage(){
+  try{
+    const headers={}; const t=getToken(); if(t) headers['X-Auth-Token']=t;
+    const res=await fetch('/api/plan-usage',{headers}); const d=await res.json();
+    serverPlanCount=d.count||0; serverPlanLimit=d.limit||ANON_LIMIT;
+    updateUsageBanner();
+  }catch(e){}
 }
-function getUsage(){ try{ return parseInt(localStorage.getItem(USAGE_KEY)||'0'); }catch(e){ return 0; } }
-function incrementUsage(){ try{ localStorage.setItem(USAGE_KEY,String(getUsage()+1)); }catch(e){} updateUsageBanner(); }
+
+function updateUsageBanner(){
+  const usedEl=document.getElementById('usageLabel');
+  const fillEl=document.getElementById('usageBarFill');
+  if(!usedEl||!fillEl) return;
+  if(isAdmin){
+    usedEl.textContent='Unlimited — admin mode';
+    fillEl.style.cssText='width:100%;background:var(--green)'; return;
+  }
+  const pct=Math.min(100,Math.round(serverPlanCount/serverPlanLimit*100));
+  usedEl.textContent=`${serverPlanCount} / ${serverPlanLimit} plans used`;
+  fillEl.style.width=pct+'%';
+  fillEl.style.background=pct>=80?'var(--red)':pct>=60?'var(--yellow)':'var(--orange)';
+  if(serverPlanCount>=serverPlanLimit) document.getElementById('adminSection').style.display='block';
+}
+function getUsage(){ return serverPlanCount; }
+function incrementUsage(){ serverPlanCount=Math.min(serverPlanCount+1,serverPlanLimit); updateUsageBanner(); }
 
 async function verifyAdmin(){
   const code=document.getElementById('adminCodeInput').value.trim(); if(!code)return;
@@ -1184,7 +1250,7 @@ function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift
 function autosave(planToSave){
   const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
   if(planToSave!==undefined) savedPlanText=planToSave;
-  const data={v:9,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
+  const data={v:10,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
     age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
     sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
     goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
@@ -1226,7 +1292,14 @@ function setLoading(on,text='Building your training plan...'){ document.getEleme
 async function calculate(){
   const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
-  if(!isAdmin&&getUsage()>=FREE_LIMIT){ err.textContent=`You've used all ${FREE_LIMIT} free plans. Enter an unlock code or create a free account.`; document.getElementById('adminSection').style.display='block'; return; }
+  if(!isAdmin&&serverPlanCount>=serverPlanLimit){
+    err.textContent=currentUser
+      ? `You've used all ${serverPlanLimit} plans on your free account. More plans coming soon!`
+      : `You've used your ${serverPlanLimit} free plans. Create a free account to get ${USER_LIMIT}.`;
+    document.getElementById('adminSection').style.display='block';
+    if(!currentUser) openModal('authModal');
+    return;
+  }
   const g=document.getElementById('maxesGrid'); g.innerHTML='';
   lifts.forEach(l=>{ const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div><div class="max-reps">${l.weight} ${unit} × ${l.reps} reps</div>`; g.appendChild(c); });
   document.getElementById('resultsCard').style.display='block'; document.getElementById('planText').innerHTML=''; document.getElementById('resultsFooter').textContent=''; document.getElementById('qaSection').style.display='none'; document.getElementById('qaMessages').innerHTML=''; qaUsedThisPlan=0; setLoading(true);
@@ -1235,7 +1308,7 @@ async function calculate(){
   const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
   const goalDetail=document.getElementById('goalDetail').value.trim(); const splitCustom=document.getElementById('splitCustom').value.trim();
   try{
-    const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({
+    const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({
       lifts,unit,goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
       experience:selectedExp,days:selectedDays,split:splitLabels[selectedSplit]+(splitCustom?` (${splitCustom})`:''),
       age:document.getElementById('userAge').value||null,
@@ -1243,10 +1316,22 @@ async function calculate(){
       sex:document.getElementById('userSex').value||null,height:document.getElementById('userHeight').value||null,
       adminCode:adminCode||undefined
     })});
-    const data=await res.json(); if(data.error)throw new Error(data.error);
+    const data=await res.json();
+    if(data.limit_hit){ err.textContent=data.error; document.getElementById('resultsCard').style.display='none'; if(!currentUser) openModal('authModal'); return; }
+    if(data.error) throw new Error(data.error);
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan,true));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
-    currentPlanContext=data.plan; autosave(data.plan); if(!isAdmin)incrementUsage();
+    currentPlanContext=data.plan; autosave(data.plan);
+    if(typeof data.plan_count==='number') serverPlanCount=data.plan_count;
+    if(typeof data.plan_limit==='number') serverPlanLimit=data.plan_limit;
+    updateUsageBanner();
+    // Auto-save plan to account if logged in
+    if(currentUser){
+      const planTitle=`${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+        body:JSON.stringify({title:planTitle,plan_text:data.plan,lifts_json:JSON.stringify(lifts)})
+      }).catch(()=>{});
+    }
     qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
   }catch(e){ err.textContent=e.message||'Something went wrong. Try again.'; document.getElementById('resultsCard').style.display='none'; }
   finally{ setLoading(false); }
@@ -1298,8 +1383,14 @@ function exportPDF(){
         const lines=doc.splitTextToSize(node.textContent.trim(),colW);
         lines.forEach(l=>{ doc.text(l,margin,y); y+=7; }); y+=1;
       } else if(tag==='p'){
-        node.childNodes.forEach(c=>pdfWalk(c,indent));
-        y+=3;
+        // Render paragraph as flowing text, not as list
+        doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(50,55,65);
+        const txt=node.textContent.trim();
+        if(txt){
+          const lines=doc.splitTextToSize(txt,colW);
+          lines.forEach(l=>{ if(y>275){doc.addPage();y=20;} doc.text(l,margin,y); y+=5.5; });
+          y+=3;
+        }
       } else if(tag==='li'){
         if(y>272){doc.addPage();y=20;}
         doc.setFont('helvetica','normal'); doc.setFontSize(10); doc.setTextColor(80,85,95);
@@ -1469,15 +1560,16 @@ async function renderHistory(){
     entries.forEach(entry=>{
       const allForEx=log.filter(e=>e.exercise===entry.exercise);
       const isPR=checkPR(allForEx,entry)&&allForEx.sort((a,bx)=>bx.estimated1rm-a.estimated1rm)[0]?.id===entry.id;
-      const div=document.createElement('div'); div.className='log-entry';
+      const div=document.createElement('div'); div.className='log-entry'; div.dataset.id=entry.id;
       div.innerHTML=`
         <div class="log-entry-left">
           <div class="log-entry-title">${entry.exercise}${isPR?' <span class="pr-badge">PR</span>':''}</div>
-          <div class="log-entry-meta">${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps</div>
+          <div class="log-entry-meta">${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps · <span style="color:var(--text-faint)">${new Date(entry.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
           ${entry.note?`<div class="log-entry-note">${entry.note}</div>`:''}
         </div>
         <div class="log-entry-right">
           <span class="log-entry-max">${entry.estimated1rm} ${entry.unit||'lbs'}</span>
+          <button class="log-entry-edit" onclick="toggleEditEntry(this,${entry.id},'${entry.exercise.replace(/'/g,"\\'")}',${entry.weight},'${entry.unit||'lbs'}',${entry.reps},'${entry.date}','${(entry.note||'').replace(/'/g,"\\'")}')">Edit</button>
           <button class="log-entry-del" onclick="deleteLogEntry(${entry.id})" title="Delete">×</button>
         </div>`;
       entriesDiv.appendChild(div);
@@ -1557,7 +1649,7 @@ function filterCatalog(){
     card.onclick=()=>openCatalogEntry(ex.name);
     card.innerHTML=`
       <div class="catalog-card-top">
-        <div class="catalog-svg-wrap">${ex.svg}</div>
+        <div class="muscle-badge"><span style="font-size:30px;line-height:1">${getMuscleIcon(ex.name).e}</span><span class="muscle-badge-label">${getMuscleIcon(ex.name).l}</span></div>
         <div class="catalog-card-info">
           <div class="catalog-card-name">${ex.name}</div>
           <div class="catalog-card-muscles">${ex.muscles}</div>
@@ -1572,12 +1664,16 @@ function filterCatalog(){
 function openCatalogEntry(name){
   const ex=CATALOG.find(e=>e.name.toLowerCase()===name.toLowerCase());
   if(!ex) return;
+  const icon=getMuscleIcon(ex.name);
   const content=document.getElementById('catalogDetailContent');
   content.innerHTML=`
     <div class="modal-badge badge-orange">${ex.category}</div>
     <h2>${ex.name}</h2>
     <p style="color:var(--orange);font-size:13px;font-weight:600;margin-bottom:0.75rem">${ex.muscles}</p>
-    <div style="text-align:center;background:var(--surface2);border-radius:12px;padding:1rem;margin:1rem 0;border:1px solid var(--border)">${ex.svg.replace('viewBox="0 0 80 80"','viewBox="0 0 80 80" style="width:140px;height:140px"')}</div>
+    <div style="text-align:center;background:var(--surface2);border-radius:12px;padding:1.5rem;margin:1rem 0;border:1px solid var(--border)">
+      <div style="font-size:72px;line-height:1;margin-bottom:8px">${icon.e}</div>
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:var(--orange)">${icon.l}</div>
+    </div>
     <p style="font-size:14px;color:var(--text-muted);line-height:1.75">${ex.desc}</p>
     <div class="catalog-tips">
       <h4>Tips</h4>
@@ -1603,6 +1699,176 @@ function calcQmc(){
   tableCard.style.display='block';
 }
 
+// ── AUTO-FILL FROM PROGRESS ───────────────────────────────────────────────────
+async function autoFillFromProgress(){
+  const log=await getLog();
+  if(!log||!log.length){ alert('No workout history found. Log some workouts first in Progress Tracker.'); return; }
+  // Find best set (highest estimated 1RM) per exercise
+  const best={};
+  log.forEach(e=>{
+    if(!best[e.exercise]||e.estimated1rm>best[e.exercise].estimated1rm) best[e.exercise]=e;
+  });
+  const exercises=Object.keys(best);
+  if(!exercises.length) return;
+  // Prefer the 5 preset lifts first, then fill remaining slots with other logged lifts
+  const presets=PRESET_LIFTS.filter(n=>best[n]);
+  const others=exercises.filter(n=>!PRESET_LIFTS.includes(n));
+  const toFill=[...presets,...others].slice(0,8);
+
+  // Clear and repopulate lifts grid
+  const grid=document.getElementById('liftsGrid');
+  grid.innerHTML='';
+  toFill.forEach(name=>{
+    const e=best[name];
+    grid.appendChild(makeLiftRow(name,e.weight,e.reps));
+  });
+  // Set unit to match most recent entries
+  const mostRecentUnit=log[0]?.unit||'lbs';
+  setUnit(mostRecentUnit);
+  autosave();
+  // Flash feedback
+  const btn=event.target;
+  btn.textContent='✓ Filled!'; btn.classList.add('done');
+  setTimeout(()=>{ btn.textContent='Auto-fill from history'; btn.classList.remove('done'); },2000);
+}
+
+// ── INLINE EDIT ENTRY ─────────────────────────────────────────────────────────
+function toggleEditEntry(btn,id,exercise,weight,entryUnit,reps,date,note){
+  const entryDiv=btn.closest('.log-entry');
+  // If already has edit overlay, remove it
+  const existing=entryDiv.nextElementSibling;
+  if(existing&&existing.classList.contains('edit-overlay')){ existing.remove(); btn.textContent='Edit'; return; }
+  // Close any other open edit overlays
+  document.querySelectorAll('.edit-overlay').forEach(el=>el.remove());
+  document.querySelectorAll('.log-entry-edit').forEach(b=>b.textContent='Edit');
+
+  btn.textContent='▲';
+  const overlay=document.createElement('div');
+  overlay.className='edit-overlay';
+  overlay.innerHTML=`
+    <div class="edit-row">
+      <span class="edit-lbl">Weight</span>
+      <input id="eWeight_${id}" type="number" value="${weight}" min="0" step="any" style="max-width:90px">
+      <span class="edit-lbl">${entryUnit} ×</span>
+      <input id="eReps_${id}" type="number" value="${reps}" min="1" max="50" style="max-width:70px">
+      <span class="edit-lbl">reps</span>
+    </div>
+    <div class="edit-row">
+      <span class="edit-lbl">Date</span>
+      <input id="eDate_${id}" type="date" value="${date}" style="flex:1">
+    </div>
+    <div class="edit-row">
+      <span class="edit-lbl">Note</span>
+      <input id="eNote_${id}" type="text" value="${note}" placeholder="Optional note..." style="flex:1">
+    </div>
+    <div class="edit-row" style="justify-content:flex-end">
+      <button class="edit-cancel" onclick="this.closest('.edit-overlay').remove();document.querySelector('[data-id=\\'${id}\\'] .log-entry-edit').textContent='Edit'">Cancel</button>
+      <button class="edit-save" onclick="saveEditEntry(${id})">Save</button>
+    </div>`;
+  entryDiv.insertAdjacentElement('afterend',overlay);
+}
+
+async function saveEditEntry(id){
+  const w=parseFloat(document.getElementById(`eWeight_${id}`)?.value);
+  const r=parseInt(document.getElementById(`eReps_${id}`)?.value);
+  const date=document.getElementById(`eDate_${id}`)?.value;
+  const note=document.getElementById(`eNote_${id}`)?.value||'';
+  if(!w||!r) return;
+  const body={weight:w,reps:r,date,note};
+  if(currentUser){
+    try{ await fetch(`/api/log/${id}`,{method:'PATCH',headers:authHeaders(),body:JSON.stringify(body)}); }catch(e){}
+  } else {
+    const log=getLocalLog();
+    const idx=log.findIndex(e=>e.id===id);
+    if(idx>=0){ log[idx]={...log[idx],...body,estimated1rm:calc1RM(w,r)}; saveLocalLog(log); }
+  }
+  renderHistory(); renderChart();
+}
+
+// ── SAVED PLANS MODAL ─────────────────────────────────────────────────────────
+async function openSavedPlansModal(){
+  closeProfileDropdown();
+  openModal('savedPlansModal');
+  const list=document.getElementById('savedPlansList');
+  list.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:2rem">Loading...</div>';
+  if(!currentUser){ list.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:2rem">Sign in to see your saved plans.</div>'; return; }
+  try{
+    const res=await fetch('/api/plans',{headers:authHeaders()});
+    const d=await res.json();
+    if(!d.plans||!d.plans.length){ list.innerHTML='<div style="color:var(--text-dim);font-size:14px">No saved plans yet. Generate a training plan and it will be saved here automatically.</div>'; return; }
+    list.innerHTML='';
+    d.plans.forEach(p=>{
+      const date=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+      const item=document.createElement('div'); item.className='saved-plan-item';
+      item.innerHTML=`
+        <div onclick="viewSavedPlan(${p.id},${JSON.stringify(p.title).replace(/</g,'&lt;')},${JSON.stringify(p.plan_text).replace(/</g,'&lt;')})" style="flex:1;min-width:0">
+          <div class="saved-plan-title">${p.title}</div>
+          <div class="saved-plan-date">${date}</div>
+        </div>
+        <button class="saved-plan-del" onclick="deleteSavedPlan(${p.id},this)" title="Delete">×</button>`;
+      list.appendChild(item);
+    });
+  }catch(e){ list.innerHTML='<div style="color:var(--red);font-size:13px">Could not load plans. Try again.</div>'; }
+}
+
+function viewSavedPlan(id,title,planText){
+  document.getElementById('planDetailContent').innerHTML=`
+    <div class="modal-badge badge-orange">Saved plan</div>
+    <h2 style="margin-bottom:1rem">${title}</h2>
+    <div class="plan-text">${renderMarkdown(planText,true).innerHTML}</div>`;
+  closeModal('savedPlansModal');
+  openModal('planDetailModal');
+}
+
+async function deleteSavedPlan(id,btn){
+  if(!confirm('Delete this plan?')) return;
+  btn.disabled=true;
+  try{ await fetch(`/api/plans/${id}`,{method:'DELETE',headers:authHeaders()}); }catch(e){}
+  btn.closest('.saved-plan-item').remove();
+  if(!document.querySelector('.saved-plan-item')) openSavedPlansModal();
+}
+
+function closeProfileDropdown(){
+  const dd=document.getElementById('profileDropdown'); if(dd) dd.classList.remove('open');
+}
+
+// ── CATALOG — replace SVGs with emoji muscle badges ───────────────────────────
+// Map each exercise to an emoji + short muscle label (clean, readable, no bad SVG)
+const MUSCLE_ICONS={
+  'Bench Press':       {e:'🏋️',l:'Chest'},
+  'Incline Bench Press':{e:'📐',l:'Upper Chest'},
+  'Dumbbell Fly':      {e:'🦋',l:'Chest'},
+  'Decline Bench Press':{e:'↘️',l:'Lower Chest'},
+  'Deadlift':          {e:'🔱',l:'Full Body'},
+  'Barbell Row':       {e:'🚣',l:'Upper Back'},
+  'Pull-up':           {e:'⬆️',l:'Lats'},
+  'Lat Pulldown':      {e:'⬇️',l:'Lats'},
+  'Cable Row':         {e:'🔄',l:'Back'},
+  'Sumo Deadlift':     {e:'🦵',l:'Glutes'},
+  'Squat':             {e:'🦵',l:'Quads'},
+  'Romanian Deadlift': {e:'🔙',l:'Hamstrings'},
+  'Leg Press':         {e:'🦿',l:'Quads'},
+  'Hip Thrust':        {e:'🍑',l:'Glutes'},
+  'Leg Curl':          {e:'🦵',l:'Hamstrings'},
+  'Leg Extension':     {e:'🦵',l:'Quads'},
+  'Front Squat':       {e:'🧱',l:'Quads+Core'},
+  'Walking Lunge':     {e:'🚶',l:'Quads'},
+  'Overhead Press':    {e:'🙌',l:'Shoulders'},
+  'Lateral Raise':     {e:'↔️',l:'Side Delts'},
+  'Face Pull':         {e:'🎯',l:'Rear Delts'},
+  'Arnold Press':      {e:'🔃',l:'All Delts'},
+  'Barbell Curl':      {e:'💪',l:'Biceps'},
+  'Tricep Pushdown':   {e:'⬇️',l:'Triceps'},
+  'Hammer Curl':       {e:'🔨',l:'Biceps'},
+  'Skull Crusher':     {e:'💀',l:'Triceps'},
+  'Preacher Curl':     {e:'🙏',l:'Biceps'},
+  'Plank':             {e:'📏',l:'Core'},
+  'Ab Wheel Rollout':  {e:'⚙️',l:'Core'},
+  'Hanging Leg Raise': {e:'🏗️',l:'Lower Abs'},
+  'Cable Crunch':      {e:'〽️',l:'Abs'},
+};
+function getMuscleIcon(name){ return MUSCLE_ICONS[name]||{e:'🏋️',l:'Strength'}; }
+
 // ═══════════════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════════════
@@ -1620,9 +1886,10 @@ updateUsageBanner();
 tryRestoreAdmin();
 updateExerciseSelectors();
 
-// Check auth on load
+// Check auth on load, then fetch server-side plan usage
 checkAuth().then(()=>{
   renderHistory();
+  fetchPlanUsage();
 });
 </script>
 </body>
