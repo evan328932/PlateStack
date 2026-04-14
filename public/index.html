@@ -1493,26 +1493,44 @@ const CATALOG_SORTED_NAMES = Object.keys(CATALOG_LOOKUP).sort((a,b) => b.length 
 function renderMarkdown(text, linkLifts=false){
   const div=document.createElement('div'); div.className='plan-text';
   const lines=text.split('\n'); let html='',inList=false,listType='';
+  // Track whether we're inside the Weekly Program section
+  let inWeeklyProgram = false;
   lines.forEach(line=>{
-    let l=line.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>').replace(/\*(.*?)\*/g,'<em>$1</em>');
-    if(linkLifts){
-      // Already-linked spans get a placeholder so we don't double-link
-      const linked = new Set();
-      let result = l;
+    // Check if this is a section header
+    const isHeader = /^#{1,3}\s/.test(line);
+    if(isHeader){
+      const headerText = line.replace(/^#{1,3}\s/,'').toLowerCase();
+      // Only link exercises inside the Weekly Program section
+      inWeeklyProgram = headerText.includes('weekly program') || headerText.includes('week program');
+    }
+
+    // Step 1: inject exercise links on the RAW line (before any HTML conversion)
+    // so we never corrupt markdown syntax like **bold** or HTML tag attributes
+    let raw = line;
+    if(linkLifts && inWeeklyProgram && !isHeader){
       CATALOG_SORTED_NAMES.forEach(lowerName => {
         const entry = CATALOG_LOOKUP[lowerName];
         const escaped = lowerName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-        // Use word-boundary-like check: not preceded/followed by a letter
         const regex = new RegExp(`(?<![a-zA-Z])(${escaped})(?![a-zA-Z])`, 'gi');
-        result = result.replace(regex, (match, p1) => {
-          // Don't re-link something already inside a span
+        raw = raw.replace(regex, (match, p1) => {
           const safeCanonical = entry.name.replace(/'/g,"\\'");
-          return `<span class="plan-lift-link" onclick="openCatalogEntry('${safeCanonical}')">${p1}</span>`;
+          return `\x00LINK:${safeCanonical}:${p1}\x00`;
         });
       });
-      l = result;
     }
-    if(/^#{1,3}\s/.test(l)){ if(inList){html+=`</${listType}>`;inList=false;} html+=`<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`; }
+
+    // Step 2: convert markdown bold/italic (safe now — exercise names are placeholders)
+    let l = raw
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,'<em>$1</em>');
+
+    // Step 3: replace placeholders with actual HTML spans
+    l = l.replace(/\x00LINK:([^:]+):([^\x00]+)\x00/g, (_, canonical, displayText) => {
+      const safe = canonical.replace(/'/g,"\\'");
+      return `<span class="plan-lift-link" onclick="openCatalogEntry('${safe}')">${displayText}</span>`;
+    });
+
+    if(isHeader){ if(inList){html+=`</${listType}>`;inList=false;} html+=`<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`; }
     else if(/^[-*•]\s/.test(l)){ if(!inList||listType!=='ul'){if(inList)html+=`</${listType}>`;html+='<ul>';inList=true;listType='ul';} html+=`<li>${l.replace(/^[-*•]\s/,'')}</li>`; }
     else if(/^\d+\.\s/.test(l)){ if(!inList||listType!=='ol'){if(inList)html+=`</${listType}>`;html+='<ol>';inList=true;listType='ol';} html+=`<li>${l.replace(/^\d+\.\s/,'')}</li>`; }
     else{ if(inList){html+=`</${listType}>`;inList=false;} if(l.trim())html+=`<p>${l}</p>`; }
