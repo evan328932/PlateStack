@@ -664,6 +664,26 @@ footer a:hover{color:var(--text-muted)}
     <div class="exp-desc visible" id="expDesc"><strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.</div>
   </div>
 
+  <div class="card">
+    <div class="card-header"><span class="card-label">Training style</span><span class="card-meta">optional — personalizes your plan</span></div>
+    <div style="margin-bottom:1rem">
+      <div class="field-label" style="margin-bottom:8px">Equipment & preferences <span style="font-weight:400;color:var(--text-dim)">(select all that apply)</span></div>
+      <div class="chip-row" id="styleRow">
+        <div class="chip" onclick="toggleStylePref(this,'barbell_only')">Barbells only</div>
+        <div class="chip" onclick="toggleStylePref(this,'dumbbells_available')">Dumbbells available</div>
+        <div class="chip" onclick="toggleStylePref(this,'cables_machines')">Cables / machines</div>
+        <div class="chip" onclick="toggleStylePref(this,'home_gym')">Home gym</div>
+        <div class="chip" onclick="toggleStylePref(this,'no_cardio')">No cardio</div>
+        <div class="chip" onclick="toggleStylePref(this,'minimize_soreness')">Minimize soreness</div>
+        <div class="chip" onclick="toggleStylePref(this,'time_limited')">Short sessions (&lt;45 min)</div>
+      </div>
+    </div>
+    <div>
+      <div class="field-label" style="margin-bottom:6px">Injuries or movements to avoid</div>
+      <textarea id="injuriesDetail" rows="1" placeholder="e.g. 'bad lower back — avoid heavy deadlifts' or 'shoulder impingement — no overhead pressing'" oninput="autosave()" style="min-height:50px"></textarea>
+    </div>
+  </div>
+
   <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate My Max + Build My Plan</button>
   <div id="error" class="error"></div>
   <div id="loading" class="loading">
@@ -843,7 +863,7 @@ footer a:hover{color:var(--text-muted)}
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════════════
-const SAVE_KEY   = 'liftlab_v10';
+const SAVE_KEY   = 'liftlab_v11';
 const LOG_KEY    = 'liftlab_progress_log';
 const ANON_LIMIT = 2;
 const USER_LIMIT = 4;
@@ -856,6 +876,7 @@ const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell
 
 let unit='lbs', qmcUnit='lbs';
 let selectedGoal='strength', selectedExp='beginner', selectedDays='4', selectedSplit='full_body';
+let selectedStylePrefs=new Set();
 let currentPlanContext=null, qaUsedThisPlan=0, savedPlanText=null;
 let chartInstance=null;
 let adminCode='', isAdmin=false;
@@ -1365,23 +1386,62 @@ function calc1RM(weight,reps){
 // Maps common AI-generated names → catalog entry name
 // ═══════════════════════════════════════════════════════════
 const EXERCISE_ALIASES = {
+  // Squat variations
   'squat': 'Back Squat',
   'barbell squat': 'Back Squat',
   'barbell back squat': 'Back Squat',
   'low bar squat': 'Back Squat',
   'high bar squat': 'Back Squat',
+  'back squat': 'Back Squat',
+  // Deadlift variations
   'conventional deadlift': 'Deadlift',
+  'barbell deadlift': 'Deadlift',
   'romanian deadlifts': 'Romanian Deadlift',
   'rdl': 'Romanian Deadlift',
+  'stiff-leg deadlift': 'Romanian Deadlift',
+  'stiff leg deadlift': 'Romanian Deadlift',
+  'sldl': 'Romanian Deadlift',
+  // Press variations
   'ohp': 'Overhead Press',
   'military press': 'Overhead Press',
   'strict press': 'Overhead Press',
   'barbell overhead press': 'Overhead Press',
   'standing overhead press': 'Overhead Press',
+  'standing press': 'Overhead Press',
+  'barbell press': 'Overhead Press',
+  'shoulder press': 'Overhead Press',
+  // Bench variations
+  'flat bench press': 'Bench Press',
+  'barbell bench press': 'Bench Press',
+  'flat barbell bench': 'Bench Press',
+  'db bench': 'Dumbbell Bench Press',
+  'dumbbell bench': 'Dumbbell Bench Press',
+  'db press': 'Dumbbell Bench Press',
+  'dumbbell press': 'Dumbbell Bench Press',
+  'incline press': 'Incline Bench Press',
+  'incline barbell press': 'Incline Bench Press',
+  'incline barbell bench press': 'Incline Bench Press',
+  'decline bench': 'Decline Bench Press',
+  // Row variations
   'bent-over row': 'Barbell Row',
   'bent over row': 'Barbell Row',
   'barbell bent-over row': 'Barbell Row',
+  'barbell bent over row': 'Barbell Row',
   'bb row': 'Barbell Row',
+  'bb bent-over row': 'Barbell Row',
+  'seated cable row': 'Cable Row',
+  'low row': 'Cable Row',
+  'low cable row': 'Cable Row',
+  'cable seated row': 'Cable Row',
+  'db row': 'Dumbbell Row',
+  'one-arm dumbbell row': 'Dumbbell Row',
+  'single-arm row': 'Dumbbell Row',
+  'single arm row': 'Dumbbell Row',
+  'single arm dumbbell row': 'Dumbbell Row',
+  'one arm row': 'Dumbbell Row',
+  't-bar rows': 'T-Bar Row',
+  'pendlay rows': 'Pendlay Row',
+  // Pull-up / pulldown
   'pull-ups': 'Pull-up',
   'pullup': 'Pull-up',
   'pullups': 'Pull-up',
@@ -1389,61 +1449,69 @@ const EXERCISE_ALIASES = {
   'chin-ups': 'Pull-up',
   'chinup': 'Pull-up',
   'chinups': 'Pull-up',
+  'weighted pull-up': 'Pull-up',
+  'weighted pullup': 'Pull-up',
   'lat pull-down': 'Lat Pulldown',
   'lat pull down': 'Lat Pulldown',
   'cable pulldown': 'Lat Pulldown',
-  'db bench': 'Dumbbell Bench Press',
-  'dumbbell bench': 'Dumbbell Bench Press',
-  'db press': 'Dumbbell Bench Press',
-  'dumbbell press': 'Dumbbell Bench Press',
-  'incline press': 'Incline Bench Press',
-  'incline barbell press': 'Incline Bench Press',
+  'lat pulldowns': 'Lat Pulldown',
+  // Curl variations
   'bb curl': 'Barbell Curl',
   'ez-bar curl': 'Barbell Curl',
   'ez bar curl': 'Barbell Curl',
+  'barbell bicep curl': 'Barbell Curl',
   'db curl': 'Dumbbell Curl',
   'alternating dumbbell curl': 'Dumbbell Curl',
   'standing dumbbell curl': 'Dumbbell Curl',
+  'dumbbell bicep curl': 'Dumbbell Curl',
+  'hammer curls': 'Hammer Curl',
+  'db hammer curl': 'Hammer Curl',
+  'cable bicep curl': 'Cable Curl',
+  'cable curls': 'Cable Curl',
+  'preacher curls': 'Preacher Curl',
+  // Tricep variations
   'tricep pushdowns': 'Tricep Pushdown',
   'cable pushdown': 'Tricep Pushdown',
   'rope pushdown': 'Tricep Pushdown',
   'triceps pushdown': 'Tricep Pushdown',
+  'tricep rope pushdown': 'Tricep Pushdown',
   'lying tricep extension': 'Skull Crusher',
   'ez-bar skull crusher': 'Skull Crusher',
   'skull crushers': 'Skull Crusher',
   'close-grip bench press': 'Close Grip Bench Press',
   'cgbp': 'Close Grip Bench Press',
-  'push-ups': 'Push-up',
-  'push up': 'Push-up',
-  'push ups': 'Push-up',
-  'pushup': 'Push-up',
-  'seated dumbbell press': 'Dumbbell Shoulder Press',
-  'db shoulder press': 'Dumbbell Shoulder Press',
-  'dumbbell overhead press': 'Dumbbell Shoulder Press',
+  'tricep dips': 'Tricep Dip',
+  'dips': 'Tricep Dip',
+  'parallel bar dip': 'Tricep Dip',
+  'weighted dips': 'Tricep Dip',
+  'overhead tricep extension': 'Skull Crusher',
+  // Shoulder isolation
   'lateral raises': 'Lateral Raise',
   'side raises': 'Lateral Raise',
   'db lateral raise': 'Lateral Raise',
+  'dumbbell lateral raise': 'Lateral Raise',
+  'side lateral raise': 'Lateral Raise',
   'rear delt flys': 'Rear Delt Fly',
   'rear delt flies': 'Rear Delt Fly',
   'reverse fly': 'Rear Delt Fly',
   'reverse flies': 'Rear Delt Fly',
+  'rear delt fly': 'Rear Delt Fly',
   'cable face pull': 'Face Pull',
   'face pulls': 'Face Pull',
-  'seated cable row': 'Cable Row',
-  'low row': 'Cable Row',
-  'low cable row': 'Cable Row',
-  'db row': 'Dumbbell Row',
-  'one-arm dumbbell row': 'Dumbbell Row',
-  'single-arm row': 'Dumbbell Row',
-  'single arm row': 'Dumbbell Row',
-  'single arm dumbbell row': 'Dumbbell Row',
+  'arnold press': 'Arnold Press',
+  'seated dumbbell press': 'Dumbbell Shoulder Press',
+  'db shoulder press': 'Dumbbell Shoulder Press',
+  'dumbbell overhead press': 'Dumbbell Shoulder Press',
+  // Leg variations
   'hip thrusts': 'Hip Thrust',
   'barbell hip thrust': 'Hip Thrust',
   'bss': 'Bulgarian Split Squat',
   'split squat': 'Bulgarian Split Squat',
   'rear foot elevated split squat': 'Bulgarian Split Squat',
+  'bulgarian split squats': 'Bulgarian Split Squat',
   'lunges': 'Walking Lunge',
   'lunge': 'Walking Lunge',
+  'walking lunges': 'Walking Lunge',
   'goblet squats': 'Goblet Squat',
   'kb goblet squat': 'Goblet Squat',
   'leg curls': 'Leg Curl',
@@ -1455,24 +1523,27 @@ const EXERCISE_ALIASES = {
   'calf raises': 'Calf Raise',
   'standing calf raise': 'Calf Raise',
   'seated calf raise': 'Calf Raise',
+  'front squats': 'Front Squat',
+  'leg press': 'Leg Press',
+  // Core
   'planks': 'Plank',
-  'farmers walk': 'Farmers Carry',
-  'farmer carry': 'Farmers Carry',
-  'farmer\'s carry': 'Farmers Carry',
-  'farmer\'s walk': 'Farmers Carry',
-  'kettlebell swings': 'Kettlebell Swing',
-  'kb swing': 'Kettlebell Swing',
+  'ab wheel': 'Ab Wheel Rollout',
+  'ab roller': 'Ab Wheel Rollout',
   'hanging leg raises': 'Hanging Leg Raise',
   'hang leg raise': 'Hanging Leg Raise',
   'cable crunches': 'Cable Crunch',
-  'tricep dips': 'Tricep Dip',
-  'dips': 'Tricep Dip',
-  'parallel bar dip': 'Tricep Dip',
-  'cable bicep curl': 'Cable Curl',
-  'ab wheel': 'Ab Wheel Rollout',
-  'ab roller': 'Ab Wheel Rollout',
-  't-bar rows': 'T-Bar Row',
-  'pendlay rows': 'Pendlay Row',
+  'cable crunch': 'Cable Crunch',
+  // Misc
+  'farmers walk': 'Farmers Carry',
+  'farmer carry': 'Farmers Carry',
+  "farmer's carry": 'Farmers Carry',
+  "farmer's walk": 'Farmers Carry',
+  'kettlebell swings': 'Kettlebell Swing',
+  'kb swing': 'Kettlebell Swing',
+  'push-ups': 'Push-up',
+  'push up': 'Push-up',
+  'push ups': 'Push-up',
+  'pushup': 'Push-up',
   'power cleans': 'Power Clean',
   'box jumps': 'Box Jump',
 };
@@ -1566,6 +1637,11 @@ function selectExp(el,v){
     advanced:'<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming.'};
   const desc=document.getElementById('expDesc'); desc.innerHTML=descs[v]||''; desc.classList.add('visible');
 }
+function toggleStylePref(el,v){
+  if(selectedStylePrefs.has(v)){ selectedStylePrefs.delete(v); el.classList.remove('active'); }
+  else { selectedStylePrefs.add(v); el.classList.add('active'); }
+  autosave();
+}
 function comboSync(selectId,inputId){ const v=document.getElementById(selectId).value; if(v) document.getElementById(inputId).value=v; }
 
 // ═══════════════════════════════════════════════════════════
@@ -1592,17 +1668,19 @@ function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift
 function autosave(planToSave){
   const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
   if(planToSave!==undefined) savedPlanText=planToSave;
-  const data={v:10,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
+  const data={v:11,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
     age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
     sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
     goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
+    injuries:document.getElementById('injuriesDetail').value,
+    stylePrefs:[...selectedStylePrefs],
     plan:savedPlanText||null,lifts};
   try{ localStorage.setItem(SAVE_KEY,JSON.stringify(data)); }catch(e){}
 }
 function loadSaved(){
   try{
     const raw=localStorage.getItem(SAVE_KEY); if(!raw)return false;
-    const d=JSON.parse(raw); if(!d||d.v!==9)return false;
+    const d=JSON.parse(raw); if(!d||d.v!==11)return false;
     setUnit(d.unit||'lbs');
     if(d.age) document.getElementById('userAge').value=d.age;
     if(d.bodyweight) document.getElementById('userWeight').value=d.bodyweight;
@@ -1610,6 +1688,8 @@ function loadSaved(){
     if(d.height) document.getElementById('userHeight').value=d.height;
     if(d.goalDetail) document.getElementById('goalDetail').value=d.goalDetail;
     if(d.splitCustom) document.getElementById('splitCustom').value=d.splitCustom;
+    if(d.injuries) document.getElementById('injuriesDetail').value=d.injuries;
+    if(d.stylePrefs&&d.stylePrefs.length){ selectedStylePrefs=new Set(d.stylePrefs); d.stylePrefs.forEach(v=>{ const chip=document.querySelector(`#styleRow .chip[onclick*="'${v}'"]`); if(chip) chip.classList.add('active'); }); }
     [['goalRow','selectedGoal',d.selectedGoal],['expRow','selectedExp',d.selectedExp],['daysRow','selectedDays',d.selectedDays],['splitRow','selectedSplit',d.selectedSplit]].forEach(([rowId,key,val])=>{
       if(!val)return; const chip=document.querySelector(`#${rowId} .chip[onclick*="'${val}'"]`);
       if(chip){ selectChipIn(rowId,chip); if(key==='selectedGoal')selectedGoal=val; if(key==='selectedExp'){selectedExp=val;selectExp(chip,val);} if(key==='selectedDays')selectedDays=val; if(key==='selectedSplit')selectedSplit=val; }
@@ -1625,7 +1705,7 @@ function loadSaved(){
     return true;
   }catch(e){ return false; }
 }
-function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; initLifts(null); }
+function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom','injuriesDetail'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; selectedStylePrefs=new Set(); document.querySelectorAll('#styleRow .chip').forEach(c=>c.classList.remove('active')); initLifts(null); }
 
 // ═══════════════════════════════════════════════════════════
 // CALCULATE
@@ -1649,6 +1729,11 @@ async function calculate(){
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
   const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
   const goalDetail=document.getElementById('goalDetail').value.trim(); const splitCustom=document.getElementById('splitCustom').value.trim();
+  const injuries=document.getElementById('injuriesDetail').value.trim()||null;
+  const stylePrefs=selectedStylePrefs.size?[...selectedStylePrefs].join(', '):null;
+  // Pull recent log entries to give AI context on actual progress
+  let logContext=[];
+  try{ const log=await getLog(); logContext=log.slice(0,15); }catch(e){}
   try{
     const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({
       lifts,unit,goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
@@ -1656,6 +1741,7 @@ async function calculate(){
       age:document.getElementById('userAge').value||null,
       bodyweight:document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
       sex:document.getElementById('userSex').value||null,height:document.getElementById('userHeight').value||null,
+      injuries,stylePrefs,logContext,
       adminCode:adminCode||undefined
     })});
     const data=await res.json();
@@ -1667,9 +1753,10 @@ async function calculate(){
     if(typeof data.plan_count==='number') serverPlanCount=data.plan_count;
     if(typeof data.plan_limit==='number') serverPlanLimit=data.plan_limit;
     updateUsageBanner();
-    // Auto-save plan to account if logged in
+    // Auto-save plan to account if logged in, using AI-generated title when available
     if(currentUser){
-      const planTitle=`${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      const fallbackTitle=`${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      const planTitle=data.plan_title||fallbackTitle;
       fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
         body:JSON.stringify({title:planTitle,plan_text:data.plan,lifts_json:JSON.stringify(lifts)})
       }).catch(()=>{});
