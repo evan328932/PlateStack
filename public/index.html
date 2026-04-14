@@ -1493,42 +1493,55 @@ const CATALOG_SORTED_NAMES = Object.keys(CATALOG_LOOKUP).sort((a,b) => b.length 
 function renderMarkdown(text, linkLifts=false){
   const div=document.createElement('div'); div.className='plan-text';
   const lines=text.split('\n'); let html='',inList=false,listType='';
-  // Track whether we're inside the Weekly Program section
   let inWeeklyProgram = false;
+
   lines.forEach(line=>{
-    // Check if this is a section header
     const isHeader = /^#{1,3}\s/.test(line);
     if(isHeader){
       const headerText = line.replace(/^#{1,3}\s/,'').toLowerCase();
-      // Only link exercises inside the Weekly Program section
       inWeeklyProgram = headerText.includes('weekly program') || headerText.includes('week program');
     }
 
-    // Step 1: inject exercise links on the RAW line (before any HTML conversion)
-    // so we never corrupt markdown syntax like **bold** or HTML tag attributes
-    let raw = line;
+    // Strip ** and * from the raw line first so exercise matching works on clean text
+    // and we never accidentally match inside HTML attribute strings
+    let clean = line
+      .replace(/\*\*(.*?)\*\*/g,'$1')
+      .replace(/\*(.*?)\*/g,'$1');
+
+    // Inject exercise links only inside the Weekly Program section, on non-header lines
     if(linkLifts && inWeeklyProgram && !isHeader){
+      // Build a list of all matches: {start, end, canonical, display}
+      // then replace from right-to-left so indices don't shift
+      const matches = [];
+      const lowerClean = clean.toLowerCase();
+
       CATALOG_SORTED_NAMES.forEach(lowerName => {
         const entry = CATALOG_LOOKUP[lowerName];
         const escaped = lowerName.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
-        const regex = new RegExp(`(?<![a-zA-Z])(${escaped})(?![a-zA-Z])`, 'gi');
-        raw = raw.replace(regex, (match, p1) => {
-          const safeCanonical = entry.name.replace(/'/g,"\\'");
-          return `\x00LINK:${safeCanonical}:${p1}\x00`;
-        });
+        const regex = new RegExp(`(?<![a-z])(${escaped})(?![a-z])`, 'gi');
+        let m;
+        while((m = regex.exec(clean)) !== null){
+          // Only add if this range isn't already covered by a previous (longer) match
+          const start = m.index, end = m.index + m[0].length;
+          const overlaps = matches.some(ex => start < ex.end && end > ex.start);
+          if(!overlaps) matches.push({start, end, canonical: entry.name, display: m[0]});
+        }
+      });
+
+      // Sort descending by start position and replace right-to-left
+      matches.sort((a,b) => b.start - a.start);
+      matches.forEach(({start, end, canonical, display}) => {
+        const safe = canonical.replace(/'/g,"\\'");
+        clean = clean.slice(0,start)
+          + `<span class="plan-lift-link" onclick="openCatalogEntry('${safe}')">${display}</span>`
+          + clean.slice(end);
       });
     }
 
-    // Step 2: convert markdown bold/italic (safe now — exercise names are placeholders)
-    let l = raw
+    // Now apply bold/italic to the (already-linked) clean line
+    let l = clean
       .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
       .replace(/\*(.*?)\*/g,'<em>$1</em>');
-
-    // Step 3: replace placeholders with actual HTML spans
-    l = l.replace(/\x00LINK:([^:]+):([^\x00]+)\x00/g, (_, canonical, displayText) => {
-      const safe = canonical.replace(/'/g,"\\'");
-      return `<span class="plan-lift-link" onclick="openCatalogEntry('${safe}')">${displayText}</span>`;
-    });
 
     if(isHeader){ if(inList){html+=`</${listType}>`;inList=false;} html+=`<h3>${l.replace(/^#{1,3}\s/,'')}</h3>`; }
     else if(/^[-*•]\s/.test(l)){ if(!inList||listType!=='ul'){if(inList)html+=`</${listType}>`;html+='<ul>';inList=true;listType='ul';} html+=`<li>${l.replace(/^[-*•]\s/,'')}</li>`; }
