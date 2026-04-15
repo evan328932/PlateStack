@@ -124,36 +124,25 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-20
 
 PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, - for bullets. No preamble. No closing remarks.
 
-IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences.
+IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences."""
 
-PROGRESSION: For the weekly program, include a simple weekly progression scheme for each main lift (e.g. "+5 lbs/week on squat", "add a rep each week", "deload every 4th week"). Make it concrete and specific to their numbers."""
-
-def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text,injuries=None,style_prefs=None,log_context=None):
-    injuries_line = f"\nInjuries/Limitations: {injuries}" if injuries else ""
-    style_line = f"\nTraining Style Preferences: {style_prefs}" if style_prefs else ""
-    log_line = f"\nRecent Progress (from their workout log):\n{log_context}" if log_context else ""
+def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text):
     return f"""ATHLETE:
 Profile: {profile}
 Experience: {experience}
 Schedule: {days} days/week, {split}
 Goal: {goal}
-Unit: {unit}{injuries_line}{style_line}
+Unit: {unit}
 Lifts:
-{lifts_text}{log_line}
+{lifts_text}
 
 TEMPLATE TO FILL:
-
-## TITLE: [Write a short punchy plan title, 4-8 words, e.g. "4-Day Strength Block for Intermediate Lifter" — NO markdown, just plain text after the colon]
 
 ## Where You're At
 [Write 2-3 plain prose sentences about their current level vs their goal. PLAIN TEXT ONLY — no dashes, no bullets, no sub-headers.]
 
 ## Weekly Program ({days}-Day {split})
 [Each training day with exercises: name — sets x reps @ % of 1RM (actual {unit})]
-[After each main lift, add a progression note: e.g. "+5 {unit}/week" or "add 1 rep/week until 12, then reset"]
-
-## Progression Scheme
-[2-3 bullet points: exactly how to add weight/reps week over week for the main lifts. Include a deload recommendation.]
 
 ## 4-Week Milestone
 [Specific numbers to hit]
@@ -165,7 +154,7 @@ TEMPLATE TO FILL:
 [Specific numbers to hit]
 
 ## Key Tips
-[2-3 tips tailored to their specific numbers and any injuries/preferences mentioned]"""
+[2-3 tips tailored to their specific numbers]"""
 
 @app.route("/api/config", methods=["GET"])
 def config():
@@ -356,29 +345,9 @@ def plan():
     if height: parts.append(f"Height {height}")
     if sex: parts.append(sex.capitalize())
     profile=", ".join(parts) if parts else "Not specified"
-    injuries=sanitize(data.get("injuries",""),300) if data.get("injuries") else None
-    style_prefs=sanitize(data.get("stylePrefs",""),300) if data.get("stylePrefs") else None
-    # Build log context from recent workout history if provided
-    log_context=None
-    log_entries=data.get("logContext",[])
-    if isinstance(log_entries,list) and log_entries:
-        lines=[]
-        for entry in log_entries[:15]:
-            try:
-                lines.append(f"- {entry['exercise']}: {entry['weight']}{unit} x {entry['reps']} reps (est. 1RM {entry['estimated1rm']}{unit}) on {entry['date']}")
-            except: continue
-        if lines: log_context="\n".join(lines)
     lifts_text="\n".join([f"- {l['name']}: {l['weight']}{unit} x {l['reps']} reps → 1RM ~{l['max']}{unit}" for l in clean_lifts])
     try:
-        plan_text=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,style_prefs,log_context),max_tokens=2500,cache_system=True)
-        # Extract AI-generated title from the plan text
-        plan_title="Training Plan"
-        import re as _re
-        title_match=_re.search(r'^##\s+TITLE:\s*(.+)$',plan_text,_re.MULTILINE)
-        if title_match:
-            plan_title=title_match.group(1).strip()
-            # Remove the TITLE line from the plan text shown to users
-            plan_text=_re.sub(r'^##\s+TITLE:.*\n?','',plan_text,flags=_re.MULTILINE).lstrip()
+        plan_text=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text),max_tokens=1500,cache_system=True)
         if not admin and not user: increment_ip_plan_count(ip)
         elif not admin and user:
             usage_key=f"user:{user['id']}"
@@ -391,7 +360,7 @@ def plan():
             new_count,new_limit=get_ip_plan_count(usage_key),USER_PLAN_LIMIT
         else:
             new_count,new_limit=get_ip_plan_count(ip),ANON_PLAN_LIMIT
-        return jsonify({"plan":plan_text,"plan_title":plan_title,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
+        return jsonify({"plan":plan_text,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
     except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
     except Exception as e: return jsonify({"error":str(e)}),500
 
