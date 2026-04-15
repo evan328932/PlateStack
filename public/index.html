@@ -894,8 +894,9 @@ const SAVE_KEY   = 'liftlab_v10';
 const LOG_KEY    = 'liftlab_progress_log';
 const ANON_LIMIT = 2;
 const USER_LIMIT = 4;
-const FREE_LIMIT = 2;   // kept for compat
 const QA_LIMIT   = 2;
+// Escape user-supplied strings before inserting into innerHTML
+function esc(s){ const d=document.createElement('div'); d.textContent=String(s??''); return d.innerHTML; }
 let serverPlanCount = 0;
 let serverPlanLimit = 2;  // updated from server
 let serverHasAccount = false; // updated from server
@@ -1096,14 +1097,6 @@ const CATALOG = [
    desc:'Hold one dumbbell overhead with both hands. Lower it behind your head by bending only at the elbows, then extend back up. Maximally stretches the long head of the tricep.',
    tips:['Elbows point straight up at the ceiling — do not flare them out','The long head only gets fully stretched when the arm is overhead','This hits a part of the tricep that pushdowns miss — do not skip it'],
    svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="21" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><line x1="38" y1="23" x2="34" y2="10" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="23" x2="56" y2="10" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><path d="M34 10 L38 2" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><path d="M56 10 L52 2" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="36" y="1" width="18" height="5" rx="2" fill="#ff9a52"/><ellipse cx="37" cy="7" rx="4" ry="7" fill="#f97316" opacity="0.85"/><ellipse cx="53" cy="7" rx="4" ry="7" fill="#f97316" opacity="0.85"/><line x1="38" y1="39" x2="33" y2="57" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="39" x2="57" y2="57" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="72" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">triceps long head</text></svg>`},
-  {name:'Dips',muscles:'Triceps, Chest, Front Delts',category:'Arms',
-   desc:'On parallel bars or a dip station, lower your body by bending at the elbows until your upper arms are roughly parallel to the floor, then push back up.',
-   tips:['Lean forward slightly to emphasize chest; stay upright for more tricep focus','Full range of motion — but stop if you feel shoulder discomfort at the bottom','A great compound finisher — add weight with a belt when bodyweight is easy'],
-   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="20" width="8" height="55" rx="3" fill="#555"/><rect x="74" y="20" width="8" height="55" rx="3" fill="#555"/><circle cx="45" cy="20" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="27" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="31" width="26" height="20" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><ellipse cx="38" cy="35" rx="4.5" ry="8" fill="#f97316" opacity="0.85"/><ellipse cx="52" cy="35" rx="4.5" ry="8" fill="#f97316" opacity="0.85"/><line x1="34" y1="36" x2="16" y2="34" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="56" y1="36" x2="74" y2="34" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="38" y1="51" x2="34" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="51" x2="56" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">triceps + chest</text></svg>`},
-  {name:'Cable Bicep Curl',muscles:'Biceps, Brachialis',category:'Arms',
-   desc:'Stand at a low cable pulley with a straight bar or EZ bar. Curl up against constant cable tension, which maintains resistance throughout the full range of motion.',
-   tips:['Cable keeps tension at the bottom of the movement — unlike dumbbells','Use a rope or EZ bar to vary the stimulus and reduce wrist stress','Same cues as barbell curl — elbows pinned, no swinging'],
-   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="50" width="10" height="30" rx="3" fill="#555"/><line x1="12" y1="72" x2="32" y2="55" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-dasharray="3 2"/><circle cx="45" cy="18" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="25" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="29" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><path d="M34 40 L22 55" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><path d="M56 40 L68 55" stroke="#888" stroke-width="2.5" stroke-linecap="round" opacity="0.3"/><ellipse cx="22" cy="47" rx="5.5" ry="9" fill="#f97316" opacity="0.9"/><ellipse cx="22" cy="47" rx="2.5" ry="5" fill="#ff6a00"/><path d="M22 55 L20 66" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="50" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">biceps</text></svg>`},
   // ── CORE (additional) ──────────────────────────────────────
   {name:'Dead Bug',muscles:'Deep Core, Transverse Abdominis, Hip Flexors',category:'Core',
    desc:'Lie on your back with arms pointing up and knees at 90 degrees. Slowly lower opposite arm and leg toward the floor while pressing your lower back into the ground.',
@@ -1148,7 +1141,7 @@ const CATALOG = [
    tips:['Think about squeezing your chest, not your arms — the arms are just hooks','Keep a consistent slight bend in elbows throughout the movement','Control the return — resist the cables pulling you back'],
    svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="10" width="8" height="70" rx="3" fill="#555"/><rect x="80" y="10" width="8" height="70" rx="3" fill="#555"/><circle cx="45" cy="20" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="27" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="31" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><line x1="10" y1="35" x2="36" y2="38" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><line x1="80" y1="35" x2="54" y2="38" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><ellipse cx="38" cy="40" rx="5" ry="6" fill="#f97316" opacity="0.85"/><ellipse cx="52" cy="40" rx="5" ry="6" fill="#f97316" opacity="0.85"/><line x1="36" y1="49" x2="30" y2="64" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="49" x2="60" y2="64" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="78" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">chest isolation</text></svg>`},
   // ── BACK (additional) ──────────────────────────────────────
-  {name:'Dumbbell Row',muscles:'Lats, Rhomboids, Biceps, Rear Delts',category:'Chest',
+  {name:'Dumbbell Row',muscles:'Lats, Rhomboids, Biceps, Rear Delts',category:'Back',
    desc:'Place one knee and hand on a bench for support. With the other hand, row a dumbbell up toward your hip, leading with your elbow.',
    tips:['Drive your elbow toward the ceiling — not your hand','Keep your back flat and parallel to the floor throughout','Squeeze your lat at the top before lowering with control'],
    svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="50" width="50" height="8" rx="3" fill="#555"/><rect x="20" y="58" width="8" height="12" rx="2" fill="#777"/><rect x="62" y="58" width="8" height="12" rx="2" fill="#777"/><circle cx="35" cy="22" r="6" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><line x1="35" y1="28" x2="32" y2="50" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="26" y="30" width="20" height="14" rx="4" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="28" y="32" width="7" height="10" rx="2" fill="#f97316" opacity="0.85"/><line x1="46" y1="35" x2="64" y2="28" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="62" y="24" width="10" height="6" rx="2" fill="#ff9a52"/><line x1="38" y1="50" x2="42" y2="62" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">lats + upper back</text></svg>`},
@@ -1364,8 +1357,8 @@ async function doLogout(){
 function updateHeaderAuth(){
   const area=document.getElementById('headerAuthArea');
   if(currentUser){
-    area.innerHTML=`<div class="user-chip" onclick="toggleProfileDropdown(event)" title="View profile"><div class="user-dot"></div><span>${currentUser.email.split('@')[0]}</span><div class="profile-dropdown" id="profileDropdown">
-      <div class="profile-email">${currentUser.email}</div>
+    area.innerHTML=`<div class="user-chip" onclick="toggleProfileDropdown(event)" title="View profile"><div class="user-dot"></div><span>${esc(currentUser.email.split('@')[0])}</span><div class="profile-dropdown" id="profileDropdown">
+      <div class="profile-email">${esc(currentUser.email)}</div>
       <div class="profile-stats" id="profileStats"><div class="profile-stat"><div class="profile-stat-val" id="statSessions">—</div><div class="profile-stat-lbl">Sessions</div></div><div class="profile-stat"><div class="profile-stat-val" id="statLifts">—</div><div class="profile-stat-lbl">Sets logged</div></div><div class="profile-stat"><div class="profile-stat-val" id="statExercises">—</div><div class="profile-stat-lbl">Exercises</div></div><div class="profile-stat"><div class="profile-stat-val" id="statStreak">—</div><div class="profile-stat-lbl">Week streak</div></div></div>
       <button class="profile-view-plans" onclick="openSavedPlansModal();event.stopPropagation()">📋 View saved plans</button>
       <button class="profile-signout" onclick="doLogout();event.stopPropagation()">Sign out</button>
@@ -1873,7 +1866,7 @@ function calcBw(){
 // ═══════════════════════════════════════════════════════════
 function makeLiftRow(name,weight='',reps=''){
   const div=document.createElement('div'); div.className='lift-row';
-  div.innerHTML=`<span class="lift-name">${name}</span><button class="lift-remove" onclick="this.closest('.lift-row').remove();autosave()" title="Remove">×</button><div class="lift-inputs"><input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${weight}" oninput="autosave()"><span class="lift-sep">×</span><input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${reps}" oninput="autosave()"><span class="lift-unit unit-display">${unit}</span></div>`;
+  div.innerHTML=`<span class="lift-name">${esc(name)}</span><button class="lift-remove" onclick="this.closest('.lift-row').remove();autosave()" title="Remove">×</button><div class="lift-inputs"><input type="number" min="0" step="any" placeholder="Weight" class="lift-weight" value="${esc(weight)}" oninput="autosave()"><span class="lift-sep">×</span><input type="number" min="1" max="50" step="1" placeholder="Reps" class="lift-reps" value="${esc(reps)}" oninput="autosave()"><span class="lift-unit unit-display">${esc(unit)}</span></div>`;
   return div;
 }
 function initLifts(saved){ const g=document.getElementById('liftsGrid'); g.innerHTML=''; if(saved&&saved.length) saved.forEach(l=>g.appendChild(makeLiftRow(l.name,l.weight,l.reps))); else PRESET_LIFTS.forEach(n=>g.appendChild(makeLiftRow(n))); }
@@ -1915,7 +1908,7 @@ function loadSaved(){
     initLifts(d.lifts&&d.lifts.length?d.lifts:null);
     if(d.plan){
       savedPlanText=d.plan; currentPlanContext=d.plan;
-      if(d.lifts&&d.lifts.length){ const g=document.getElementById('maxesGrid'); g.innerHTML=''; d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{ const max=calc1RM(parseFloat(l.weight),parseInt(l.reps)); const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${max}</div><div class="max-unit">${d.unit||'lbs'} estimated 1RM</div><div class="max-reps">${l.weight} ${d.unit||'lbs'} × ${l.reps} reps</div>`; g.appendChild(c); }); }
+      if(d.lifts&&d.lifts.length){ const g=document.getElementById('maxesGrid'); g.innerHTML=''; d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{ const max=calc1RM(parseFloat(l.weight),parseInt(l.reps)); const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${esc(l.name)}</div><div class="max-value">${max}</div><div class="max-unit">${esc(d.unit||'lbs')} estimated 1RM</div><div class="max-reps">${esc(l.weight)} ${esc(d.unit||'lbs')} × ${esc(l.reps)} reps</div>`; g.appendChild(c); }); }
       document.getElementById('planText').replaceChildren(renderMarkdown(d.plan,true));
       document.getElementById('resultsCard').style.display='block';
       qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
@@ -1941,7 +1934,7 @@ async function calculate(){
     return;
   }
   const g=document.getElementById('maxesGrid'); g.innerHTML='';
-  lifts.forEach(l=>{ const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${l.name}</div><div class="max-value">${l.max}</div><div class="max-unit">${unit} estimated 1RM</div><div class="max-reps">${l.weight} ${unit} × ${l.reps} reps</div>`; g.appendChild(c); });
+  lifts.forEach(l=>{ const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${esc(l.name)}</div><div class="max-value">${l.max}</div><div class="max-unit">${esc(unit)} estimated 1RM</div><div class="max-reps">${esc(l.weight)} ${esc(unit)} × ${esc(l.reps)} reps</div>`; g.appendChild(c); });
   document.getElementById('resultsCard').style.display='block'; document.getElementById('planText').innerHTML=''; document.getElementById('resultsFooter').textContent=''; document.getElementById('qaSection').style.display='none'; document.getElementById('qaMessages').innerHTML=''; qaUsedThisPlan=0; setLoading(true);
   document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
@@ -2198,11 +2191,11 @@ async function renderHistory(){
 
     // Session header
     const header=document.createElement('div'); header.className='session-header';
-    header.innerHTML=`<div><div class="session-date">${dateStr}</div><div class="session-summary">${entries.length} set${entries.length>1?'s':''} · ${exercises.slice(0,3).join(', ')}${exercises.length>3?` +${exercises.length-3} more`:''}</div></div>`;
+    header.innerHTML=`<div><div class="session-date">${dateStr}</div><div class="session-summary">${entries.length} set${entries.length>1?'s':''} · ${exercises.slice(0,3).map(esc).join(', ')}${exercises.length>3?` +${exercises.length-3} more`:''}</div></div>`;
 
     // Session note input
     const noteArea=document.createElement('div'); noteArea.className='session-note-area';
-    noteArea.innerHTML=`<textarea class="session-note-input" placeholder="Add a session note (e.g. feeling strong, deload week, new gym...)" rows="1" onchange="saveSessionNote('${date}',this.value)">${sessionNote}</textarea>`;
+    noteArea.innerHTML=`<textarea class="session-note-input" placeholder="Add a session note (e.g. feeling strong, deload week, new gym...)" rows="1" onchange="saveSessionNote('${esc(date)}',this.value)">${esc(sessionNote)}</textarea>`;
 
     // Individual entries
     const entriesDiv=document.createElement('div'); entriesDiv.className='session-entries';
@@ -2212,13 +2205,13 @@ async function renderHistory(){
       const div=document.createElement('div'); div.className='log-entry'; div.dataset.id=entry.id;
       div.innerHTML=`
         <div class="log-entry-left">
-          <div class="log-entry-title">${entry.exercise}${isPR?' <span class="pr-badge">PR</span>':''}</div>
-          <div class="log-entry-meta">${entry.weight} ${entry.unit||'lbs'} × ${entry.reps} reps · <span style="color:var(--text-faint)">${new Date(entry.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
-          ${entry.note?`<div class="log-entry-note">${entry.note}</div>`:''}
+          <div class="log-entry-title">${esc(entry.exercise)}${isPR?' <span class="pr-badge">PR</span>':''}</div>
+          <div class="log-entry-meta">${esc(entry.weight)} ${esc(entry.unit||'lbs')} × ${esc(entry.reps)} reps · <span style="color:var(--text-faint)">${new Date(entry.date+'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric'})}</span></div>
+          ${entry.note?`<div class="log-entry-note">${esc(entry.note)}</div>`:''}
         </div>
         <div class="log-entry-right">
-          <span class="log-entry-max" title="Estimated 1 Rep Max — the maximum weight you could theoretically lift for a single rep, calculated from your set using the Epley/Brzycki formula">${entry.estimated1rm} ${entry.unit||'lbs'}<span class="log-entry-max-label">est. 1RM</span></span>
-          <button class="log-entry-edit" onclick="toggleEditEntry(this,${entry.id},'${entry.exercise.replace(/'/g,"\\'")}',${entry.weight},'${entry.unit||'lbs'}',${entry.reps},'${entry.date}','${(entry.note||'').replace(/'/g,"\\'")}')">Edit</button>
+          <span class="log-entry-max" title="Estimated 1 Rep Max — the maximum weight you could theoretically lift for a single rep, calculated from your set using the Epley/Brzycki formula">${esc(entry.estimated1rm)} ${esc(entry.unit||'lbs')}<span class="log-entry-max-label">est. 1RM</span></span>
+          <button class="log-entry-edit" onclick="toggleEditEntry(this,${entry.id},'${esc(entry.exercise).replace(/'/g,"\\'")}',${entry.weight},'${entry.unit||'lbs'}',${entry.reps},'${entry.date}','${esc(entry.note||'').replace(/'/g,"\\'")}')">Edit</button>
           <button class="log-entry-del" onclick="deleteLogEntry(${entry.id})" title="Delete">×</button>
         </div>`;
       entriesDiv.appendChild(div);
@@ -2456,9 +2449,9 @@ async function openSavedPlansModal(){
       const item=document.createElement('div'); item.className='saved-plan-item';
       item.innerHTML=`
         <div style="flex:1;min-width:0;cursor:pointer" onclick="viewSavedPlan(${p.id})">
-          <div class="saved-plan-title">${p.title}</div>
+          <div class="saved-plan-title">${esc(p.title)}</div>
           <div class="saved-plan-date">${date}</div>
-          <div class="saved-plan-preview">${p.plan_text.replace(/#+\s*/g,'').substring(0,120)}...</div>
+          <div class="saved-plan-preview">${esc(p.plan_text.replace(/#+\s*/g,'').substring(0,120))}...</div>
         </div>
         <button class="saved-plan-del" onclick="deleteSavedPlan(${p.id},this)" title="Delete">×</button>`;
       list.appendChild(item);
