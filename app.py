@@ -12,7 +12,6 @@ DB_PATH       = os.environ.get("DB_PATH", "liftlab.db")
 WAITLIST_FILE = "waitlist.txt"
 ANON_PLAN_LIMIT = 2    # no account
 USER_PLAN_LIMIT = 4    # free account
-FREE_PLAN_LIMIT = 2    # alias used in older code paths
 
 RATE_LIMIT  = 30
 RATE_WINDOW = 3600
@@ -36,7 +35,12 @@ def is_auth_rate_limited(ip):
 
 def get_ip():
     fwd=request.headers.get("X-Forwarded-For","")
-    return fwd.split(",")[0].strip() if fwd else (request.remote_addr or "unknown")
+    # Use the LAST entry — that's the one Railway's proxy added, which can't be spoofed
+    # The first entry can be forged by the client
+    if fwd:
+        parts=[p.strip() for p in fwd.split(",") if p.strip()]
+        return parts[-1] if parts else (request.remote_addr or "unknown")
+    return request.remote_addr or "unknown"
 
 def get_db():
     if 'db' not in g:
@@ -203,7 +207,10 @@ def login():
     email=sanitize(data.get("email",""),200).lower(); pw=str(data.get("password",""))
     db=get_db(); row=db.execute("SELECT id,password FROM users WHERE email=?",(email,)).fetchone()
     if not row or not check_password(pw,row["password"]): return jsonify({"error":"Incorrect email or password."}),401
-    token=make_token(); db.execute("INSERT INTO sessions(token,user_id) VALUES(?,?)",(token,row["id"])); db.commit()
+    token=make_token(); db.execute("INSERT INTO sessions(token,user_id) VALUES(?,?)",(token,row["id"]))
+    # Clean up sessions older than 30 days to prevent table bloat
+    db.execute("DELETE FROM sessions WHERE user_id=? AND created<=strftime('%s','now')-2592000",(row["id"],))
+    db.commit()
     return jsonify({"ok":True,"token":token,"email":email}),200
 
 @app.route("/api/auth/logout",methods=["POST"])
@@ -413,7 +420,10 @@ def plan():
             new_count,new_limit=get_ip_plan_count(ip),ANON_PLAN_LIMIT
         return jsonify({"plan":plan_text,"plan_title":plan_title,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
     except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
-    except Exception as e: return jsonify({"error":str(e)}),500
+    except Exception as e:
+        # Log internally but don't expose stack traces or internal details to the client
+        print(f"Plan generation error: {e}")
+        return jsonify({"error":"Something went wrong generating your plan. Please try again."}),500
 
 @app.route("/api/question",methods=["POST"])
 def question():
@@ -428,7 +438,9 @@ def question():
         answer=call_claude("You are an expert strength coach answering a follow-up question about a training plan. Be concise — 2-4 sentences or a short bullet list. Never restate the full plan.",f"Training plan:\n{plan_text}\n\nQuestion: {q}",max_tokens=350,model="claude-haiku-4-5-20251001",cache_system=True)
         return jsonify({"answer":answer})
     except requests.exceptions.Timeout: return jsonify({"error":"Request timed out."}),504
-    except Exception as e: return jsonify({"error":str(e)}),500
+    except Exception as e:
+        print(f"Question error: {e}")
+        return jsonify({"error":"Something went wrong. Please try again."}),500
 
 @app.route("/api/waitlist",methods=["POST"])
 def waitlist():
