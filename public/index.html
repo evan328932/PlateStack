@@ -22,9 +22,9 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);min
 
 /* HEADER */
 header{display:flex;align-items:center;justify-content:space-between;padding:0 1rem;height:58px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg);z-index:100}
-.logo{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:900;letter-spacing:0.02em;color:#fff;cursor:pointer;display:flex;align-items:center;gap:8px;text-decoration:none}
-.logo span{color:var(--orange)}
-.logo-icon{width:26px;height:26px;flex-shrink:0}
+.logo{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;letter-spacing:0.04em;color:#fff;cursor:pointer;display:flex;align-items:center;gap:10px;text-decoration:none;text-transform:uppercase}
+.logo span{color:var(--orange);letter-spacing:0.06em}
+.logo-icon{width:32px;height:28px;flex-shrink:0}
 .header-right{display:flex;align-items:center;gap:6px}
 nav{display:flex;gap:2px}
 nav a{font-size:13px;color:var(--text-dim);text-decoration:none;padding:6px 10px;border-radius:8px;transition:all 0.15s;font-weight:500;white-space:nowrap}
@@ -486,14 +486,22 @@ footer a:hover{color:var(--text-muted)}
 <!-- HEADER -->
 <header>
   <a class="logo" onclick="goHome()" href="#">
-    <svg class="logo-icon" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <rect x="1" y="11" width="5" height="6" rx="1.5" fill="#f97316"/>
-      <rect x="22" y="11" width="5" height="6" rx="1.5" fill="#f97316"/>
-      <rect x="6" y="8" width="4" height="12" rx="1.5" fill="#f97316"/>
-      <rect x="18" y="8" width="4" height="12" rx="1.5" fill="#f97316"/>
-      <rect x="10" y="12" width="8" height="4" rx="1" fill="#fff"/>
+    <svg class="logo-icon" viewBox="0 0 32 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <!-- barbell bar -->
+      <rect x="4" y="12.5" width="24" height="3" rx="1.5" fill="#666"/>
+      <!-- outer collars -->
+      <rect x="1" y="10" width="4" height="8" rx="1.5" fill="#f97316"/>
+      <rect x="27" y="10" width="4" height="8" rx="1.5" fill="#f97316"/>
+      <!-- plate stack left - 3 plates getting smaller inward -->
+      <rect x="5.5" y="7" width="3.5" height="14" rx="1" fill="#f97316" opacity="0.95"/>
+      <rect x="9" y="9" width="3" height="10" rx="1" fill="#f97316" opacity="0.75"/>
+      <rect x="12" y="11" width="2.5" height="6" rx="1" fill="#f97316" opacity="0.5"/>
+      <!-- plate stack right - mirror -->
+      <rect x="23" y="7" width="3.5" height="14" rx="1" fill="#f97316" opacity="0.95"/>
+      <rect x="20" y="9" width="3" height="10" rx="1" fill="#f97316" opacity="0.75"/>
+      <rect x="17.5" y="11" width="2.5" height="6" rx="1" fill="#f97316" opacity="0.5"/>
     </svg>
-    Lift<span>Lab</span>
+    Plate<span>Stack</span>
   </a>
   <div class="header-right">
     <nav>
