@@ -8,7 +8,7 @@ app = Flask(__name__, static_folder="public")
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ADMIN_CODE    = os.environ.get("ADMIN_CODE", "")
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # set in Railway env vars
-DB_PATH       = os.environ.get("DB_PATH", "liftlab.db")
+DB_PATH       = os.environ.get("DB_PATH", "platestack.db")
 WAITLIST_FILE = "waitlist.txt"
 ANON_PLAN_LIMIT = 2    # no account
 USER_PLAN_LIMIT = 4    # free account
@@ -474,7 +474,7 @@ def view_emails():
         if not rows: return f"<h2>{title}</h2><p style='color:#999'>None yet.</p>"
         trs="".join(f"<tr><td>{i+1}</td><td>{r['email']}</td><td style='color:#999'>{r['ts']}</td></tr>" for i,r in enumerate(rows))
         return f"<h2>{title} ({len(rows)})</h2><table><thead><tr><th>#</th><th>Email</th><th>Date</th></tr></thead><tbody>{trs}</tbody></table>"
-    return f"""<!DOCTYPE html><html><head><title>LiftLab Admin</title><style>body{{font-family:system-ui;padding:2rem;max-width:700px;margin:0 auto;background:#f9f9f9}}h1{{font-size:22px}}h2{{font-size:16px;margin:2rem 0 0.5rem}}table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}}th{{text-align:left;padding:10px 14px;background:#f0f0f0;border-bottom:2px solid #ddd}}td{{padding:9px 14px;border-bottom:1px solid #eee}}a{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}</style></head><body><h1>🏋️ LiftLab Admin</h1>{tbl(ur,"Accounts")}{tbl(wl,"Waitlist")}<a href="?code={code}&format=json">JSON</a></body></html>"""
+    return f"""<!DOCTYPE html><html><head><title>PlateStack Admin</title><style>body{{font-family:system-ui;padding:2rem;max-width:700px;margin:0 auto;background:#f9f9f9}}h1{{font-size:22px}}h2{{font-size:16px;margin:2rem 0 0.5rem}}table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}}th{{text-align:left;padding:10px 14px;background:#f0f0f0;border-bottom:2px solid #ddd}}td{{padding:9px 14px;border-bottom:1px solid #eee}}a{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}</style></head><body><h1>🏋️ PlateStack Admin</h1>{tbl(ur,"Accounts")}{tbl(wl,"Waitlist")}<a href="?code={code}&format=json">JSON</a></body></html>"""
 
 if __name__=="__main__":
     app.run(debug=False)
