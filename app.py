@@ -124,25 +124,39 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-20
 
 PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, - for bullets. No preamble. No closing remarks.
 
-IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences."""
+IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences.
 
-def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text):
+TITLE RULE: The very first line of your response must be a TITLE line in this exact format:
+TITLE: [short punchy 3-7 word plan name that captures the goal and style, e.g. "Raw Strength: 4-Day Upper/Lower" or "5-Day PPL Mass Builder"]
+Then a blank line, then the rest of the plan."""
+
+def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text,injuries="",preferences="",log_context=""):
+    extras = []
+    if injuries: extras.append(f"Injuries/limitations: {injuries}")
+    if preferences: extras.append(f"Equipment/preferences: {preferences}")
+    extra_block = ("\n" + "\n".join(extras)) if extras else ""
+    log_block = f"\nRecent training history (use for progression context):\n{log_context}" if log_context else ""
     return f"""ATHLETE:
 Profile: {profile}
 Experience: {experience}
 Schedule: {days} days/week, {split}
 Goal: {goal}
-Unit: {unit}
+Unit: {unit}{extra_block}
 Lifts:
-{lifts_text}
+{lifts_text}{log_block}
 
 TEMPLATE TO FILL:
+
+TITLE: [3-7 word punchy plan name]
 
 ## Where You're At
 [Write 2-3 plain prose sentences about their current level vs their goal. PLAIN TEXT ONLY — no dashes, no bullets, no sub-headers.]
 
 ## Weekly Program ({days}-Day {split})
-[Each training day with exercises: name — sets x reps @ % of 1RM (actual {unit})]
+[Each training day labeled Day N - name. List exercises: Name - sets x reps @ weight. Include rest periods.]
+
+## Week-by-Week Progression
+[Show exactly how to progress the main lifts over 4 weeks. E.g. "Week 1: Bench 225x5x4, Week 2: 230x5x4, Week 3: 235x4x4, Week 4: 240x5x4". Cover the 2-3 most important lifts.]
 
 ## 4-Week Milestone
 [Specific numbers to hit]
@@ -154,7 +168,7 @@ TEMPLATE TO FILL:
 [Specific numbers to hit]
 
 ## Key Tips
-[2-3 tips tailored to their specific numbers]"""
+[2-3 tips tailored to their specific situation and any injuries or preferences noted]"""
 
 @app.route("/api/config", methods=["GET"])
 def config():
@@ -324,9 +338,11 @@ def plan():
     bw=sanitize(str(data.get("bodyweight","")),20) if data.get("bodyweight") else None
     sex=sanitize(str(data.get("sex","")),10) if data.get("sex") else None
     height=sanitize(str(data.get("height","")),20) if data.get("height") else None
+    injuries=sanitize(data.get("injuries",""),300) if data.get("injuries") else ""
+    preferences=sanitize(data.get("preferences",""),300) if data.get("preferences") else ""
     if unit not in ("lbs","kg"): unit="lbs"
     if exp not in ("beginner","intermediate","advanced"): exp="beginner"
-    for field in [goal,split]:
+    for field in [goal,split,injuries,preferences]:
         if not is_safe(field): return jsonify({"error":"Invalid input detected."}),400
     if not isinstance(lifts,list) or not lifts: return jsonify({"error":"No lifts provided."}),400
     if len(lifts)>20: return jsonify({"error":"Maximum 20 lifts allowed."}),400
@@ -346,8 +362,43 @@ def plan():
     if sex: parts.append(sex.capitalize())
     profile=", ".join(parts) if parts else "Not specified"
     lifts_text="\n".join([f"- {l['name']}: {l['weight']}{unit} x {l['reps']} reps → 1RM ~{l['max']}{unit}" for l in clean_lifts])
+    # Build log context from user's recent history if logged in
+    log_context=""
+    if user:
+        try:
+            db=get_db()
+            recent=db.execute(
+                "SELECT exercise,weight,reps,estimated1rm,unit,date FROM workout_log WHERE user_id=? ORDER BY date DESC,created DESC LIMIT 60",
+                (user["id"],)
+            ).fetchall()
+            if recent:
+                # Find best estimated1rm per exercise from recent logs
+                best={}
+                for row in recent:
+                    ex=row["exercise"]
+                    if ex not in best or row["estimated1rm"]>best[ex]["estimated1rm"]:
+                        best[ex]=dict(row)
+                lines=[]
+                for ex,r in list(best.items())[:10]:
+                    lines.append(f"- {ex}: best recent set {r['weight']}{r['unit']} x {r['reps']} reps (est. 1RM {r['estimated1rm']}{r['unit']}) on {r['date']}")
+                log_context="\n".join(lines)
+        except: pass
     try:
-        plan_text=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text),max_tokens=1500,cache_system=True)
+        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=2000,cache_system=True)
+        # Parse AI-generated title out of the response
+        plan_title=None
+        plan_text=raw
+        lines=raw.split("\n")
+        for i,line in enumerate(lines):
+            stripped=line.strip()
+            if stripped.startswith("TITLE:"):
+                plan_title=stripped[6:].strip()
+                # Remove the title line (and blank line after) from the plan body
+                rest=lines[i+1:]
+                while rest and not rest[0].strip():
+                    rest=rest[1:]
+                plan_text="\n".join(rest)
+                break
         if not admin and not user: increment_ip_plan_count(ip)
         elif not admin and user:
             usage_key=f"user:{user['id']}"
@@ -360,7 +411,7 @@ def plan():
             new_count,new_limit=get_ip_plan_count(usage_key),USER_PLAN_LIMIT
         else:
             new_count,new_limit=get_ip_plan_count(ip),ANON_PLAN_LIMIT
-        return jsonify({"plan":plan_text,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
+        return jsonify({"plan":plan_text,"plan_title":plan_title,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
     except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
     except Exception as e: return jsonify({"error":str(e)}),500
 
