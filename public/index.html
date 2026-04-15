@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>LiftLab — Know your max. Hit your goals.</title>
+<title>PlateStack — Know your max. Hit your goals.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@700;900&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -446,7 +446,7 @@ footer a:hover{color:var(--text-muted)}
   <button class="modal-close" onclick="closeModal('howModal')">×</button>
   <div class="modal-badge badge-orange">How it works</div>
   <h2>Track lifts. Hit goals.</h2>
-  <p>LiftLab uses your real gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic programs.</p>
+  <p>PlateStack uses your real gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic programs.</p>
   <div class="how-steps">
     <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Age, bodyweight, training schedule, and current numbers.</span></div></div>
     <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Strength, size, endurance, or something specific — tell us exactly what you're chasing.</span></div></div>
@@ -461,7 +461,7 @@ footer a:hover{color:var(--text-muted)}
   <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
   <div class="modal-badge badge-green">Free during beta</div>
   <h2>Completely free right now</h2>
-  <p>LiftLab is in early access — create a free account to sync everything across devices. AI plans are free with a limit.</p>
+  <p>PlateStack is in early access — create a free account to sync everything across devices. AI plans are free with a limit.</p>
   <p>A paid tier may launch in future for unlimited plans, advanced periodization, and coaching tools. Core features stay free forever.</p>
   <button class="auth-submit" onclick="closeModal('pricingModal');openModal('authModal')" style="margin-top:1rem;width:100%">Create free account</button>
 </div>
@@ -473,10 +473,10 @@ footer a:hover{color:var(--text-muted)}
   <button class="modal-close" onclick="closeModal('tosModal')">×</button>
   <div class="modal-badge badge-yellow">Terms of service</div>
   <h2>Terms of Service</h2>
-  <p>By using LiftLab you agree to these terms. Last updated April 2026.</p>
-  <div class="tos-section"><h3>1. Not medical advice</h3><p>LiftLab provides general fitness information only. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
+  <p>By using PlateStack you agree to these terms. Last updated April 2026.</p>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>PlateStack provides general fitness information only. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
   <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>1RM calculations use a weighted average of Brzycki, Lander, Epley, and Mayhew formulas. These are estimates — never attempt a true 1RM without a spotter.</p></div>
-  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. LiftLab is not liable for any injury or damage from following generated advice.</p></div>
+  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. PlateStack is not liable for any injury or damage from following generated advice.</p></div>
   <div class="tos-section"><h3>4. Privacy and data</h3><p>Account data is stored securely on our servers. Browser-only data stays in localStorage. We do not sell any data.</p></div>
   <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not abuse or spam the service. We reserve the right to block access for misuse.</p></div>
   <div class="tos-section"><h3>6. Liability</h3><p>Total liability is capped at what you have paid (zero during free beta).</p></div>
@@ -878,7 +878,7 @@ footer a:hover{color:var(--text-muted)}
 </div><!-- end tab-qmc -->
 
 <footer>
-  LiftLab &mdash; free during beta &mdash; powered by Claude
+  PlateStack &mdash; free during beta &mdash; powered by Claude
   <br style="margin-bottom:8px">
   <a href="#" onclick="openModal('howModal');return false">How it works</a>
   <a href="#" onclick="openModal('pricingModal');return false">Pricing</a>
@@ -890,8 +890,8 @@ footer a:hover{color:var(--text-muted)}
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════════════
-const SAVE_KEY   = 'liftlab_v10';
-const LOG_KEY    = 'liftlab_progress_log';
+const SAVE_KEY   = 'platestack_v1';
+const LOG_KEY    = 'platestack_progress_log';
 const ANON_LIMIT = 2;
 const USER_LIMIT = 4;
 const QA_LIMIT   = 2;
@@ -1319,7 +1319,7 @@ async function doRegister(){
     currentUser={id:null,email:d.email,token:d.token};
     updateHeaderAuth();
     fetchPlanUsage(); // show the account's plan limit
-    msg.style.color='var(--green)'; msg.textContent='Account created! Welcome to LiftLab.';
+    msg.style.color='var(--green)'; msg.textContent='Account created! Welcome to PlateStack.';
     setTimeout(()=>closeModal('authModal'),1500);
   }catch(e){ msg.textContent='Something went wrong. Try again.'; }
   finally{ btn.disabled=false; btn.textContent='Create free account'; }
@@ -1450,16 +1450,16 @@ async function verifyAdmin(){
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
     const d=await res.json();
-    if(d.valid){ isAdmin=true; adminCode=code; localStorage.setItem('liftlab_admin',code); st.textContent='Unlocked — unlimited plans active'; st.className='admin-status ok'; document.getElementById('adminCodeInput').value=''; updateUsageBanner(); }
-    else{ st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('liftlab_admin'); }
+    if(d.valid){ isAdmin=true; adminCode=code; localStorage.setItem('platestack_admin',code); st.textContent='Unlocked — unlimited plans active'; st.className='admin-status ok'; document.getElementById('adminCodeInput').value=''; updateUsageBanner(); }
+    else{ st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('platestack_admin'); }
   }catch(e){ st.textContent='Error. Try again.'; st.className='admin-status err'; }
 }
 async function tryRestoreAdmin(){
-  const stored=localStorage.getItem('liftlab_admin'); if(!stored)return;
+  const stored=localStorage.getItem('platestack_admin'); if(!stored)return;
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:stored})});
     const d=await res.json();
-    if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); } else localStorage.removeItem('liftlab_admin');
+    if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); } else localStorage.removeItem('platestack_admin');
   }catch(e){}
 }
 
@@ -1989,7 +1989,7 @@ function exportPDF(){
   let y=20;
   doc.setFillColor(249,115,22); doc.rect(0,0,W,14,'F');
   doc.setTextColor(255,255,255); doc.setFont('helvetica','bold'); doc.setFontSize(16);
-  doc.text('LIFTLAB — TRAINING PLAN',margin,10);
+  doc.text('PLATESTACK — TRAINING PLAN',margin,10);
   doc.setFont('helvetica','normal'); doc.setFontSize(9);
   doc.text(new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}),W-margin,10,{align:'right'});
   y=24;
@@ -2060,8 +2060,8 @@ function exportPDF(){
   y+=6; if(y>270){doc.addPage();y=20;}
   doc.setDrawColor(220,220,220); doc.setLineWidth(0.3); doc.line(margin,y,W-margin,y); y+=5;
   doc.setFont('helvetica','italic'); doc.setFontSize(8); doc.setTextColor(160,165,175);
-  doc.text('Generated by LiftLab · Always train with proper form and appropriate supervision.',margin,y);
-  doc.save('liftlab-training-plan.pdf');
+  doc.text('Generated by PlateStack · Always train with proper form and appropriate supervision.',margin,y);
+  doc.save('platestack-training-plan.pdf');
   const btn=document.getElementById('exportPdfBtn'); btn.textContent='Exported!'; btn.classList.add('done');
   setTimeout(()=>{btn.textContent='Export PDF';btn.classList.remove('done');},2000);
 }
@@ -2225,7 +2225,7 @@ async function renderHistory(){
 }
 
 // Session notes stored in localStorage
-const SESSION_NOTES_KEY='liftlab_session_notes';
+const SESSION_NOTES_KEY='platestack_session_notes';
 function getSessionNotes(){ try{ return JSON.parse(localStorage.getItem(SESSION_NOTES_KEY)||'{}'); }catch(e){ return {}; } }
 function saveSessionNote(date,note){ const notes=getSessionNotes(); if(note.trim()) notes[date]=note.trim(); else delete notes[date]; try{ localStorage.setItem(SESSION_NOTES_KEY,JSON.stringify(notes)); }catch(e){} }
 
