@@ -664,6 +664,27 @@ footer a:hover{color:var(--text-muted)}
     <div class="exp-desc visible" id="expDesc"><strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.</div>
   </div>
 
+  <div class="card">
+    <div class="card-header"><span class="card-label">Equipment &amp; preferences</span><span class="card-meta">select all that apply</span></div>
+    <div class="chip-row" id="prefsRow" style="flex-wrap:wrap;gap:6px">
+      <div class="chip pref-chip" onclick="togglePref(this,'Barbell only')">Barbell only</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Dumbbells only')">Dumbbells only</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Full gym access')">Full gym</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Home gym')">Home gym</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'No machines')">No machines</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Prefer compound lifts')">Compound focus</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Include cardio')">Include cardio</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Minimize cardio')">Minimize cardio</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Short sessions (45 min)')">Short sessions</div>
+      <div class="chip pref-chip" onclick="togglePref(this,'Long sessions (90+ min)')">Long sessions</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-header"><span class="card-label">Injuries or limitations</span><span class="card-meta">optional</span></div>
+    <textarea id="injuriesField" rows="2" placeholder="e.g. Bad left knee — avoid deep squats, shoulder impingement on right side" oninput="autosave()"></textarea>
+  </div>
+
   <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate My Max + Build My Plan</button>
   <div id="error" class="error"></div>
   <div id="loading" class="loading">
@@ -682,6 +703,7 @@ footer a:hover{color:var(--text-muted)}
     <div class="maxes-grid" id="maxesGrid"></div>
     <div class="plan-section">
       <div class="plan-label">Your training plan <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(click any exercise name to see how to do it)</span></div>
+      <div id="planTitle" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:0.75rem;letter-spacing:0.01em"></div>
       <div class="plan-text" id="planText"></div>
     </div>
     <div class="results-footer" id="resultsFooter"></div>
@@ -1167,6 +1189,84 @@ const CATALOG = [
    desc:'Pick up heavy dumbbells or kettlebells and walk for a set distance or time. Keep your chest tall, shoulders back, and core tight throughout.',
    tips:['Grip as hard as you can — the forearms and grip are the limiting factor','Do not let the weight pull your shoulder down — actively pack your shoulders','Short, quick steps are more stable than long strides'],
    svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="33" y="21" width="24" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><line x1="33" y1="30" x2="14" y2="36" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="57" y1="30" x2="76" y2="36" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="8" y="34" width="12" height="22" rx="3" fill="#f97316" opacity="0.75"/><rect x="70" y="34" width="12" height="22" rx="3" fill="#f97316" opacity="0.75"/><line x1="37" y1="37" x2="34" y2="54" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="53" y1="37" x2="58" y2="52" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="34" y1="54" x2="28" y2="72" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="58" y1="52" x2="64" y2="72" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="86" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">grip + traps + core</text></svg>`},
+  // ── SQUAT VARIANTS ─────────────────────────────────────────
+  {name:'Hack Squat',muscles:'Quads, Glutes, Hamstrings',category:'Legs',
+   desc:'On a hack squat machine, shoulders against the pads, feet on the platform. Lower until thighs are parallel, then drive back up through your heels.',
+   tips:['Foot placement high on the platform targets glutes; low placement hits quads more','Do not let your lower back peel off the pad at the bottom','Control the descent — do not slam into the bottom'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="10" width="12" height="70" rx="3" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><rect x="5" y="50" width="40" height="8" rx="3" fill="#555"/><circle cx="58" cy="16" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="51" y="23" width="14" height="5" rx="2" fill="#c07040"/><rect x="17" y="28" width="20" height="14" rx="4" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="19" y="30" width="7" height="10" rx="2" fill="#f97316" opacity="0.85"/><line x1="17" y1="42" x2="12" y2="58" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="37" y1="42" x2="42" y2="58" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="44" y1="30" x2="52" y2="22" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="50" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">quads + glutes</text></svg>`},
+  {name:'Box Squat',muscles:'Quads, Glutes, Hamstrings, Hip Flexors',category:'Legs',
+   desc:'Squat back to a box or bench, pause briefly to remove stretch reflex, then drive back up explosively. Teaches proper hip hinge and builds starting strength.',
+   tips:['Sit back to the box — do not just bend your knees and drop straight down','Pause on the box without relaxing — stay braced','Box height should put you at or just below parallel'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="30" y="58" width="35" height="18" rx="3" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="33" y="21" width="24" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="35" y="23" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><rect x="46" y="23" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><line x1="37" y1="37" x2="32" y2="58" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="53" y1="37" x2="58" y2="58" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="22" x2="14" y2="22" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="64" y1="22" x2="76" y2="22" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="85" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">quads + glutes</text></svg>`},
+  {name:'Pause Squat',muscles:'Quads, Glutes, Core',category:'Legs',
+   desc:'Perform a back squat but pause for 2-3 seconds at the bottom before driving back up. Eliminates the stretch reflex and builds strength out of the hole.',
+   tips:['Stay completely rigid during the pause — do not relax at the bottom','3 seconds is enough — longer fatigues you too much before the drive','This is brutal — use 75-80% of your normal squat weight'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="33" y="60" width="24" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="35" y="62" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><rect x="46" y="62" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><line x1="45" y1="17" x2="45" y2="62" stroke="#888" stroke-width="2" stroke-dasharray="4 3"/><line x1="26" y1="21" x2="14" y2="21" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="64" y1="21" x2="76" y2="21" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="37" y1="76" x2="28" y2="84" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="53" y1="76" x2="62" y2="84" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="30" text-anchor="middle" font-size="7" fill="#f97316" font-family="sans-serif" font-weight="600">pause 2-3s</text></svg>`},
+  {name:'Reverse Lunge',muscles:'Quads, Glutes, Hamstrings, Balance',category:'Legs',
+   desc:'Step backward into a lunge instead of forward. Less stress on the knee than a forward lunge, easier to control balance, and great for unilateral leg development.',
+   tips:['Step straight back — not out to the side','Keep your front shin vertical and front knee over your ankle','Drive back up through your front heel, not your back toes'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="40" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="33" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="28" y="21" width="24" height="14" rx="4" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="30" y="23" width="9" height="10" rx="2" fill="#f97316" opacity="0.85"/><line x1="32" y1="35" x2="26" y2="52" stroke="#888" stroke-width="3" stroke-linecap="round"/><line x1="48" y1="35" x2="60" y2="52" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="26" y1="52" x2="20" y2="70" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="60" y1="52" x2="72" y2="70" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="26" cy="55" rx="5" ry="4" fill="#f97316" opacity="0.7"/><ellipse cx="60" cy="55" rx="5" ry="4" fill="#f97316" opacity="0.7"/><text x="45" y="82" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">quads + glutes</text></svg>`},
+  {name:'Step-Up',muscles:'Quads, Glutes, Hamstrings, Balance',category:'Legs',
+   desc:'Stand facing a box or bench. Step up with one foot, drive through that heel to bring yourself fully upright, then step back down. Alternate legs.',
+   tips:['Drive through the heel of the elevated foot — do not push off the trailing leg','Use a box height where your thigh is at least parallel when stepping up','Add dumbbells or a barbell to progress once bodyweight is easy'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="40" y="52" width="42" height="24" rx="3" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><circle cx="30" cy="12" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="23" y="19" width="14" height="5" rx="2" fill="#c07040"/><rect x="20" y="23" width="20" height="14" rx="4" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="22" y="25" width="7" height="10" rx="2" fill="#f97316" opacity="0.85"/><line x1="22" y1="37" x2="16" y2="55" stroke="#888" stroke-width="3" stroke-linecap="round"/><line x1="38" y1="37" x2="52" y2="52" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="16" y1="55" x2="12" y2="72" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><ellipse cx="52" cy="52" rx="5" ry="3" fill="#f97316" opacity="0.7"/><text x="45" y="86" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">quads + glutes</text></svg>`},
+  // ── DEADLIFT VARIANTS ──────────────────────────────────────
+  {name:'Trap Bar Deadlift',muscles:'Quads, Glutes, Hamstrings, Back',category:'Back',
+   desc:'Stand inside a hex/trap bar, hinge down to grip the handles, and drive upward. More quad-dominant than conventional deadlift and easier on the lower back.',
+   tips:['Use the high handles to learn the movement before switching to low handles','Keep your chest up — the trap bar makes it tempting to round forward','This often allows heavier loads than conventional — great for max strength testing'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="20" y="60" width="50" height="7" rx="3" fill="#555"/><rect x="14" y="57" width="8" height="13" rx="2" fill="#777"/><rect x="68" y="57" width="8" height="13" rx="2" fill="#777"/><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="21" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="34" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><rect x="47" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><line x1="34" y1="40" x2="26" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="56" y1="40" x2="64" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="35" y1="28" x2="22" y2="62" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3 2"/><line x1="55" y1="28" x2="68" y2="62" stroke="#f97316" stroke-width="1.5" stroke-dasharray="3 2"/><text x="45" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">quads + posterior chain</text></svg>`},
+  {name:'Deficit Deadlift',muscles:'Hamstrings, Glutes, Back, Lats',category:'Back',
+   desc:'Stand on a 1-4 inch platform to increase the range of motion of the deadlift. Strengthens the bottom position and improves off-the-floor pulling power.',
+   tips:['Even 2 inches of deficit significantly increases the difficulty — start small','Maintain perfect back position throughout the extra range of motion','Use 80-85% of your regular deadlift weight to start'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="12" y="68" width="66" height="6" rx="2" fill="#555"/><rect x="6" y="65" width="8" height="9" rx="2" fill="#777"/><rect x="76" y="65" width="8" height="9" rx="2" fill="#777"/><rect x="12" y="60" width="66" height="8" rx="2" fill="#444"/><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="21" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="34" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><rect x="47" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><line x1="36" y1="39" x2="28" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="39" x2="62" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="36" y1="28" x2="12" y2="66" stroke="#888" stroke-width="2" stroke-linecap="round"/><line x1="54" y1="28" x2="78" y2="66" stroke="#888" stroke-width="2" stroke-linecap="round"/><text x="45" y="84" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">extended ROM pull</text></svg>`},
+  {name:'Rack Pull',muscles:'Traps, Spinal Erectors, Glutes, Hamstrings',category:'Back',
+   desc:'Deadlift from a raised starting position (pins set at knee height). Allows supramaximal loading to overload the lockout portion of the deadlift.',
+   tips:['This is a partial movement — do not compare weights to your regular deadlift','Focus on driving hips through at the top — full hip extension','Great for building trap thickness and upper back strength'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="10" width="8" height="70" rx="2" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><rect x="77" y="10" width="8" height="70" rx="2" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><rect x="5" y="48" width="80" height="5" rx="2" fill="#555"/><rect x="13" y="44" width="64" height="7" rx="3" fill="#666"/><rect x="8" y="41" width="8" height="13" rx="2" fill="#888"/><rect x="74" y="41" width="8" height="13" rx="2" fill="#888"/><circle cx="45" cy="16" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="23" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="27" width="26" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="34" y="29" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><rect x="47" y="29" width="9" height="12" rx="3" fill="#f97316" opacity="0.85"/><line x1="34" y1="43" x2="28" y2="54" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="56" y1="43" x2="62" y2="54" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">traps + lockout</text></svg>`},
+  {name:'Hang Clean',muscles:'Full Body, Traps, Glutes, Quads, Shoulders',category:'Back',
+   desc:'Start with the bar hanging at hip/knee level (not from the floor). Explosively extend hips to clean the bar to your shoulders in a front rack position.',
+   tips:['The bar stays tight to your body — brush your thighs on the way up','Lead with your elbows around the bar fast — the catch is the hardest part','Great for developing explosive power without the floor pull complexity'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="52" width="74" height="6" rx="3" fill="#555"/><rect x="3" y="49" width="8" height="12" rx="2" fill="#777"/><rect x="79" y="49" width="8" height="12" rx="2" fill="#777"/><circle cx="45" cy="10" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="17" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="21" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="34" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><rect x="47" y="23" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><line x1="36" y1="14" x2="24" y2="10" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><line x1="54" y1="14" x2="66" y2="10" stroke="#f97316" stroke-width="2" stroke-linecap="round"/><line x1="36" y1="39" x2="30" y2="52" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="39" x2="60" y2="52" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="72" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">explosive power</text></svg>`},
+  // ── PRESS VARIANTS ─────────────────────────────────────────
+  {name:'Incline Dumbbell Press',muscles:'Upper Chest, Triceps, Front Delts',category:'Chest',
+   desc:'Set bench to 30-45 degrees and press dumbbells from shoulder level upward. Greater range of motion than barbell incline and allows independent arm movement.',
+   tips:['30-45 degrees is optimal — steeper becomes a shoulder press','Allow arms to travel slightly inward at the top for a chest squeeze','Dumbbells let you get a deeper stretch at the bottom than a barbell'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="14" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="21" width="14" height="6" rx="2" fill="#c07040"/><ellipse cx="45" cy="30" rx="13" ry="9" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><ellipse cx="37" cy="28" rx="5" ry="7" fill="#f97316" opacity="0.9"/><ellipse cx="53" cy="28" rx="5" ry="7" fill="#f97316" opacity="0.9"/><rect x="8" y="8" width="12" height="5" rx="2" fill="#f97316" opacity="0.8"/><rect x="70" y="8" width="12" height="5" rx="2" fill="#f97316" opacity="0.8"/><line x1="37" y1="21" x2="14" y2="13" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="53" y1="21" x2="76" y2="13" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="40" y1="40" x2="36" y2="57" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="40" x2="55" y2="57" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="71" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">upper chest</text></svg>`},
+  {name:'Decline Bench Press',muscles:'Lower Chest, Triceps, Front Delts',category:'Chest',
+   desc:'Lie on a decline bench (head lower than hips). Press the barbell from lower chest level upward. Targets the lower pectoral fibers more directly than flat bench.',
+   tips:['Decline reduces shoulder stress compared to flat bench for many people','The bar touches lower on your chest than a flat bench — near the bottom of your sternum','Keep your feet secured in the ankle pads and brace your core throughout'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="8" y="44" width="74" height="7" rx="3" fill="#555" transform="rotate(-10 45 47)"/><rect x="3" y="40" width="8" height="13" rx="2" fill="#777" transform="rotate(-10 7 47)"/><rect x="79" y="40" width="8" height="13" rx="2" fill="#777" transform="rotate(-10 83 47)"/><circle cx="35" cy="14" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="28" y="21" width="14" height="7" rx="2" fill="#c07040"/><ellipse cx="37" cy="34" rx="6" ry="8" fill="#f97316" opacity="0.85"/><ellipse cx="51" cy="34" rx="6" ry="8" fill="#f97316" opacity="0.85"/><line x1="34" y1="43" x2="14" y2="46" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="43" x2="72" y2="46" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="38" y1="50" x2="36" y2="66" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="50" y1="50" x2="52" y2="66" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="76" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">lower chest</text></svg>`},
+  {name:'Floor Press',muscles:'Triceps, Chest, Front Delts',category:'Chest',
+   desc:'Lie on the floor and press a barbell or dumbbells. Arms contact the floor at the bottom, eliminating leg drive and limiting range of motion — great for tricep lockout strength.',
+   tips:['Arms should rest completely on the floor at the bottom for a full reset','This removes leg drive entirely — pure upper body pressing','Great for shoulder health when bench pressing causes pain'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="68" width="80" height="4" rx="2" fill="#333"/><circle cx="45" cy="22" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="29" width="14" height="7" rx="2" fill="#c07040"/><ellipse cx="37" cy="42" rx="6" ry="8" fill="#f97316" opacity="0.85"/><ellipse cx="53" cy="42" rx="6" ry="8" fill="#f97316" opacity="0.85"/><line x1="36" y1="32" x2="14" y2="32" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="32" x2="76" y2="32" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="8" y="28" width="10" height="6" rx="2" fill="#555"/><rect x="72" y="28" width="10" height="6" rx="2" fill="#555"/><line x1="38" y1="56" x2="26" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="56" x2="64" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="18" y1="64" x2="14" y2="68" stroke="#888" stroke-width="2" stroke-linecap="round"/><line x1="72" y1="64" x2="76" y2="68" stroke="#888" stroke-width="2" stroke-linecap="round"/><text x="45" y="82" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">triceps + chest lockout</text></svg>`},
+  {name:'Push Press',muscles:'Deltoids, Triceps, Upper Chest, Legs',category:'Shoulders',
+   desc:'A slight dip and drive with the legs helps you press a barbell overhead explosively. Allows heavier loads than a strict press — trains power transfer from lower to upper body.',
+   tips:['The dip is shallow — just 2-3 inches — this is not a squat','The leg drive just initiates the press — your upper body finishes it','Great for overhead strength when strict press stalls'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="8" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="15" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="19" width="26" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><ellipse cx="38" cy="24" rx="5" ry="8" fill="#f97316" opacity="0.9"/><ellipse cx="52" cy="24" rx="5" ry="8" fill="#f97316" opacity="0.9"/><line x1="34" y1="22" x2="14" y2="16" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="56" y1="22" x2="76" y2="16" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="8" y="12" width="8" height="6" rx="2" fill="#555"/><rect x="74" y="12" width="8" height="6" rx="2" fill="#555"/><line x1="36" y1="35" x2="30" y2="50" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="35" x2="60" y2="50" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="30" y1="50" x2="26" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="60" y1="50" x2="64" y2="68" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="20" y1="68" x2="72" y2="68" stroke="#888" stroke-width="2" stroke-linecap="round"/><text x="45" y="80" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">power overhead</text></svg>`},
+  // ── ARMS ───────────────────────────────────────────────────
+  {name:'Concentration Curl',muscles:'Biceps Peak, Brachialis',category:'Arms',
+   desc:'Sit on a bench, brace your upper arm against your inner thigh, and curl a dumbbell upward. Maximum isolation of the bicep with no swinging possible.',
+   tips:['The elbow braced against your leg prevents any cheating','Supinate (rotate palm fully up) at the top for maximum peak contraction','Slow and controlled — this is a pure isolation movement'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="28" cy="14" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="21" y="21" width="14" height="5" rx="2" fill="#c07040"/><rect x="5" y="44" width="55" height="10" rx="4" fill="#2a2c35" stroke="#444" stroke-width="1.5"/><rect x="16" y="26" width="18" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="18" y="28" width="7" height="14" rx="3" fill="#f97316" opacity="0.85"/><line x1="28" y1="44" x2="28" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="34" y1="34" x2="48" y2="28" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><rect x="44" y="24" width="10" height="6" rx="2" fill="#f97316" opacity="0.8"/><ellipse cx="28" cy="36" rx="5" ry="6" fill="#f97316" opacity="0.7"/><text x="50" y="72" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">bicep peak</text></svg>`},
+  {name:'Incline Dumbbell Curl',muscles:'Long Head Biceps, Brachialis',category:'Arms',
+   desc:'Lie back on a 45-60 degree incline bench holding dumbbells. Arms hang straight down to start — this full stretch position maximally loads the long head of the bicep.',
+   tips:['Let arms hang fully at the bottom for the deep stretch that makes this effective','Do not swing — the incline removes any momentum cheating','This is a light-to-moderate weight exercise — stretch and squeeze matters more than load'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="45" cy="16" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="23" width="14" height="5" rx="2" fill="#c07040"/><rect x="30" y="27" width="30" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><path d="M30 38 Q18 46 14 56" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/><path d="M60 38 Q72 46 76 56" stroke="#888" stroke-width="2.5" fill="none" stroke-linecap="round"/><rect x="10" y="54" width="8" height="5" rx="2" fill="#f97316" opacity="0.8"/><rect x="72" y="54" width="8" height="5" rx="2" fill="#f97316" opacity="0.8"/><ellipse cx="20" cy="46" rx="5" ry="4" fill="#f97316" opacity="0.7"/><ellipse cx="70" cy="46" rx="5" ry="4" fill="#f97316" opacity="0.7"/><line x1="38" y1="45" x2="32" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="45" x2="58" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="76" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">bicep long head</text></svg>`},
+  // ── CORE ───────────────────────────────────────────────────
+  {name:'Toes-to-Bar',muscles:'Core, Hip Flexors, Lats, Grip',category:'Core',
+   desc:'Hang from a pull-up bar. Keeping legs straight, raise your toes up to touch the bar. Lower under control. Requires significant core and lat strength.',
+   tips:['Hollow body position is key — do not swing or kip unless you are an advanced athlete','Keep a slight scapular depression — do not just hang from your joints','Scale with hanging knee raises if full toes-to-bar is too difficult'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="5" width="80" height="6" rx="3" fill="#555"/><circle cx="45" cy="20" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="27" width="14" height="5" rx="2" fill="#c07040"/><rect x="32" y="11" width="26" height="12" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="34" y="13" width="9" height="8" rx="2" fill="#f97316" opacity="0.85"/><rect x="45" y="13" width="9" height="8" rx="2" fill="#f97316" opacity="0.85"/><line x1="34" y1="23" x2="14" y2="11" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="56" y1="23" x2="76" y2="11" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="41" y1="32" x2="38" y2="55" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="49" y1="32" x2="52" y2="55" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="38" y1="55" x2="34" y2="72" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="52" y1="55" x2="56" y2="72" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="45" y="84" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">core + hip flexors</text></svg>`},
+  {name:'Landmine Press',muscles:'Anterior Deltoid, Upper Chest, Triceps, Core',category:'Shoulders',
+   desc:'Anchor a barbell in a corner or landmine attachment. Press the sleeve end from shoulder height to full extension overhead at an angle. Easier on shoulders than vertical pressing.',
+   tips:['Great shoulder-friendly pressing option if overhead pressing causes impingement','Keep your core braced — the angled press wants to rotate your torso','Single-arm variation is excellent for identifying and fixing side-to-side imbalances'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="72" width="16" height="16" rx="3" fill="#555"/><line x1="10" y1="72" x2="60" y2="18" stroke="#888" stroke-width="3" stroke-linecap="round"/><rect x="54" y="12" width="18" height="7" rx="2" fill="#f97316" opacity="0.7"/><circle cx="45" cy="32" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="38" y="39" width="14" height="5" rx="2" fill="#c07040"/><rect x="30" y="43" width="26" height="18" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="32" y="45" width="9" height="14" rx="3" fill="#f97316" opacity="0.85"/><line x1="32" y1="48" x2="18" y2="28" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="36" y1="61" x2="30" y2="76" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="54" y1="61" x2="60" y2="76" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="50" y="86" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">shoulder-friendly press</text></svg>`},
+  // ── BACK VARIANT ───────────────────────────────────────────
+  {name:'Meadows Row',muscles:'Lats, Teres Major, Rear Delt, Biceps',category:'Back',
+   desc:'Stand perpendicular to a landmine or bar anchored in a corner. Row the end of the bar toward your hip in a unilateral movement with a neutral grip.',
+   tips:['The angle targets the upper lat and teres major differently than standard rows','Use a rope attachment or V-grip for a better grip on the bar end','Drive your elbow back and up — not just straight back'],
+   svg:`<svg viewBox="0 0 90 90" fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="72" width="16" height="16" rx="3" fill="#555"/><line x1="10" y1="72" x2="55" y2="30" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><circle cx="28" cy="16" r="7" fill="#d1845a" stroke="#b8633b" stroke-width="1"/><rect x="21" y="23" width="14" height="5" rx="2" fill="#c07040"/><rect x="15" y="27" width="24" height="16" rx="5" fill="#1a1c22" stroke="#2a2c35" stroke-width="1.5"/><rect x="17" y="29" width="8" height="12" rx="3" fill="#f97316" opacity="0.85"/><line x1="39" y1="34" x2="54" y2="30" stroke="#f97316" stroke-width="2.5" stroke-linecap="round"/><line x1="17" y1="43" x2="10" y2="60" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><line x1="37" y1="43" x2="48" y2="58" stroke="#888" stroke-width="2.5" stroke-linecap="round"/><text x="55" y="78" text-anchor="middle" font-size="8" fill="#f97316" font-family="sans-serif" font-weight="600">lat + teres</text></svg>`},
 ];
 const CATALOG_CATEGORIES = ['All', ...new Set(CATALOG.map(e=>e.category))];
 
@@ -1390,71 +1490,81 @@ function calc1RM(weight,reps){
 // Maps common AI-generated names → catalog entry name
 // ═══════════════════════════════════════════════════════════
 const EXERCISE_ALIASES = {
+  // SQUAT variations
   'squat': 'Back Squat',
   'barbell squat': 'Back Squat',
   'barbell back squat': 'Back Squat',
   'low bar squat': 'Back Squat',
   'high bar squat': 'Back Squat',
+  'back squats': 'Back Squat',
+  'squats': 'Back Squat',
+  'front squats': 'Front Squat',
+  'goblet squats': 'Goblet Squat',
+  'kb goblet squat': 'Goblet Squat',
+  'bss': 'Bulgarian Split Squat',
+  'split squat': 'Bulgarian Split Squat',
+  'rear foot elevated split squat': 'Bulgarian Split Squat',
+  'bulgarian split squats': 'Bulgarian Split Squat',
+  'hack squat': 'Hack Squat',
+  'hack squats': 'Hack Squat',
+  'pause squats': 'Pause Squat',
+  'box squat': 'Box Squat',
+  'box squats': 'Box Squat',
+  // DEADLIFT variations
   'conventional deadlift': 'Deadlift',
+  'deadlifts': 'Deadlift',
   'romanian deadlifts': 'Romanian Deadlift',
   'rdl': 'Romanian Deadlift',
+  'rdls': 'Romanian Deadlift',
+  'stiff leg deadlift': 'Romanian Deadlift',
+  'stiff-leg deadlift': 'Romanian Deadlift',
+  'stiff legged deadlift': 'Romanian Deadlift',
+  'sldl': 'Romanian Deadlift',
+  'sumo deadlifts': 'Sumo Deadlift',
+  'trap bar deadlift': 'Trap Bar Deadlift',
+  'hex bar deadlift': 'Trap Bar Deadlift',
+  'deficit deadlift': 'Deficit Deadlift',
+  'rack pull': 'Rack Pull',
+  'rack pulls': 'Rack Pull',
+  // PRESS variations
   'ohp': 'Overhead Press',
   'military press': 'Overhead Press',
   'strict press': 'Overhead Press',
   'barbell overhead press': 'Overhead Press',
   'standing overhead press': 'Overhead Press',
-  'bent-over row': 'Barbell Row',
-  'bent over row': 'Barbell Row',
-  'barbell bent-over row': 'Barbell Row',
-  'bb row': 'Barbell Row',
-  'pull-ups': 'Pull-up',
-  'pullup': 'Pull-up',
-  'pullups': 'Pull-up',
-  'chin-up': 'Pull-up',
-  'chin-ups': 'Pull-up',
-  'chinup': 'Pull-up',
-  'chinups': 'Pull-up',
-  'lat pull-down': 'Lat Pulldown',
-  'lat pull down': 'Lat Pulldown',
-  'cable pulldown': 'Lat Pulldown',
+  'standing press': 'Overhead Press',
+  'overhead presses': 'Overhead Press',
+  'push press': 'Push Press',
+  'push presses': 'Push Press',
   'db bench': 'Dumbbell Bench Press',
   'dumbbell bench': 'Dumbbell Bench Press',
   'db press': 'Dumbbell Bench Press',
   'dumbbell press': 'Dumbbell Bench Press',
+  'flat dumbbell press': 'Dumbbell Bench Press',
   'incline press': 'Incline Bench Press',
   'incline barbell press': 'Incline Bench Press',
-  'bb curl': 'Barbell Curl',
-  'ez-bar curl': 'Barbell Curl',
-  'ez bar curl': 'Barbell Curl',
-  'db curl': 'Dumbbell Curl',
-  'alternating dumbbell curl': 'Dumbbell Curl',
-  'standing dumbbell curl': 'Dumbbell Curl',
-  'tricep pushdowns': 'Tricep Pushdown',
-  'cable pushdown': 'Tricep Pushdown',
-  'rope pushdown': 'Tricep Pushdown',
-  'triceps pushdown': 'Tricep Pushdown',
-  'lying tricep extension': 'Skull Crusher',
-  'ez-bar skull crusher': 'Skull Crusher',
-  'skull crushers': 'Skull Crusher',
+  'incline bench': 'Incline Bench Press',
+  'incline dumbbell press': 'Incline Dumbbell Press',
+  'incline db press': 'Incline Dumbbell Press',
+  'decline bench press': 'Decline Bench Press',
+  'decline press': 'Decline Bench Press',
   'close-grip bench press': 'Close Grip Bench Press',
   'cgbp': 'Close Grip Bench Press',
-  'push-ups': 'Push-up',
-  'push up': 'Push-up',
-  'push ups': 'Push-up',
-  'pushup': 'Push-up',
+  'floor press': 'Floor Press',
   'seated dumbbell press': 'Dumbbell Shoulder Press',
   'db shoulder press': 'Dumbbell Shoulder Press',
   'dumbbell overhead press': 'Dumbbell Shoulder Press',
-  'lateral raises': 'Lateral Raise',
-  'side raises': 'Lateral Raise',
-  'db lateral raise': 'Lateral Raise',
-  'rear delt flys': 'Rear Delt Fly',
-  'rear delt flies': 'Rear Delt Fly',
-  'reverse fly': 'Rear Delt Fly',
-  'reverse flies': 'Rear Delt Fly',
-  'cable face pull': 'Face Pull',
-  'face pulls': 'Face Pull',
+  'db ohp': 'Dumbbell Shoulder Press',
+  // BACK
+  'bent-over row': 'Barbell Row',
+  'bent over row': 'Barbell Row',
+  'barbell bent-over row': 'Barbell Row',
+  'bb row': 'Barbell Row',
+  'barbell rows': 'Barbell Row',
+  'pendlay rows': 'Pendlay Row',
+  't-bar rows': 'T-Bar Row',
   'seated cable row': 'Cable Row',
+  'cable rows': 'Cable Row',
   'low row': 'Cable Row',
   'low cable row': 'Cable Row',
   'db row': 'Dumbbell Row',
@@ -1462,44 +1572,156 @@ const EXERCISE_ALIASES = {
   'single-arm row': 'Dumbbell Row',
   'single arm row': 'Dumbbell Row',
   'single arm dumbbell row': 'Dumbbell Row',
+  'chest supported rows': 'Chest Supported Row',
+  'chest-supported row': 'Chest Supported Row',
+  'meadows row': 'Meadows Row',
+  'kroc row': 'Dumbbell Row',
+  'pull-ups': 'Pull-up',
+  'pullup': 'Pull-up',
+  'pullups': 'Pull-up',
+  'pull ups': 'Pull-up',
+  'chin-up': 'Pull-up',
+  'chin-ups': 'Pull-up',
+  'chinup': 'Pull-up',
+  'chinups': 'Pull-up',
+  'weighted pull-ups': 'Pull-up',
+  'weighted pull ups': 'Pull-up',
+  'weighted pullups': 'Pull-up',
+  'lat pull-down': 'Lat Pulldown',
+  'lat pull down': 'Lat Pulldown',
+  'cable pulldown': 'Lat Pulldown',
+  'lat pulldowns': 'Lat Pulldown',
+  'pull-down': 'Lat Pulldown',
+  'pulldown': 'Lat Pulldown',
+  'power cleans': 'Power Clean',
+  'hang clean': 'Hang Clean',
+  'hang cleans': 'Hang Clean',
+  'hang power clean': 'Hang Clean',
+  // HINGE / GLUTES
   'hip thrusts': 'Hip Thrust',
   'barbell hip thrust': 'Hip Thrust',
-  'bss': 'Bulgarian Split Squat',
-  'split squat': 'Bulgarian Split Squat',
-  'rear foot elevated split squat': 'Bulgarian Split Squat',
-  'lunges': 'Walking Lunge',
-  'lunge': 'Walking Lunge',
-  'goblet squats': 'Goblet Squat',
-  'kb goblet squat': 'Goblet Squat',
+  'glute bridge': 'Glute Bridge',
+  'glute bridges': 'Glute Bridge',
+  'barbell glute bridge': 'Glute Bridge',
+  // LEGS
   'leg curls': 'Leg Curl',
   'lying leg curl': 'Leg Curl',
   'seated leg curl': 'Leg Curl',
   'hamstring curl': 'Leg Curl',
+  'hamstring curls': 'Leg Curl',
   'leg extensions': 'Leg Extension',
   'quad extension': 'Leg Extension',
+  'lunges': 'Walking Lunge',
+  'lunge': 'Walking Lunge',
+  'reverse lunge': 'Reverse Lunge',
+  'reverse lunges': 'Reverse Lunge',
+  'step up': 'Step-Up',
+  'step-ups': 'Step-Up',
+  'step ups': 'Step-Up',
   'calf raises': 'Calf Raise',
   'standing calf raise': 'Calf Raise',
   'seated calf raise': 'Calf Raise',
-  'planks': 'Plank',
-  'farmers walk': 'Farmers Carry',
-  'farmer carry': 'Farmers Carry',
-  'farmer\'s carry': 'Farmers Carry',
-  'farmer\'s walk': 'Farmers Carry',
-  'kettlebell swings': 'Kettlebell Swing',
-  'kb swing': 'Kettlebell Swing',
-  'hanging leg raises': 'Hanging Leg Raise',
-  'hang leg raise': 'Hanging Leg Raise',
-  'cable crunches': 'Cable Crunch',
+  'seated calf raises': 'Calf Raise',
+  'leg presses': 'Leg Press',
+  // SHOULDERS
+  'lateral raises': 'Lateral Raise',
+  'side raises': 'Lateral Raise',
+  'db lateral raise': 'Lateral Raise',
+  'side lateral raise': 'Lateral Raise',
+  'rear delt flys': 'Rear Delt Fly',
+  'rear delt flies': 'Rear Delt Fly',
+  'reverse fly': 'Rear Delt Fly',
+  'reverse flies': 'Rear Delt Fly',
+  'cable face pull': 'Face Pull',
+  'face pulls': 'Face Pull',
+  'upright rows': 'Upright Row',
+  'barbell upright row': 'Upright Row',
+  'cable lateral raise': 'Lateral Raise',
+  // ARMS
+  'bb curl': 'Barbell Curl',
+  'ez-bar curl': 'Barbell Curl',
+  'ez bar curl': 'Barbell Curl',
+  'ez curl': 'Barbell Curl',
+  'barbell curls': 'Barbell Curl',
+  'db curl': 'Dumbbell Curl',
+  'alternating dumbbell curl': 'Dumbbell Curl',
+  'standing dumbbell curl': 'Dumbbell Curl',
+  'dumbbell curls': 'Dumbbell Curl',
+  'cable bicep curl': 'Cable Curl',
+  'cable curls': 'Cable Curl',
+  'concentration curl': 'Concentration Curl',
+  'concentration curls': 'Concentration Curl',
+  'incline dumbbell curl': 'Incline Dumbbell Curl',
+  'hammer curls': 'Hammer Curl',
+  'cross-body hammer curl': 'Hammer Curl',
+  'preacher curls': 'Preacher Curl',
+  'tricep pushdowns': 'Tricep Pushdown',
+  'cable pushdown': 'Tricep Pushdown',
+  'rope pushdown': 'Tricep Pushdown',
+  'triceps pushdown': 'Tricep Pushdown',
+  'tricep pushdown': 'Tricep Pushdown',
+  'rope tricep pushdown': 'Tricep Pushdown',
+  'lying tricep extension': 'Skull Crusher',
+  'ez-bar skull crusher': 'Skull Crusher',
+  'skull crushers': 'Skull Crusher',
+  'lying ez-bar extension': 'Skull Crusher',
+  'overhead tricep extension': 'Overhead Tricep Extension',
+  'overhead tricep extensions': 'Overhead Tricep Extension',
+  'tricep overhead extension': 'Overhead Tricep Extension',
+  'cable overhead tricep extension': 'Overhead Tricep Extension',
   'tricep dips': 'Tricep Dip',
   'dips': 'Tricep Dip',
   'parallel bar dip': 'Tricep Dip',
-  'cable bicep curl': 'Cable Curl',
+  'weighted dips': 'Tricep Dip',
+  'close-grip bench': 'Close Grip Bench Press',
+  // CORE
+  'planks': 'Plank',
+  'cable crunches': 'Cable Crunch',
+  'hanging leg raises': 'Hanging Leg Raise',
+  'hang leg raise': 'Hanging Leg Raise',
+  'toes to bar': 'Toes-to-Bar',
+  'toes-to-bar': 'Toes-to-Bar',
+  'ttb': 'Toes-to-Bar',
   'ab wheel': 'Ab Wheel Rollout',
   'ab roller': 'Ab Wheel Rollout',
-  't-bar rows': 'T-Bar Row',
-  'pendlay rows': 'Pendlay Row',
-  'power cleans': 'Power Clean',
+  'russian twists': 'Russian Twist',
+  'sit-ups': 'Sit-up',
+  'situp': 'Sit-up',
+  'situps': 'Sit-up',
+  'bicycle crunches': 'Bicycle Crunch',
+  'dead bugs': 'Dead Bug',
+  'pallof presses': 'Pallof Press',
+  'landmine press': 'Landmine Press',
+  'landmine rotation': 'Landmine Press',
+  // CARDIO / CONDITIONING
+  'kb swing': 'Kettlebell Swing',
+  'kettlebell swings': 'Kettlebell Swing',
   'box jumps': 'Box Jump',
+  'farmers walk': 'Farmers Carry',
+  'farmer carry': 'Farmers Carry',
+  "farmer's carry": 'Farmers Carry',
+  "farmer's walk": 'Farmers Carry',
+  'battle rope': 'Battle Ropes',
+  // CHEST ISOLATION
+  'cable flys': 'Cable Fly',
+  'cable flies': 'Cable Fly',
+  'pec dec': 'Cable Fly',
+  'pec deck': 'Cable Fly',
+  'machine fly': 'Cable Fly',
+  'db fly': 'Dumbbell Fly',
+  'dumbbell flys': 'Dumbbell Fly',
+  'dumbbell flies': 'Dumbbell Fly',
+  // MISC
+  'push-ups': 'Push-up',
+  'push up': 'Push-up',
+  'push ups': 'Push-up',
+  'pushup': 'Push-up',
+  'barbell shrug': 'Shrug',
+  'barbell shrugs': 'Shrug',
+  'db shrug': 'Shrug',
+  'dumbbell shrug': 'Shrug',
+  'shrugs': 'Shrug',
+  't-bar rows': 'T-Bar Row',
 };
 // Build combined lookup: all catalog names + all aliases → catalog entry
 // Done once at startup so renderMarkdown doesn't rebuild it on every call
@@ -1581,6 +1803,9 @@ function renderMarkdown(text, linkLifts=false){
 // CHIPS
 // ═══════════════════════════════════════════════════════════
 function selectChipIn(rowId,el){ document.getElementById(rowId).querySelectorAll('.chip').forEach(c=>c.classList.remove('active')); el.classList.add('active'); }
+function togglePref(el, val){ el.classList.toggle('active'); autosave(); }
+function getSelectedPrefs(){ return [...document.querySelectorAll('#prefsRow .pref-chip.active')].map(el=>el.textContent.trim()); }
+function setSelectedPrefs(prefs){ if(!prefs||!prefs.length)return; document.querySelectorAll('#prefsRow .pref-chip').forEach(el=>{ el.classList.toggle('active', prefs.includes(el.textContent.trim())); }); }
 function selectGoal(el,v){ selectChipIn('goalRow',el); selectedGoal=v; autosave(); }
 function selectDays(el,v){ selectChipIn('daysRow',el); selectedDays=v; autosave(); }
 function selectSplit(el,v){ selectChipIn('splitRow',el); selectedSplit=v; autosave(); }
@@ -1665,6 +1890,8 @@ function autosave(planToSave){
     age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
     sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
     goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
+    injuries:document.getElementById('injuriesField').value,
+    prefs:getSelectedPrefs(),
     plan:savedPlanText||null,lifts};
   try{ localStorage.setItem(SAVE_KEY,JSON.stringify(data)); }catch(e){}
 }
@@ -1679,6 +1906,8 @@ function loadSaved(){
     if(d.height) document.getElementById('userHeight').value=d.height;
     if(d.goalDetail) document.getElementById('goalDetail').value=d.goalDetail;
     if(d.splitCustom) document.getElementById('splitCustom').value=d.splitCustom;
+    if(d.injuries) document.getElementById('injuriesField').value=d.injuries;
+    if(d.prefs) setSelectedPrefs(d.prefs);
     [['goalRow','selectedGoal',d.selectedGoal],['expRow','selectedExp',d.selectedExp],['daysRow','selectedDays',d.selectedDays],['splitRow','selectedSplit',d.selectedSplit]].forEach(([rowId,key,val])=>{
       if(!val)return; const chip=document.querySelector(`#${rowId} .chip[onclick*="'${val}'"]`);
       if(chip){ selectChipIn(rowId,chip); if(key==='selectedGoal')selectedGoal=val; if(key==='selectedExp'){selectedExp=val;selectExp(chip,val);} if(key==='selectedDays')selectedDays=val; if(key==='selectedSplit')selectedSplit=val; }
@@ -1694,7 +1923,7 @@ function loadSaved(){
     return true;
   }catch(e){ return false; }
 }
-function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; initLifts(null); }
+function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom','injuriesField'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; document.querySelectorAll('#prefsRow .pref-chip').forEach(el=>el.classList.remove('active')); initLifts(null); }
 
 // ═══════════════════════════════════════════════════════════
 // CALCULATE
@@ -1717,7 +1946,10 @@ async function calculate(){
   document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
   const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
-  const goalDetail=document.getElementById('goalDetail').value.trim(); const splitCustom=document.getElementById('splitCustom').value.trim();
+  const goalDetail=document.getElementById('goalDetail').value.trim();
+  const splitCustom=document.getElementById('splitCustom').value.trim();
+  const injuries=document.getElementById('injuriesField').value.trim();
+  const prefs=getSelectedPrefs();
   try{
     const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({
       lifts,unit,goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
@@ -1725,11 +1957,17 @@ async function calculate(){
       age:document.getElementById('userAge').value||null,
       bodyweight:document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
       sex:document.getElementById('userSex').value||null,height:document.getElementById('userHeight').value||null,
+      injuries:injuries||null,
+      preferences:prefs.length?prefs.join(', '):null,
       adminCode:adminCode||undefined
     })});
     const data=await res.json();
     if(data.limit_hit){ err.textContent=data.error; document.getElementById('resultsCard').style.display='none'; if(!currentUser) openModal('authModal'); return; }
     if(data.error) throw new Error(data.error);
+    // Show AI-generated title if present
+    const titleEl=document.getElementById('planTitle');
+    if(data.plan_title){ titleEl.textContent=data.plan_title; titleEl.style.display='block'; }
+    else { titleEl.style.display='none'; }
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan,true));
     document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
     currentPlanContext=data.plan; autosave(data.plan);
@@ -1738,7 +1976,7 @@ async function calculate(){
     updateUsageBanner();
     // Auto-save plan to account if logged in
     if(currentUser){
-      const planTitle=`${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+      const planTitle=data.plan_title || `${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
       fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
         body:JSON.stringify({title:planTitle,plan_text:data.plan,lifts_json:JSON.stringify(lifts)})
       }).catch(()=>{});
