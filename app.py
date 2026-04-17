@@ -5,6 +5,18 @@ from flask import Flask, request, jsonify, send_from_directory, g
 
 app = Flask(__name__, static_folder="public")
 
+@app.after_request
+def add_security_headers(resp):
+    """Standard security headers applied to every response."""
+    resp.headers["X-Content-Type-Options"] = "nosniff"
+    resp.headers["X-Frame-Options"] = "DENY"
+    resp.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    resp.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+    # Only HSTS on HTTPS responses
+    if request.is_secure:
+        resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    return resp
+
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ADMIN_CODE    = os.environ.get("ADMIN_CODE", "")
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # set in Railway env vars
@@ -63,6 +75,9 @@ def init_db():
             CREATE TABLE IF NOT EXISTS saved_plans(id INTEGER PRIMARY KEY AUTOINCREMENT,user_id INTEGER NOT NULL,title TEXT NOT NULL,plan_text TEXT NOT NULL,lifts_json TEXT,created INTEGER NOT NULL DEFAULT(strftime('%s','now')),FOREIGN KEY(user_id) REFERENCES users(id));
             CREATE TABLE IF NOT EXISTS ip_plan_usage(ip TEXT PRIMARY KEY,count INTEGER NOT NULL DEFAULT 0,updated INTEGER NOT NULL DEFAULT(strftime('%s','now')));
             CREATE TABLE IF NOT EXISTS waitlist(id INTEGER PRIMARY KEY AUTOINCREMENT,email TEXT UNIQUE NOT NULL,created INTEGER NOT NULL DEFAULT(strftime('%s','now')));
+            CREATE TABLE IF NOT EXISTS page_visits(id INTEGER PRIMARY KEY AUTOINCREMENT,date TEXT NOT NULL,ip_hash TEXT NOT NULL,created INTEGER NOT NULL DEFAULT(strftime('%s','now')));
+            CREATE INDEX IF NOT EXISTS idx_visits_date ON page_visits(date);
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_visits_unique ON page_visits(date,ip_hash);
         """)
         db.commit()
 
@@ -94,6 +109,18 @@ def sanitize(value,max_len=500):
     text=str(value).strip()[:max_len]
     while "\n\n\n" in text: text=text.replace("\n\n\n","\n\n")
     return re.sub(r'<[^>]*>','',text)
+
+def valid_date(s):
+    """Validates YYYY-MM-DD format and that it's a real calendar date. Returns '' if invalid."""
+    if not s or not isinstance(s,str): return ""
+    s=s.strip()[:10]
+    if not re.match(r'^\d{4}-\d{2}-\d{2}$',s): return ""
+    try:
+        import datetime
+        datetime.date.fromisoformat(s)
+        return s
+    except ValueError:
+        return ""
 
 def is_safe(s):
     bad=["ignore previous","ignore all","disregard","forget your instructions","new instructions","system prompt","you are now","act as","pretend you","jailbreak","<script","javascript:"]
@@ -179,6 +206,24 @@ def config():
     """Returns public config values — safe to expose to frontend."""
     return jsonify({"contact_email": CONTACT_EMAIL}), 200
 
+@app.route("/api/track-visit",methods=["POST"])
+def track_visit():
+    """Records a unique daily visit. IP is SHA-256 hashed before storage — raw IPs are never saved."""
+    ip=get_ip()
+    # Use the general rate limiter to prevent abuse/flooding
+    if is_rate_limited(ip): return jsonify({"ok":True}),200
+    try:
+        # Hash the IP so we never store the raw address in the database
+        ip_hash=hashlib.sha256(ip.encode()).hexdigest()[:32]
+        today=time.strftime("%Y-%m-%d")
+        db=get_db()
+        # INSERT OR IGNORE → unique constraint on (date, ip_hash) means one row per visitor per day
+        db.execute("INSERT OR IGNORE INTO page_visits(date,ip_hash) VALUES(?,?)",(today,ip_hash))
+        db.commit()
+    except Exception as e:
+        print(f"Track visit error: {e}")
+    return jsonify({"ok":True}),200
+
 @app.route("/")
 def index(): return send_from_directory("public","index.html")
 
@@ -251,8 +296,9 @@ def add_log():
     data=request.get_json(silent=True) or {}
     exercise=sanitize(data.get("exercise",""),100); weight=float(data.get("weight",0)); reps=int(data.get("reps",0))
     e1rm=int(data.get("estimated1rm",0)); unit_val=data.get("unit","lbs")
-    note=sanitize(data.get("note",""),500); date_val=sanitize(data.get("date",""),20)
+    note=sanitize(data.get("note",""),500); date_val=valid_date(data.get("date",""))
     if not exercise or weight<=0 or reps<=0: return jsonify({"error":"Invalid entry."}),400
+    if not date_val: return jsonify({"error":"Invalid date. Use YYYY-MM-DD format."}),400
     if unit_val not in ("lbs","kg"): unit_val="lbs"
     db=get_db()
     db.execute("INSERT INTO workout_log(user_id,exercise,weight,reps,estimated1rm,unit,note,date) VALUES(?,?,?,?,?,?,?,?)",(user["id"],exercise,weight,reps,e1rm,unit_val,note,date_val))
@@ -285,9 +331,13 @@ def update_log(entry_id):
                 e1rm=int(w2*(1+r/30)) if r>1 else int(w2)
                 fields.append("estimated1rm=?"); values.append(e1rm)
     if "note" in data: fields.append("note=?"); values.append(sanitize(str(data["note"]),500))
-    if "date" in data: fields.append("date=?"); values.append(sanitize(str(data["date"]),20))
+    if "date" in data:
+        d=valid_date(str(data["date"]))
+        if d: fields.append("date=?"); values.append(d)
     if fields:
         values.extend([entry_id,user["id"]])
+        # Safe: `fields` contains only hardcoded column=? strings, never user input.
+        # All actual values are passed as ? parameters.
         db.execute(f"UPDATE workout_log SET {','.join(fields)} WHERE id=? AND user_id=?",values)
         db.commit()
     return jsonify({"ok":True}),200
@@ -468,13 +518,58 @@ def view_emails():
     db=get_db()
     wl=db.execute("SELECT email,datetime(created,'unixepoch') as ts FROM waitlist ORDER BY created DESC").fetchall()
     ur=db.execute("SELECT email,datetime(created,'unixepoch') as ts FROM users ORDER BY created DESC").fetchall()
+    # Visit analytics
+    total_visits=db.execute("SELECT COUNT(*) as c FROM page_visits").fetchone()["c"]
+    today=time.strftime("%Y-%m-%d")
+    visits_today=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date=?",(today,)).fetchone()["c"]
+    visits_7d=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-7 days')").fetchone()["c"]
+    visits_30d=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-30 days')").fetchone()["c"]
+    # Daily breakdown for last 14 days
+    daily=db.execute("SELECT date,COUNT(*) as visits FROM page_visits WHERE date>=date('now','-14 days') GROUP BY date ORDER BY date DESC").fetchall()
+    # Plan generation totals
+    plans_made=db.execute("SELECT COALESCE(SUM(count),0) as total FROM ip_plan_usage").fetchone()["total"]
+    plans_saved=db.execute("SELECT COUNT(*) as c FROM saved_plans").fetchone()["c"]
+    workouts_logged=db.execute("SELECT COUNT(*) as c FROM workout_log").fetchone()["c"]
     fmt=request.args.get("format","html")
-    if fmt=="json": return jsonify({"waitlist":[dict(r) for r in wl],"accounts":[dict(r) for r in ur]})
+    if fmt=="json":
+        return jsonify({
+            "waitlist":[dict(r) for r in wl],
+            "accounts":[dict(r) for r in ur],
+            "stats":{
+                "total_unique_visits":total_visits,
+                "visits_today":visits_today,
+                "visits_7d":visits_7d,
+                "visits_30d":visits_30d,
+                "daily_last_14":[dict(r) for r in daily],
+                "plans_generated":plans_made,
+                "plans_saved":plans_saved,
+                "workouts_logged":workouts_logged,
+            }
+        })
     def tbl(rows,title):
         if not rows: return f"<h2>{title}</h2><p style='color:#999'>None yet.</p>"
         trs="".join(f"<tr><td>{i+1}</td><td>{r['email']}</td><td style='color:#999'>{r['ts']}</td></tr>" for i,r in enumerate(rows))
         return f"<h2>{title} ({len(rows)})</h2><table><thead><tr><th>#</th><th>Email</th><th>Date</th></tr></thead><tbody>{trs}</tbody></table>"
-    return f"""<!DOCTYPE html><html><head><title>PlateStack Admin</title><style>body{{font-family:system-ui;padding:2rem;max-width:700px;margin:0 auto;background:#f9f9f9}}h1{{font-size:22px}}h2{{font-size:16px;margin:2rem 0 0.5rem}}table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}}th{{text-align:left;padding:10px 14px;background:#f0f0f0;border-bottom:2px solid #ddd}}td{{padding:9px 14px;border-bottom:1px solid #eee}}a{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}</style></head><body><h1>🏋️ PlateStack Admin</h1>{tbl(ur,"Accounts")}{tbl(wl,"Waitlist")}<a href="?code={code}&format=json">JSON</a></body></html>"""
+    # Stat cards
+    stat_cards=f"""<div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">{visits_today}</div><div class="stat-label">Visits today</div></div>
+        <div class="stat-card"><div class="stat-value">{visits_7d}</div><div class="stat-label">Last 7 days</div></div>
+        <div class="stat-card"><div class="stat-value">{visits_30d}</div><div class="stat-label">Last 30 days</div></div>
+        <div class="stat-card"><div class="stat-value">{total_visits}</div><div class="stat-label">All time</div></div>
+    </div>
+    <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">{len(ur)}</div><div class="stat-label">Accounts</div></div>
+        <div class="stat-card"><div class="stat-value">{plans_made}</div><div class="stat-label">Plans generated</div></div>
+        <div class="stat-card"><div class="stat-value">{plans_saved}</div><div class="stat-label">Plans saved</div></div>
+        <div class="stat-card"><div class="stat-value">{workouts_logged}</div><div class="stat-label">Workouts logged</div></div>
+    </div>"""
+    # Daily visits table
+    if daily:
+        daily_rows="".join(f"<tr><td>{r['date']}</td><td>{r['visits']}</td></tr>" for r in daily)
+        daily_tbl=f'<h2>Daily visits (last 14 days)</h2><table><thead><tr><th>Date</th><th>Unique visitors</th></tr></thead><tbody>{daily_rows}</tbody></table>'
+    else:
+        daily_tbl='<h2>Daily visits</h2><p style="color:#999">No visits tracked yet.</p>'
+    return f"""<!DOCTYPE html><html><head><title>PlateStack Admin</title><style>body{{font-family:system-ui;padding:2rem;max-width:800px;margin:0 auto;background:#f9f9f9}}h1{{font-size:22px}}h2{{font-size:16px;margin:2rem 0 0.5rem}}table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}}th{{text-align:left;padding:10px 14px;background:#f0f0f0;border-bottom:2px solid #ddd}}td{{padding:9px 14px;border-bottom:1px solid #eee}}a{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}.stats-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:1rem 0}}.stat-card{{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);text-align:center}}.stat-value{{font-size:28px;font-weight:700;color:#f97316;line-height:1}}.stat-label{{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px}}@media(max-width:600px){{.stats-grid{{grid-template-columns:repeat(2,1fr)}}}}</style></head><body><h1>🏋️ PlateStack Admin</h1>{stat_cards}{daily_tbl}{tbl(ur,"Accounts")}{tbl(wl,"Waitlist")}<a href="?code={code}&format=json">JSON</a></body></html>"""
 
 if __name__=="__main__":
     app.run(debug=False)
