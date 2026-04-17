@@ -2554,6 +2554,14 @@ fetch('/api/config').then(r=>r.json()).then(d=>{
   }
 }).catch(()=>{});
 
+// Track a visit once per browser session (sessionStorage clears when tab closes)
+try{
+  if(!sessionStorage.getItem('ps_visit_tracked')){
+    sessionStorage.setItem('ps_visit_tracked','1');
+    fetch('/api/track-visit',{method:'POST'}).catch(()=>{});
+  }
+}catch(e){}
+
 // Check auth on load, then fetch server-side plan usage
 checkAuth().then(()=>{
   renderHistory();
