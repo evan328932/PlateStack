@@ -714,6 +714,19 @@ footer a:hover{color:#fff}
       <div id="planTitle" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:0.75rem;letter-spacing:0.01em"></div>
       <div class="plan-text" id="planText"></div>
     </div>
+    <div id="trackingCta" style="display:none;margin-top:1.25rem;padding:1rem 1.1rem;background:linear-gradient(135deg,rgba(249,115,22,0.12),rgba(249,115,22,0.04));border:1px solid rgba(249,115,22,0.35);border-radius:10px">
+      <div id="trackingCtaAuth" style="display:none">
+        <div style="font-weight:700;color:#fff;margin-bottom:4px;font-size:15px">📈 Track this plan and auto-adapt as you progress</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Log each set with an effort rating. PlateStack will nudge weights up when you're crushing it and back off when you're grinding.</div>
+        <button class="action-btn" id="startTrackingBtn" onclick="startTrackingCurrentPlan()" style="background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700">Start tracking this plan</button>
+        <span id="trackingCtaStatus" style="font-size:12px;color:var(--text-dim);margin-left:10px"></span>
+      </div>
+      <div id="trackingCtaAnon" style="display:none">
+        <div style="font-weight:700;color:#fff;margin-bottom:4px;font-size:15px">🔒 Create a free account to track this plan</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Signed-in users can log each set of this plan and PlateStack will auto-adapt weights based on actual performance.</div>
+        <button class="action-btn" onclick="openModal('authModal')" style="background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700">Sign up — it's free</button>
+      </div>
+    </div>
     <div class="results-footer" id="resultsFooter"></div>
     <div class="qa-section" id="qaSection" style="display:none">
       <div class="qa-label">Ask about your plan</div>
@@ -740,6 +753,24 @@ footer a:hover{color:#fff}
   <div class="account-nudge" id="progressNudge" style="display:none">
     <span><b>Sign in to sync</b> — your progress will be saved to your account and accessible everywhere.</span>
     <button class="nudge-btn" onclick="openModal('authModal')">Sign in / Sign up</button>
+  </div>
+
+  <!-- ACTIVE PLAN TRACKER — only visible if user has an active plan -->
+  <div class="card" id="activePlanCard" style="display:none">
+    <div class="card-header">
+      <span class="card-label">Active plan</span>
+      <div style="display:flex;gap:8px;align-items:center">
+        <select class="lift-selector" id="activePlanDaySelect" onchange="renderActiveSession()" style="max-width:220px"></select>
+        <button class="action-btn" onclick="endActivePlan()" title="Stop tracking this plan" style="padding:6px 10px;font-size:12px">End</button>
+      </div>
+    </div>
+    <div id="activePlanTitle" style="font-weight:700;color:#fff;font-size:16px;margin-bottom:6px"></div>
+    <div id="activePlanMeta" style="font-size:12px;color:var(--text-dim);margin-bottom:12px"></div>
+    <div id="activePlanMsg" style="display:none;font-size:13px;padding:8px 10px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);color:#fff;margin-bottom:10px"></div>
+    <div id="activeSessionBody"></div>
+    <div style="margin-top:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);font-size:11px;color:var(--text-dim);line-height:1.5">
+      ⚠️ PlateStack is not medical advice. Adjust or skip anything that causes pain. Consult a qualified professional for injuries or medical conditions.
+    </div>
   </div>
 
   <div class="card">
@@ -1281,7 +1312,7 @@ function switchTab(name){
   ['tabPlanner','tabProgress','tabCatalog','tabQmc'].forEach((id,i)=>{
     document.getElementById(id).classList.toggle('active',['planner','progress','catalog','qmc'][i]===name);
   });
-  if(name==='progress'){ checkProgressNudge(); renderHistory(); renderChart(); }
+  if(name==='progress'){ checkProgressNudge(); renderHistory(); renderChart(); loadActivePlan(); }
   if(name==='catalog'){ renderCatalog(); }
 }
 
@@ -1350,7 +1381,7 @@ async function doLogin(){
     updateHeaderAuth();
     msg.style.color='var(--green)'; msg.textContent='Signed in!';
     fetchPlanUsage(); // refresh plan count for this account
-    setTimeout(()=>{ closeModal('authModal'); renderHistory(); renderChart(); },1000);
+    setTimeout(()=>{ closeModal('authModal'); renderHistory(); renderChart(); loadActivePlan(); },1000);
   }catch(e){ msg.textContent='Something went wrong. Try again.'; }
   finally{ btn.disabled=false; btn.textContent='Sign in'; }
 }
@@ -1360,6 +1391,10 @@ async function doLogout(){
   if(token) await fetch('/api/auth/logout',{method:'POST',headers:{'X-Auth-Token':token}}).catch(()=>{});
   setToken(null); currentUser=null; updateHeaderAuth();
   renderHistory(); renderChart();
+  // Clear active plan UI on logout
+  _activePlan=null;
+  const card=document.getElementById('activePlanCard');
+  if(card) card.style.display='none';
 }
 
 function updateHeaderAuth(){
@@ -1410,6 +1445,8 @@ async function checkAuth(){
     else { setToken(null); currentUser=null; }
   }catch(e){ currentUser=null; }
   updateHeaderAuth();
+  // If they're signed in, preload their active plan so the Progress tab is ready
+  if(currentUser){ try{ loadActivePlan(); }catch(e){} }
 }
 
 function checkProgressNudge(){
@@ -1975,12 +2012,39 @@ async function calculate(){
     if(typeof data.plan_count==='number') serverPlanCount=data.plan_count;
     if(typeof data.plan_limit==='number') serverPlanLimit=data.plan_limit;
     updateUsageBanner();
-    // Auto-save plan to account if logged in
+    // Stash the raw generation results so "Start tracking" can use them
+    _lastGenerated = {
+      title: data.plan_title || `${splitLabels[selectedSplit]} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`,
+      plan_text: data.plan,
+      structured: data.structured || null,
+      lifts: lifts,
+      unit: document.querySelector('.unit-toggle .active')?.dataset?.unit || 'lbs',
+      savedPlanId: null
+    };
+    // Show tracking CTA — differs based on auth + whether structured data came back
+    const cta=document.getElementById('trackingCta');
+    const ctaAuth=document.getElementById('trackingCtaAuth');
+    const ctaAnon=document.getElementById('trackingCtaAnon');
+    const btn=document.getElementById('startTrackingBtn');
+    const status=document.getElementById('trackingCtaStatus');
+    if(btn){ btn.disabled=false; btn.textContent='Start tracking this plan'; }
+    if(status) status.textContent='';
+    if(data.structured && currentUser){
+      cta.style.display='block'; ctaAuth.style.display='block'; ctaAnon.style.display='none';
+    } else if(data.structured && !currentUser){
+      cta.style.display='block'; ctaAuth.style.display='none'; ctaAnon.style.display='block';
+    } else {
+      cta.style.display='none';
+    }
+    // Save plan to account silently (without activating) if logged in — so it shows up in Saved Plans
     if(currentUser){
-      const planTitle=data.plan_title || `${splitLabels[selectedSplit]} · ${goalLabels[selectedGoal].replace('Build ','').replace(' and size','').replace(' muscle','').replace(' maximum','')} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
-      fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
-        body:JSON.stringify({title:planTitle,plan_text:data.plan,lifts_json:JSON.stringify(lifts)})
-      }).catch(()=>{});
+      try{
+        const saveRes=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+          body:JSON.stringify({title:_lastGenerated.title,plan_text:data.plan,lifts_json:JSON.stringify(lifts),structured:data.structured||null,unit:_lastGenerated.unit,activate:false})
+        });
+        const sd=await saveRes.json();
+        if(sd && sd.id) _lastGenerated.savedPlanId=sd.id;
+      }catch(e){}
     }
     qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
   }catch(e){ err.textContent=e.message||'Something went wrong. Try again.'; document.getElementById('resultsCard').style.display='none'; }
@@ -2436,7 +2500,227 @@ async function saveEditEntry(id){
   renderHistory(); renderChart();
 }
 
-// ── SAVED PLANS MODAL ─────────────────────────────────────────────────────────
+// ── ACTIVE PLAN TRACKER ───────────────────────────────────────────────────────
+// Holds the latest /api/plan response so "Start tracking" knows what to activate
+let _lastGenerated = null;
+// Cache of the server's active plan so switching days doesn't re-fetch
+let _activePlan = null; // {plan, sessions}
+let _activeSelectedDay = null;
+
+async function startTrackingCurrentPlan(){
+  if(!currentUser){ openModal('authModal'); return; }
+  if(!_lastGenerated || !_lastGenerated.structured){
+    alert('This plan is missing structured data. Try generating a new plan.'); return;
+  }
+  const btn=document.getElementById('startTrackingBtn');
+  const status=document.getElementById('trackingCtaStatus');
+  btn.disabled=true; btn.textContent='Starting...';
+  try{
+    // If we already saved this plan silently above, just activate it; otherwise save+activate
+    let planId=_lastGenerated.savedPlanId;
+    if(planId){
+      const res=await fetch(`/api/plans/${planId}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
+      const d=await res.json();
+      if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
+      if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
+    } else {
+      const res=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+        body:JSON.stringify({title:_lastGenerated.title,plan_text:_lastGenerated.plan_text,lifts_json:JSON.stringify(_lastGenerated.lifts||[]),structured:_lastGenerated.structured,unit:_lastGenerated.unit||'lbs',activate:true})
+      });
+      const d=await res.json();
+      if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
+      if(!res.ok || !d.ok){ throw new Error(d.error||'Could not save plan.'); }
+      _lastGenerated.savedPlanId=d.id;
+    }
+    btn.textContent='✓ Tracking — go to Progress Tracker';
+    status.textContent='';
+    // Load + jump to tracker
+    await loadActivePlan();
+    switchTab('progress');
+  }catch(e){
+    btn.disabled=false; btn.textContent='Start tracking this plan';
+    status.textContent = (e && e.message) ? e.message : 'Something went wrong.';
+    status.style.color='var(--red)';
+  }
+}
+
+async function loadActivePlan(){
+  const card=document.getElementById('activePlanCard');
+  if(!currentUser){ card.style.display='none'; return; }
+  try{
+    const res=await fetch('/api/active-plan',{headers:{'X-Auth-Token':getToken()}});
+    const d=await res.json();
+    if(!d.active_plan){ card.style.display='none'; _activePlan=null; return; }
+    _activePlan=d;
+    card.style.display='block';
+    document.getElementById('activePlanTitle').textContent=d.active_plan.title;
+    // Build day selector: show unique weeks+days with progress indicator
+    const sel=document.getElementById('activePlanDaySelect');
+    const byWeekDay={};
+    d.sessions.forEach(s=>{
+      const k=`${s.week}|${s.day}`;
+      if(!byWeekDay[k]) byWeekDay[k]={week:s.week,day:s.day,total:0,done:0};
+      byWeekDay[k].total++;
+      if(s.completed) byWeekDay[k].done++;
+    });
+    const entries=Object.values(byWeekDay).sort((a,b)=> a.week-b.week || a.day-b.day);
+    sel.innerHTML='';
+    entries.forEach(e=>{
+      const opt=document.createElement('option');
+      opt.value=`${e.week}|${e.day}`;
+      opt.textContent=`Week ${e.week} · Day ${e.day}  (${e.done}/${e.total} sets)`;
+      sel.appendChild(opt);
+    });
+    // Default to first incomplete day, else the last one
+    const firstIncomplete = entries.find(e=>e.done<e.total);
+    const defaultKey = firstIncomplete ? `${firstIncomplete.week}|${firstIncomplete.day}` : (entries.length? `${entries[entries.length-1].week}|${entries[entries.length-1].day}` : null);
+    if(defaultKey){ sel.value=defaultKey; _activeSelectedDay=defaultKey; }
+    const weeks=[...new Set(d.sessions.map(s=>s.week))];
+    document.getElementById('activePlanMeta').textContent=`Week ${Math.max(...weeks)} · ${d.sessions.length} total sets across ${entries.length} sessions`;
+    renderActiveSession();
+  }catch(e){
+    console.error(e);
+    card.style.display='none';
+  }
+}
+
+function renderActiveSession(){
+  if(!_activePlan) return;
+  const sel=document.getElementById('activePlanDaySelect');
+  const key=sel.value; _activeSelectedDay=key;
+  if(!key) return;
+  const [week,day]=key.split('|').map(Number);
+  const sets=_activePlan.sessions.filter(s=>s.week===week && s.day===day)
+    .sort((a,b)=> a.exercise_order-b.exercise_order || a.set_number-b.set_number);
+  const body=document.getElementById('activeSessionBody');
+  body.innerHTML='';
+  if(!sets.length){ body.innerHTML='<div style="color:var(--text-dim);font-size:13px">No sets found for this day.</div>'; return; }
+  // Group by exercise
+  const byEx={};
+  sets.forEach(s=>{ const k=`${s.exercise_order}|${s.exercise}`; (byEx[k]=byEx[k]||[]).push(s); });
+  Object.values(byEx).forEach(exSets=>{
+    const ex=exSets[0];
+    const card=document.createElement('div');
+    card.style.cssText='margin-bottom:14px;padding:10px 12px;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);border-radius:8px';
+    const header=document.createElement('div');
+    header.style.cssText='font-weight:700;color:#fff;font-size:14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center';
+    const exName=document.createElement('span'); exName.textContent=ex.exercise;
+    const repTarget=document.createElement('span');
+    repTarget.style.cssText='font-size:11px;color:var(--text-dim);font-weight:500';
+    repTarget.textContent=`${exSets.length}×${ex.prescribed_reps} @ ${ex.prescribed_weight}${ex.unit}`;
+    header.appendChild(exName); header.appendChild(repTarget);
+    card.appendChild(header);
+    exSets.forEach(s=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap';
+      const label=document.createElement('span');
+      label.style.cssText='font-size:12px;color:var(--text-dim);min-width:46px';
+      label.textContent=`Set ${s.set_number}`;
+      row.appendChild(label);
+      if(s.completed){
+        const done=document.createElement('div');
+        done.style.cssText='font-size:12px;color:var(--green);display:flex;gap:8px;align-items:center;flex-wrap:wrap';
+        done.innerHTML=`<span>✓ ${s.actual_weight}${s.unit} × ${s.actual_reps} @ RPE ${s.rpe}</span>`;
+        row.appendChild(done);
+      } else {
+        const wIn=document.createElement('input'); wIn.type='number'; wIn.step='any'; wIn.min='0';
+        wIn.placeholder=`${s.prescribed_weight}`; wIn.value=s.prescribed_weight||'';
+        wIn.style.cssText='width:72px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+        wIn.dataset.field='weight'; wIn.dataset.sessionId=s.id;
+        const rIn=document.createElement('input'); rIn.type='number'; rIn.min='0'; rIn.max='100';
+        rIn.placeholder=`${s.prescribed_reps}`;
+        rIn.style.cssText='width:56px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+        rIn.dataset.field='reps'; rIn.dataset.sessionId=s.id;
+        const rpe=document.createElement('select');
+        rpe.style.cssText='width:70px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+        rpe.dataset.field='rpe'; rpe.dataset.sessionId=s.id;
+        const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='RPE…'; rpe.appendChild(opt0);
+        for(let v=5;v<=10;v+=0.5){ const o=document.createElement('option'); o.value=v; o.textContent=v; rpe.appendChild(o); }
+        const btn=document.createElement('button');
+        btn.textContent='Log';
+        btn.style.cssText='padding:4px 12px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-weight:700;font-size:12px;cursor:pointer';
+        btn.onclick=()=>logSet(s.id,wIn,rIn,rpe,btn);
+        row.appendChild(wIn);
+        const x1=document.createElement('span'); x1.textContent='×'; x1.style.cssText='color:var(--text-dim);font-size:11px'; row.appendChild(x1);
+        row.appendChild(rIn);
+        row.appendChild(rpe);
+        row.appendChild(btn);
+      }
+      card.appendChild(row);
+    });
+    body.appendChild(card);
+  });
+  // Show "Advance to next week" if all current-week sets are done and no next-week exists
+  const weekSets=_activePlan.sessions.filter(s=>s.week===week);
+  const weekDone=weekSets.every(s=>s.completed);
+  const nextWeekExists=_activePlan.sessions.some(s=>s.week===week+1);
+  if(weekDone && !nextWeekExists){
+    const adv=document.createElement('button');
+    adv.textContent=`✓ Week ${week} complete — Generate Week ${week+1} with adapted weights`;
+    adv.style.cssText='display:block;margin-top:10px;width:100%;padding:12px;background:var(--orange);color:#fff;border:none;border-radius:6px;font-weight:700;font-size:14px;cursor:pointer';
+    adv.onclick=()=>advanceToNextWeek(week);
+    body.appendChild(adv);
+  }
+}
+
+async function logSet(sessionId,wIn,rIn,rpeSel,btn){
+  const weight=parseFloat(wIn.value); const reps=parseInt(rIn.value,10); const rpe=parseFloat(rpeSel.value);
+  if(!(weight>=0) || !(reps>=0) || !(rpe>=1 && rpe<=10)){
+    alert('Enter weight, reps, and an RPE (1-10).'); return;
+  }
+  btn.disabled=true; btn.textContent='...';
+  try{
+    const res=await fetch(`/api/plan-sessions/${sessionId}/log`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+      body:JSON.stringify({actual_weight:weight,actual_reps:reps,rpe:Math.round(rpe)})
+    });
+    const d=await res.json();
+    if(!res.ok){ throw new Error(d.error||'Failed to log.'); }
+    const msg=document.getElementById('activePlanMsg');
+    if(d.adjustment){
+      msg.style.display='block';
+      msg.textContent=`💪 ${d.adjustment.reason}. Remaining sets updated.`;
+      setTimeout(()=>{ msg.style.display='none'; },6000);
+    }
+    await loadActivePlan(); // refresh to pick up adjustments + completion state
+  }catch(e){
+    btn.disabled=false; btn.textContent='Log';
+    alert(e.message||'Failed to log set.');
+  }
+}
+
+async function advanceToNextWeek(fromWeek){
+  if(!_activePlan || !_activePlan.active_plan) return;
+  if(!confirm(`Generate Week ${fromWeek+1} with weights adapted from your performance?`)) return;
+  try{
+    const res=await fetch(`/api/plans/${_activePlan.active_plan.id}/advance-week`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+      body:JSON.stringify({from_week:fromWeek})
+    });
+    const d=await res.json();
+    if(!res.ok){ throw new Error(d.error||'Failed to advance week.'); }
+    await loadActivePlan();
+  }catch(e){ alert(e.message||'Failed to advance week.'); }
+}
+
+async function endActivePlan(){
+  if(!_activePlan || !_activePlan.active_plan) return;
+  if(!confirm('Stop tracking this plan? Your workout log history will be preserved, but you can start tracking a different plan.')) return;
+  try{
+    // "End" just means deactivating — keep the row + history. We reuse the Saved Plans modal to re-activate later.
+    // Simpler path: delete the active flag via a lightweight endpoint. We'll piggyback on activate with plan_id=0 approach? Easier: just null it client-side by deactivating via a dedicated call.
+    // Since we don't have a deactivate endpoint, use DELETE only if the user wants full removal. For now, keep the plan but just hide the card by clearing local state and asking them to pick another.
+    // Fallback: just hide the UI — the flag stays in DB. On next login, loadActivePlan re-reads. So we need a real deactivate path.
+    const res=await fetch(`/api/plans/${_activePlan.active_plan.id}/deactivate`,{method:'POST',headers:{'X-Auth-Token':getToken()}});
+    if(!res.ok){ throw new Error('Could not stop tracking.'); }
+    _activePlan=null;
+    document.getElementById('activePlanCard').style.display='none';
+  }catch(e){ alert(e.message||'Could not stop tracking.'); }
+}
+
+
 const _planCache = new Map(); // id -> {title, plan_text}
 
 async function openSavedPlansModal(){
