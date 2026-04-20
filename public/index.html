@@ -446,11 +446,66 @@ footer a:hover{color:#fff}
   <button class="modal-close" onclick="closeModal('howModal')">×</button>
   <div class="modal-badge badge-orange">How it works</div>
   <h2>Track lifts. Hit goals.</h2>
-  <p>PlateStack uses your real gym numbers to calculate your one-rep max and build a personalized training plan — no guessing, no generic programs.</p>
-  <div class="how-steps">
-    <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and lifts</strong><span>Age, bodyweight, training schedule, and current numbers.</span></div></div>
-    <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Strength, size, endurance, or something specific — tell us exactly what you're chasing.</span></div></div>
-    <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your plan + track progress</strong><span>See your 1RM, get an AI plan, ask questions, export PDF, and log every workout over time.</span></div></div>
+  <p>PlateStack uses your real gym numbers to calculate your one-rep max, build a personalized AI training plan, and then <strong>automatically adjust the weights week by week based on how your workouts are actually going.</strong></p>
+
+  <div class="tos-section" style="margin-top:1.25rem">
+    <h3>The basics, in order</h3>
+    <div class="how-steps">
+      <div class="how-step"><div class="how-num">1</div><div class="how-step-text"><strong>Enter your stats and current lifts</strong><span>Age, bodyweight, training days per week, and what you can currently lift. We use these to estimate your 1RM (one-rep max — the most you could lift for a single rep).</span></div></div>
+      <div class="how-step"><div class="how-num">2</div><div class="how-step-text"><strong>Set your goal</strong><span>Strength, size (hypertrophy), endurance, athletic performance, or something specific — tell us exactly what you're chasing.</span></div></div>
+      <div class="how-step"><div class="how-num">3</div><div class="how-step-text"><strong>Get your AI-generated plan</strong><span>A multi-week program built around your exact numbers, goal, schedule, equipment, and any injuries you list.</span></div></div>
+      <div class="how-step"><div class="how-num">4</div><div class="how-step-text"><strong>Log your workouts as you go</strong><span>One tap per set. Enter actual weight/reps if different from prescribed, or just hit "Log as prescribed" and you're done.</span></div></div>
+      <div class="how-step"><div class="how-num">5</div><div class="how-step-text"><strong>The plan adapts automatically</strong><span>Weights go up when you're crushing it, stay the same when you're holding steady, and back off when you're struggling. You don't have to do the math.</span></div></div>
+    </div>
+  </div>
+
+  <div class="tos-section">
+    <h3>What "adaptive" actually means</h3>
+    <p style="color:var(--text-muted)">Most training apps give you a fixed plan. PlateStack watches what you actually lifted and adjusts the <em>next</em> sets and <em>next week's</em> weights based on it:</p>
+    <ul style="font-size:13px;color:var(--text-muted);line-height:1.75;padding-left:1.1rem;margin-bottom:0">
+      <li><strong>Within a workout:</strong> if one set felt way too easy or way too hard, remaining sets of that same exercise adjust immediately.</li>
+      <li><strong>Week to week:</strong> when you finish a week, hit "Generate Next Week" and weights are reassessed for every exercise based on how that whole week went — bumped up, held, or deloaded.</li>
+    </ul>
+  </div>
+
+  <div class="tos-section">
+    <h3>What's RPE? (totally optional)</h3>
+    <p style="color:var(--text-muted)">RPE = <strong>Rate of Perceived Exertion</strong>, a 1–10 scale for how hard a set felt:</p>
+    <ul style="font-size:13px;color:var(--text-muted);line-height:1.75;padding-left:1.1rem;margin-bottom:0.6rem">
+      <li><strong>RPE 6</strong> — could have done ~4 more reps easily</li>
+      <li><strong>RPE 8</strong> — hard but had ~2 reps left in the tank</li>
+      <li><strong>RPE 10</strong> — absolute max, could not have done another rep</li>
+    </ul>
+    <p style="color:var(--text-muted);margin-bottom:0">You can log a set without it — the plan still adapts, just based on reps alone. If you <em>do</em> log RPE, adjustments get smarter (big easy bumps when you've got gas left, earlier deloads when you're grinding).</p>
+  </div>
+
+  <div class="tos-section">
+    <h3>No account vs. free account</h3>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px">
+      <div style="padding:12px;background:rgba(255,255,255,0.03);border:1px solid var(--border);border-radius:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">No account</div>
+        <ul style="font-size:12.5px;color:var(--text-muted);line-height:1.65;padding-left:1rem;margin:0">
+          <li>1RM calculator</li>
+          <li>Generate AI training plans</li>
+          <li>Ask follow-up questions about your plan</li>
+          <li>Export plan as PDF</li>
+          <li>Browse the exercise catalog</li>
+          <li>Log workouts (stored in this browser only)</li>
+        </ul>
+      </div>
+      <div style="padding:12px;background:rgba(249,115,22,0.08);border:1px solid var(--orange-border);border-radius:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:8px">With free account</div>
+        <ul style="font-size:12.5px;color:var(--text-muted);line-height:1.65;padding-left:1rem;margin:0">
+          <li>Everything on the left, <strong>plus:</strong></li>
+          <li><strong>Adaptive plan tracking</strong> — auto-adjusting weights</li>
+          <li>Week-over-week progress charts</li>
+          <li>Sync across all your devices</li>
+          <li>History never gets wiped if you clear your browser</li>
+          <li>Save and switch between multiple plans</li>
+        </ul>
+      </div>
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);margin-top:10px;margin-bottom:0">Accounts are free during beta. A paid tier may launch later for unlimited plans and advanced features — core tracking stays free.</p>
   </div>
 </div>
 </div>
@@ -795,6 +850,9 @@ footer a:hover{color:#fff}
     <div id="activePlanTitle" style="font-weight:700;color:#fff;font-size:16px;margin-bottom:6px"></div>
     <div id="activePlanMeta" style="font-size:12px;color:var(--text-dim);margin-bottom:12px"></div>
     <div id="activePlanMsg" style="display:none;font-size:13px;padding:8px 10px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);color:#fff;margin-bottom:10px"></div>
+    <div style="font-size:11.5px;color:var(--text-dim);line-height:1.6;margin-bottom:10px;padding:8px 10px;background:rgba(255,255,255,0.02);border-radius:6px">
+      💡 Tap <strong style="color:var(--orange)">Log as prescribed</strong> to log a set exactly as planned, or enter your actual weight/reps and tap <strong>Log</strong>. <strong>RPE is optional</strong> — it's a 1–10 rating for how hard the set felt (6 = easy, 8 = hard, 10 = max). Logging it makes week-to-week weight adjustments smarter.
+    </div>
     <div id="activeSessionBody"></div>
 
     <!-- Week-over-week progress chart -->
@@ -2828,7 +2886,8 @@ function renderActiveSession(){
       if(s.completed){
         const done=document.createElement('div');
         done.style.cssText='font-size:12px;color:var(--green);display:flex;gap:8px;align-items:center;flex-wrap:wrap';
-        done.innerHTML=`<span>✓ ${s.actual_weight}${s.unit} × ${s.actual_reps} @ RPE ${s.rpe}</span>`;
+        const rpeText = (s.rpe!==null && s.rpe!==undefined && s.rpe!=='') ? ` @ RPE ${s.rpe}` : '';
+        done.innerHTML=`<span>✓ ${s.actual_weight}${s.unit} × ${s.actual_reps}${rpeText}</span>`;
         row.appendChild(done);
       } else {
         const wIn=document.createElement('input'); wIn.type='number'; wIn.step='any'; wIn.min='0';
@@ -2840,19 +2899,28 @@ function renderActiveSession(){
         rIn.style.cssText='width:56px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
         rIn.dataset.field='reps'; rIn.dataset.sessionId=s.id;
         const rpe=document.createElement('select');
-        rpe.style.cssText='width:70px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+        rpe.style.cssText='width:90px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
         rpe.dataset.field='rpe'; rpe.dataset.sessionId=s.id;
-        const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='RPE…'; rpe.appendChild(opt0);
+        rpe.title='RPE (optional): how hard the set felt, 1–10';
+        const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='RPE (opt)'; rpe.appendChild(opt0);
         for(let v=5;v<=10;v+=0.5){ const o=document.createElement('option'); o.value=v; o.textContent=v; rpe.appendChild(o); }
         const btn=document.createElement('button');
         btn.textContent='Log';
+        btn.title='Log this set with the values you entered';
         btn.style.cssText='padding:4px 12px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-weight:700;font-size:12px;cursor:pointer';
         btn.onclick=()=>logSet(s.id,wIn,rIn,rpe,btn);
+        // NEW: one-click "log exactly as prescribed" — bypasses manual entry entirely
+        const quickBtn=document.createElement('button');
+        quickBtn.textContent='✓ As prescribed';
+        quickBtn.title='Log this set with the prescribed weight and reps, no RPE';
+        quickBtn.style.cssText='padding:4px 10px;background:rgba(34,197,94,0.15);color:var(--green);border:1px solid rgba(34,197,94,0.35);border-radius:4px;font-weight:700;font-size:12px;cursor:pointer';
+        quickBtn.onclick=()=>logSetAsPrescribed(s,quickBtn);
         row.appendChild(wIn);
         const x1=document.createElement('span'); x1.textContent='×'; x1.style.cssText='color:var(--text-dim);font-size:11px'; row.appendChild(x1);
         row.appendChild(rIn);
         row.appendChild(rpe);
         row.appendChild(btn);
+        row.appendChild(quickBtn);
       }
       card.appendChild(row);
     });
@@ -2872,16 +2940,23 @@ function renderActiveSession(){
 }
 
 async function logSet(sessionId,wIn,rIn,rpeSel,btn){
-  const weight=parseFloat(wIn.value); const reps=parseInt(rIn.value,10); const rpe=parseFloat(rpeSel.value);
-  if(!(weight>=0) || !(reps>=0) || !(rpe>=1 && rpe<=10)){
-    alert('Enter weight, reps, and an RPE (1-10).'); return;
+  const weight=parseFloat(wIn.value); const reps=parseInt(rIn.value,10);
+  const rpeRaw=rpeSel.value;
+  const rpe = rpeRaw==='' ? null : parseFloat(rpeRaw);
+  if(!(weight>=0) || !(reps>=0)){
+    alert('Enter weight and reps. RPE is optional.'); return;
+  }
+  if(rpe!==null && !(rpe>=1 && rpe<=10)){
+    alert('RPE must be between 1 and 10 if provided.'); return;
   }
   btn.disabled=true; btn.textContent='...';
   try{
+    const payload = {actual_weight:weight, actual_reps:reps};
+    if(rpe!==null) payload.rpe = Math.round(rpe);
     const res=await fetch(`/api/plan-sessions/${sessionId}/log`,{
       method:'POST',
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
-      body:JSON.stringify({actual_weight:weight,actual_reps:reps,rpe:Math.round(rpe)})
+      body:JSON.stringify(payload)
     });
     const d=await res.json();
     if(!res.ok){ throw new Error(d.error||'Failed to log.'); }
@@ -2894,6 +2969,29 @@ async function logSet(sessionId,wIn,rIn,rpeSel,btn){
     await loadActivePlan(); // refresh to pick up adjustments + completion state
   }catch(e){
     btn.disabled=false; btn.textContent='Log';
+    alert(e.message||'Failed to log set.');
+  }
+}
+
+// One-click log: uses prescribed weight/reps, skips RPE entirely
+async function logSetAsPrescribed(s, btn){
+  btn.disabled=true; btn.textContent='...';
+  try{
+    const payload = {
+      actual_weight: s.prescribed_weight || 0,
+      actual_reps: s.prescribed_reps || 0
+      // no rpe — optional
+    };
+    const res=await fetch(`/api/plan-sessions/${s.id}/log`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+      body:JSON.stringify(payload)
+    });
+    const d=await res.json();
+    if(!res.ok){ throw new Error(d.error||'Failed to log.'); }
+    await loadActivePlan();
+  }catch(e){
+    btn.disabled=false; btn.textContent='✓ As prescribed';
     alert(e.message||'Failed to log set.');
   }
 }
