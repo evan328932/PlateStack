@@ -303,6 +303,64 @@ def me():
         user["is_premium"]=is_premium_user(user)
     return jsonify({"user":user}),200
 
+@app.route("/api/auth/export",methods=["GET"])
+def export_user_data():
+    """GDPR Art. 20 / CCPA — right to data portability. Returns everything we store about the user
+    in a machine-readable JSON format. Triggered from the user's profile; no admin approval needed."""
+    user=get_auth_user()
+    if not user: return jsonify({"error":"Not logged in."}),401
+    db=get_db()
+    uid=user["id"]
+    u_row=db.execute("SELECT id,email,datetime(created,'unixepoch') as created_at,is_premium FROM users WHERE id=?",(uid,)).fetchone()
+    logs=db.execute("SELECT exercise,weight,reps,estimated1rm,unit,note,date,datetime(created,'unixepoch') as created_at FROM workout_log WHERE user_id=? ORDER BY created",(uid,)).fetchall()
+    plans=db.execute("SELECT id,title,plan_text,lifts_json,structured_plan,days_per_week,unit,is_active,datetime(created,'unixepoch') as created_at FROM saved_plans WHERE user_id=? ORDER BY created",(uid,)).fetchall()
+    sessions=db.execute("SELECT plan_id,week,day,exercise,set_number,prescribed_weight,prescribed_reps,actual_weight,actual_reps,rpe,unit,completed,datetime(completed_at,'unixepoch') as completed_at FROM plan_sessions WHERE user_id=? ORDER BY plan_id,week,day,set_number",(uid,)).fetchall()
+    data={
+        "export_version":"1.0",
+        "exported_at":time.strftime("%Y-%m-%dT%H:%M:%SZ",time.gmtime()),
+        "account":dict(u_row) if u_row else {},
+        "workout_log":[dict(r) for r in logs],
+        "saved_plans":[dict(r) for r in plans],
+        "plan_sessions":[dict(r) for r in sessions],
+        "notes":"This export contains all personal data PlateStack stores about your account. Page visit tracking is anonymized (SHA-256 hashed IP, not tied to your identity) and therefore not included."
+    }
+    # Force the browser to download it as a .json file
+    from flask import Response
+    import json as _json
+    filename=f"platestack-data-{time.strftime('%Y-%m-%d')}.json"
+    return Response(
+        _json.dumps(data,indent=2),
+        mimetype="application/json",
+        headers={"Content-Disposition":f'attachment; filename="{filename}"'}
+    )
+
+@app.route("/api/auth/delete-account",methods=["POST"])
+def delete_account():
+    """GDPR Art. 17 / CCPA — right to erasure. Permanently deletes the user and all their data.
+    Requires password confirmation in the request body to prevent accidental/CSRF deletion."""
+    ip=get_ip()
+    if is_auth_rate_limited(ip): return jsonify({"error":"Too many attempts. Wait a few minutes."}),429
+    user=get_auth_user()
+    if not user: return jsonify({"error":"Not logged in."}),401
+    data=request.get_json(silent=True) or {}
+    confirm_pw=str(data.get("password",""))
+    if not confirm_pw: return jsonify({"error":"Password required to confirm deletion."}),400
+    db=get_db()
+    row=db.execute("SELECT password FROM users WHERE id=?",(user["id"],)).fetchone()
+    if not row or not check_password(confirm_pw,row["password"]):
+        return jsonify({"error":"Incorrect password."}),401
+    uid=user["id"]
+    # Delete in dependency order — children first
+    db.execute("DELETE FROM plan_sessions WHERE user_id=?",(uid,))
+    db.execute("DELETE FROM saved_plans WHERE user_id=?",(uid,))
+    db.execute("DELETE FROM workout_log WHERE user_id=?",(uid,))
+    db.execute("DELETE FROM sessions WHERE user_id=?",(uid,))
+    # Note: ip_plan_usage uses "user:{id}" key — nuke that too
+    db.execute("DELETE FROM ip_plan_usage WHERE ip=?",(f"user:{uid}",))
+    db.execute("DELETE FROM users WHERE id=?",(uid,))
+    db.commit()
+    return jsonify({"ok":True}),200
+
 @app.route("/api/plan-usage",methods=["GET"])
 def plan_usage():
     user=get_auth_user(); ip=get_ip()
@@ -380,7 +438,7 @@ def update_log(entry_id):
 def get_saved_plans():
     user=get_auth_user()
     if not user: return jsonify({"error":"Not logged in."}),401
-    rows=get_db().execute("SELECT id,title,plan_text,lifts_json,datetime(created,'unixepoch') as created_at FROM saved_plans WHERE user_id=? ORDER BY created DESC LIMIT 20",(user["id"],)).fetchall()
+    rows=get_db().execute("SELECT id,title,plan_text,lifts_json,is_active,(structured_plan IS NOT NULL) as trackable,datetime(created,'unixepoch') as created_at FROM saved_plans WHERE user_id=? ORDER BY created DESC LIMIT 20",(user["id"],)).fetchall()
     return jsonify({"plans":[dict(r) for r in rows]}),200
 
 @app.route("/api/plans",methods=["POST"])
@@ -629,6 +687,32 @@ def log_session_set(session_id):
         db.commit()
         adjustment={"new_weight":new_weight,"reason":reason}
     return jsonify({"ok":True,"adjustment":adjustment}),200
+
+@app.route("/api/plans/<int:plan_id>/progress",methods=["GET"])
+def plan_progress(plan_id):
+    """Week-over-week per-exercise progress for charting. Returns average top-set weight per week."""
+    user=get_auth_user()
+    if not user: return jsonify({"error":"Not logged in."}),401
+    db=get_db()
+    # Verify the user owns this plan
+    plan=db.execute("SELECT id,title,unit FROM saved_plans WHERE id=? AND user_id=?",(plan_id,user["id"])).fetchone()
+    if not plan: return jsonify({"error":"Plan not found."}),404
+    # Aggregate per (exercise, week): best actual_weight across logged sets that week
+    rows=db.execute("""SELECT exercise,week,MAX(actual_weight) as top_weight,AVG(actual_weight) as avg_weight,AVG(rpe) as avg_rpe,COUNT(*) as sets_logged
+        FROM plan_sessions WHERE user_id=? AND plan_id=? AND completed=1
+        GROUP BY exercise,week ORDER BY exercise,week""",(user["id"],plan_id)).fetchall()
+    by_ex={}
+    for r in rows:
+        ex=r["exercise"]
+        if ex not in by_ex: by_ex[ex]=[]
+        by_ex[ex].append({
+            "week":r["week"],
+            "top_weight":round(r["top_weight"] or 0,1),
+            "avg_weight":round(r["avg_weight"] or 0,1),
+            "avg_rpe":round(r["avg_rpe"] or 0,1),
+            "sets_logged":r["sets_logged"]
+        })
+    return jsonify({"plan":dict(plan),"progress":by_ex}),200
 
 @app.route("/api/plans/<int:plan_id>/advance-week",methods=["POST"])
 def advance_week(plan_id):
