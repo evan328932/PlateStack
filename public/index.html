@@ -467,19 +467,47 @@ footer a:hover{color:#fff}
 </div>
 </div>
 
+<!-- DELETE ACCOUNT -->
+<div class="modal-overlay" id="deleteAccountModal" onclick="closeModal('deleteAccountModal')">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:440px">
+  <button class="modal-close" onclick="closeModal('deleteAccountModal')">×</button>
+  <div class="modal-badge badge-orange" style="background:rgba(239,68,68,0.2);color:#ef4444;border-color:rgba(239,68,68,0.4)">⚠️ Permanent action</div>
+  <h2 style="color:#ef4444">Delete your account</h2>
+  <p style="color:var(--text-muted);font-size:14px;line-height:1.5">This will permanently delete your account and all data: saved plans, workout logs, tracked sessions, and preferences. This cannot be undone.</p>
+  <p style="color:var(--text-muted);font-size:13px;margin-top:10px">Want a copy first? <a href="#" onclick="exportMyData();return false" style="color:var(--orange)">Export your data</a> before deleting.</p>
+  <div style="margin-top:16px">
+    <div class="field-label" style="margin-bottom:6px">Type <b>DELETE</b> to confirm</div>
+    <input class="log-input" id="deleteConfirmText" placeholder="DELETE" style="width:100%">
+  </div>
+  <div style="margin-top:10px">
+    <div class="field-label" style="margin-bottom:6px">Enter your password</div>
+    <input class="log-input" id="deleteConfirmPw" type="password" placeholder="Your password" style="width:100%">
+  </div>
+  <div id="deleteAccountMsg" style="font-size:13px;color:var(--red);margin-top:10px;min-height:16px"></div>
+  <div style="display:flex;gap:8px;margin-top:14px">
+    <button class="action-btn" onclick="closeModal('deleteAccountModal')" style="flex:1">Cancel</button>
+    <button class="action-btn" id="confirmDeleteBtn" onclick="confirmDeleteAccount()" style="flex:1;background:#ef4444;color:#fff;border-color:#ef4444;font-weight:700">Delete forever</button>
+  </div>
+</div>
+</div>
+
 <!-- TERMS -->
 <div class="modal-overlay" id="tosModal" onclick="closeModal('tosModal')">
 <div class="modal" onclick="event.stopPropagation()">
   <button class="modal-close" onclick="closeModal('tosModal')">×</button>
-  <div class="modal-badge badge-yellow">Terms of service</div>
-  <h2>Terms of Service</h2>
+  <div class="modal-badge badge-yellow">Terms &amp; privacy</div>
+  <h2>Terms of Service &amp; Privacy Policy</h2>
   <p>By using PlateStack you agree to these terms. Last updated April 2026.</p>
-  <div class="tos-section"><h3>1. Not medical advice</h3><p>PlateStack provides general fitness information only. Consult a qualified professional before starting any new program. You train at your own risk.</p></div>
-  <div class="tos-section"><h3>2. Accuracy of estimates</h3><p>1RM calculations use a weighted average of Brzycki, Lander, Epley, and Mayhew formulas. These are estimates — never attempt a true 1RM without a spotter.</p></div>
-  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. PlateStack is not liable for any injury or damage from following generated advice.</p></div>
-  <div class="tos-section"><h3>4. Privacy and data</h3><p>Account data is stored securely on our servers. Browser-only data stays in localStorage. We do not sell any data.</p></div>
-  <div class="tos-section"><h3>5. Acceptable use</h3><p>Do not abuse or spam the service. We reserve the right to block access for misuse.</p></div>
-  <div class="tos-section"><h3>6. Liability</h3><p>Total liability is capped at what you have paid (zero during free beta).</p></div>
+  <div class="tos-section"><h3>1. Not medical advice</h3><p>PlateStack provides general fitness information only — it is not medical advice, physical therapy, or a substitute for a qualified coach. The AI-generated training plans and automatic weight adaptations are informational suggestions based on the data you provide. Consult a qualified professional before starting any new program, especially if you have injuries, medical conditions, or are pregnant. You train at your own risk.</p></div>
+  <div class="tos-section"><h3>2. Accuracy of estimates and adaptations</h3><p>1RM calculations use a weighted average of Brzycki, Lander, Epley, and Mayhew formulas. The plan adaptation engine adjusts prescribed weights based on your logged performance and self-reported effort (RPE). These are estimates — never attempt a true 1RM without a spotter, and use your own judgment to ignore or modify any prescribed weight that feels unsafe.</p></div>
+  <div class="tos-section"><h3>3. Your responsibility</h3><p>You are solely responsible for how you use this information. PlateStack and its operators are not liable for any injury, damage, or loss resulting from following generated advice or adapted training prescriptions.</p></div>
+  <div class="tos-section"><h3>4. What data we collect</h3><p>If you create an account: your email address, password (stored as a salted PBKDF2 hash — we never see your actual password), and any lifting data you enter (exercise names, weights, reps, RPE, notes, training plans, plan-tracking sessions). If you use the site without an account: generated plans are stored in your browser only. We also log anonymized daily visit counts using a hashed IP address that cannot be reversed to identify you.</p></div>
+  <div class="tos-section"><h3>5. How we use your data</h3><p>Your lifting data is used to generate training plans, calculate estimated 1RMs, and adapt future plan prescriptions. We do not sell, rent, or share your personal data with third parties for marketing. We use Anthropic's API to generate plans — when you request a plan, relevant workout context is sent to Anthropic to produce the response. Review <a href="https://www.anthropic.com/legal/privacy" target="_blank" rel="noopener">Anthropic's privacy policy</a> for details. Our hosting is provided by Railway.</p></div>
+  <div class="tos-section"><h3>6. Your rights (GDPR / CCPA)</h3><p>You have the right to access, export, and delete your data at any time. Account holders can download a full JSON export of everything we store about them, or permanently delete their account and all associated data, from the profile menu. Deletion is immediate and irreversible. We retain anonymized aggregate usage statistics (daily visit counts) indefinitely; these cannot be linked back to you.</p></div>
+  <div class="tos-section"><h3>7. Data retention</h3><p>Account data is retained for as long as your account exists. If you delete your account, all identifiable data is permanently removed within 24 hours. Session tokens older than 30 days are automatically pruned. We have no offline backups that persist deleted data.</p></div>
+  <div class="tos-section"><h3>8. Acceptable use</h3><p>Do not abuse or spam the service, attempt to circumvent rate limits, or use the service to generate content unrelated to strength training. We reserve the right to block access for misuse.</p></div>
+  <div class="tos-section"><h3>9. Liability</h3><p>Total liability is capped at what you have paid (zero during free beta). No warranty of fitness for a particular purpose is given or implied.</p></div>
+  <div class="tos-section"><h3>10. Contact</h3><p>For data requests or questions, contact us through the email link in the footer.</p></div>
 </div>
 </div>
 
@@ -768,6 +796,18 @@ footer a:hover{color:#fff}
     <div id="activePlanMeta" style="font-size:12px;color:var(--text-dim);margin-bottom:12px"></div>
     <div id="activePlanMsg" style="display:none;font-size:13px;padding:8px 10px;border-radius:6px;background:rgba(249,115,22,0.12);border:1px solid rgba(249,115,22,0.3);color:#fff;margin-bottom:10px"></div>
     <div id="activeSessionBody"></div>
+
+    <!-- Week-over-week progress chart -->
+    <div id="planProgressSection" style="display:none;margin-top:16px;padding-top:14px;border-top:1px solid var(--border2)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px">
+        <div class="card-label">Week-over-week progress</div>
+        <select class="lift-selector" id="planProgressExercise" onchange="renderPlanProgressChart()" style="max-width:220px"></select>
+      </div>
+      <div id="planProgressEmpty" class="empty-state" style="display:none">Complete at least 2 weeks to see adaptation progress.</div>
+      <div id="planProgressWrap" class="chart-wrap" style="display:none;height:240px">
+        <canvas id="planProgressChart"></canvas>
+      </div>
+    </div>
     <div style="margin-top:10px;padding:8px 10px;border-radius:6px;background:rgba(255,255,255,0.03);font-size:11px;color:var(--text-dim);line-height:1.5">
       ⚠️ PlateStack is not medical advice. Adjust or skip anything that causes pain. Consult a qualified professional for injuries or medical conditions.
     </div>
@@ -1404,6 +1444,8 @@ function updateHeaderAuth(){
       <div class="profile-email">${esc(currentUser.email)}</div>
       <div class="profile-stats" id="profileStats"><div class="profile-stat"><div class="profile-stat-val" id="statSessions">—</div><div class="profile-stat-lbl">Sessions</div></div><div class="profile-stat"><div class="profile-stat-val" id="statLifts">—</div><div class="profile-stat-lbl">Sets logged</div></div><div class="profile-stat"><div class="profile-stat-val" id="statExercises">—</div><div class="profile-stat-lbl">Exercises</div></div><div class="profile-stat"><div class="profile-stat-val" id="statStreak">—</div><div class="profile-stat-lbl">Week streak</div></div></div>
       <button class="profile-view-plans" onclick="openSavedPlansModal();event.stopPropagation()">📋 View saved plans</button>
+      <button class="profile-view-plans" onclick="exportMyData();event.stopPropagation()" style="margin-top:6px">⬇ Export my data</button>
+      <button class="profile-view-plans" onclick="openDeleteAccountModal();event.stopPropagation()" style="margin-top:6px;color:var(--red)">🗑 Delete account</button>
       <button class="profile-signout" onclick="doLogout();event.stopPropagation()">Sign out</button>
     </div></div>`;
     loadProfileStats();
@@ -2500,12 +2542,72 @@ async function saveEditEntry(id){
   renderHistory(); renderChart();
 }
 
+// ── GDPR / CCPA: DATA EXPORT & ACCOUNT DELETION ───────────────────────────────
+async function exportMyData(){
+  closeProfileDropdown();
+  if(!currentUser){ openModal('authModal'); return; }
+  try{
+    // Hit the export endpoint; we force a JSON download client-side so the token stays in the header
+    const res=await fetch('/api/auth/export',{headers:{'X-Auth-Token':getToken()}});
+    if(!res.ok){ alert('Could not export data. Please try again.'); return; }
+    const blob=await res.blob();
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;
+    a.download=`platestack-data-${new Date().toISOString().slice(0,10)}.json`;
+    document.body.appendChild(a); a.click();
+    setTimeout(()=>{ URL.revokeObjectURL(url); a.remove(); },100);
+  }catch(e){ alert('Export failed. Please try again.'); }
+}
+
+function openDeleteAccountModal(){
+  closeProfileDropdown();
+  if(!currentUser){ openModal('authModal'); return; }
+  document.getElementById('deleteConfirmText').value='';
+  document.getElementById('deleteConfirmPw').value='';
+  document.getElementById('deleteAccountMsg').textContent='';
+  const btn=document.getElementById('confirmDeleteBtn');
+  btn.disabled=false; btn.textContent='Delete forever';
+  openModal('deleteAccountModal');
+}
+
+async function confirmDeleteAccount(){
+  const msg=document.getElementById('deleteAccountMsg');
+  msg.textContent='';
+  const confirmText=document.getElementById('deleteConfirmText').value.trim();
+  const pw=document.getElementById('deleteConfirmPw').value;
+  if(confirmText!=='DELETE'){ msg.textContent='Type DELETE (all caps) to confirm.'; return; }
+  if(!pw){ msg.textContent='Password required.'; return; }
+  const btn=document.getElementById('confirmDeleteBtn');
+  btn.disabled=true; btn.textContent='Deleting...';
+  try{
+    const res=await fetch('/api/auth/delete-account',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+      body:JSON.stringify({password:pw})
+    });
+    const d=await res.json();
+    if(!res.ok){ msg.textContent=d.error||'Could not delete account.'; btn.disabled=false; btn.textContent='Delete forever'; return; }
+    // Success — clear everything local and reload
+    setToken(null); currentUser=null;
+    try{ localStorage.removeItem(LOG_KEY); localStorage.removeItem(SAVE_KEY); }catch(e){}
+    alert('Your account and all data have been permanently deleted.');
+    window.location.reload();
+  }catch(e){
+    msg.textContent='Something went wrong. Try again.';
+    btn.disabled=false; btn.textContent='Delete forever';
+  }
+}
+
 // ── ACTIVE PLAN TRACKER ───────────────────────────────────────────────────────
 // Holds the latest /api/plan response so "Start tracking" knows what to activate
 let _lastGenerated = null;
 // Cache of the server's active plan so switching days doesn't re-fetch
 let _activePlan = null; // {plan, sessions}
 let _activeSelectedDay = null;
+// Week-over-week chart state
+let _planProgressData = null; // {exercise: [{week, top_weight, avg_rpe, ...}]}
+let _planProgressChart = null; // Chart.js instance (destroy before re-rendering)
 
 async function startTrackingCurrentPlan(){
   if(!currentUser){ openModal('authModal'); return; }
@@ -2578,10 +2680,116 @@ async function loadActivePlan(){
     const weeks=[...new Set(d.sessions.map(s=>s.week))];
     document.getElementById('activePlanMeta').textContent=`Week ${Math.max(...weeks)} · ${d.sessions.length} total sets across ${entries.length} sessions`;
     renderActiveSession();
+    // Fetch week-over-week progress data for the chart
+    loadPlanProgress(d.active_plan.id);
   }catch(e){
     console.error(e);
     card.style.display='none';
   }
+}
+
+async function loadPlanProgress(planId){
+  const section=document.getElementById('planProgressSection');
+  try{
+    const res=await fetch(`/api/plans/${planId}/progress`,{headers:{'X-Auth-Token':getToken()}});
+    if(!res.ok){ section.style.display='none'; return; }
+    const d=await res.json();
+    _planProgressData=d.progress||{};
+    // Only show section if at least one exercise has 2+ weeks of completed data
+    const exercises=Object.keys(_planProgressData).filter(ex=>_planProgressData[ex].length>=2);
+    if(!exercises.length){ section.style.display='none'; return; }
+    section.style.display='block';
+    // Populate exercise selector — prioritize exercises with the most weeks logged
+    const sel=document.getElementById('planProgressExercise');
+    const prevSelected=sel.value;
+    sel.innerHTML='';
+    exercises.sort((a,b)=>_planProgressData[b].length-_planProgressData[a].length).forEach(ex=>{
+      const opt=document.createElement('option'); opt.value=ex; opt.textContent=ex; sel.appendChild(opt);
+    });
+    if(prevSelected && exercises.includes(prevSelected)) sel.value=prevSelected;
+    renderPlanProgressChart();
+  }catch(e){
+    console.error('Plan progress load failed:',e);
+    section.style.display='none';
+  }
+}
+
+function renderPlanProgressChart(){
+  if(!_planProgressData) return;
+  const sel=document.getElementById('planProgressExercise');
+  const ex=sel.value;
+  const empty=document.getElementById('planProgressEmpty');
+  const wrap=document.getElementById('planProgressWrap');
+  const points=_planProgressData[ex]||[];
+  if(points.length<2){
+    wrap.style.display='none';
+    empty.style.display='block';
+    empty.textContent=`Complete at least 2 weeks of ${ex} to see adaptation progress.`;
+    return;
+  }
+  empty.style.display='none';
+  wrap.style.display='block';
+  // Destroy prior instance to prevent the canvas from stacking overlays
+  if(_planProgressChart){ _planProgressChart.destroy(); _planProgressChart=null; }
+  const canvas=document.getElementById('planProgressChart');
+  if(!canvas) return;
+  const ctx=canvas.getContext('2d');
+  const unit=(_activePlan && _activePlan.active_plan && _activePlan.active_plan.unit)||'lbs';
+  const labels=points.map(p=>`Week ${p.week}`);
+  _planProgressChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels,
+      datasets:[
+        {
+          label:`${ex} — top weight (${unit})`,
+          data:points.map(p=>p.top_weight),
+          borderColor:'#f97316',
+          backgroundColor:'rgba(249,115,22,0.1)',
+          borderWidth:2,
+          pointBackgroundColor:'#f97316',
+          pointRadius:5,
+          tension:0.3,
+          fill:true,
+          yAxisID:'y'
+        },
+        {
+          label:'Avg RPE',
+          data:points.map(p=>p.avg_rpe),
+          borderColor:'#888',
+          backgroundColor:'transparent',
+          borderWidth:1.5,
+          borderDash:[4,4],
+          pointBackgroundColor:'#888',
+          pointRadius:3,
+          tension:0.3,
+          fill:false,
+          yAxisID:'yRpe'
+        }
+      ]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{ labels:{ color:'#888', font:{size:11} } },
+        tooltip:{
+          callbacks:{
+            afterLabel:function(ctx){
+              const p=points[ctx.dataIndex];
+              if(ctx.datasetIndex===0) return `Avg: ${p.avg_weight}${unit} · ${p.sets_logged} sets`;
+              return '';
+            }
+          }
+        }
+      },
+      scales:{
+        x:{ ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} },
+        y:{ position:'left', title:{display:true,text:`Weight (${unit})`,color:'#888',font:{size:11}}, ticks:{color:'#555',font:{size:11}}, grid:{color:'rgba(30,32,38,0.8)'} },
+        yRpe:{ position:'right', title:{display:true,text:'RPE',color:'#888',font:{size:11}}, min:5, max:10, ticks:{color:'#555',font:{size:11},stepSize:1}, grid:{display:false} }
+      }
+    }
+  });
 }
 
 function renderActiveSession(){
@@ -2736,16 +2944,22 @@ async function openSavedPlansModal(){
     list.innerHTML='';
     _planCache.clear();
     d.plans.forEach(p=>{
-      _planCache.set(p.id, {title: p.title, plan_text: p.plan_text});
+      _planCache.set(p.id, {title: p.title, plan_text: p.plan_text, trackable: !!p.trackable, is_active: !!p.is_active});
       const date=new Date(p.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
       const item=document.createElement('div'); item.className='saved-plan-item';
+      let trackBtn='';
+      if(p.is_active){
+        trackBtn=`<span style="font-size:10px;color:var(--orange);font-weight:700;text-transform:uppercase;letter-spacing:0.05em;padding:3px 7px;border:1px solid var(--orange);border-radius:4px;margin-right:6px">Tracking</span>`;
+      } else if(p.trackable){
+        trackBtn=`<button class="action-btn" onclick="activateSavedPlan(${p.id},event)" style="margin-right:6px;padding:4px 10px;font-size:12px;background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700">Track this</button>`;
+      }
       item.innerHTML=`
         <div style="flex:1;min-width:0;cursor:pointer" onclick="viewSavedPlan(${p.id})">
           <div class="saved-plan-title">${esc(p.title)}</div>
           <div class="saved-plan-date">${date}</div>
           <div class="saved-plan-preview">${esc(p.plan_text.replace(/#+\s*/g,'').substring(0,120))}...</div>
         </div>
-        <button class="saved-plan-del" onclick="deleteSavedPlan(${p.id},this)" title="Delete">×</button>`;
+        <div style="display:flex;align-items:center">${trackBtn}<button class="saved-plan-del" onclick="deleteSavedPlan(${p.id},this)" title="Delete">×</button></div>`;
       list.appendChild(item);
     });
   }catch(e){ list.innerHTML='<div style="color:var(--red);font-size:13px">Could not load plans. Try again.</div>'; }
@@ -2769,6 +2983,24 @@ async function deleteSavedPlan(id,btn){
   try{ await fetch(`/api/plans/${id}`,{method:'DELETE',headers:authHeaders()}); }catch(e){}
   btn.closest('.saved-plan-item').remove();
   if(!document.querySelector('.saved-plan-item')) openSavedPlansModal();
+}
+
+async function activateSavedPlan(id,event){
+  if(event){ event.stopPropagation(); }
+  const btn=event&&event.target;
+  if(btn){ btn.disabled=true; btn.textContent='Starting...'; }
+  try{
+    const res=await fetch(`/api/plans/${id}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
+    const d=await res.json();
+    if(res.status===402){ alert('Plan tracking is a premium feature.'); if(btn){ btn.disabled=false; btn.textContent='Track this'; } return; }
+    if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
+    closeModal('savedPlansModal');
+    await loadActivePlan();
+    switchTab('progress');
+  }catch(e){
+    alert(e.message||'Could not activate plan.');
+    if(btn){ btn.disabled=false; btn.textContent='Track this'; }
+  }
 }
 
 function closeProfileDropdown(){
