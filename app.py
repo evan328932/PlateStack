@@ -529,17 +529,23 @@ def bump_amount(exercise_name,unit):
 def adapt_session_weight(prescribed_weight,prescribed_reps,actual_reps,rpe,exercise_name,unit):
     """Per-session micro-adjustment for the SAME exercise's *next unlogged set* later in the workout.
     Kept conservative — big changes happen at week boundaries.
+    RPE is optional: if None, we fall back to reps-only logic (no low-effort bump, but still deload if reps missed badly).
     Returns (new_weight, reason) or (None, None) if no change."""
-    if prescribed_weight<=0 or prescribed_reps<=0 or actual_reps is None or rpe is None:
+    if prescribed_weight<=0 or prescribed_reps<=0 or actual_reps is None:
         return None,None
     bump=bump_amount(exercise_name,unit)
-    # Hit or exceeded target reps at low effort → tiny bump on remaining sets
-    if actual_reps>=prescribed_reps and rpe<=6:
-        return prescribed_weight+bump, f"Easy set (RPE {rpe}) — nudging up {bump}{unit}"
-    # Missed target significantly → back off remaining sets
-    if actual_reps<=prescribed_reps-2 and rpe>=9:
+    # With RPE: richer decisions (low effort = bump, high effort + missed = deload)
+    if rpe is not None:
+        if actual_reps>=prescribed_reps and rpe<=6:
+            return prescribed_weight+bump, f"Easy set (RPE {rpe}) — nudging up {bump}{unit}"
+        if actual_reps<=prescribed_reps-2 and rpe>=9:
+            new_w=round(prescribed_weight*0.95,1)
+            return new_w, f"Struggling (RPE {rpe}) — backing off to {new_w}{unit}"
+        return None,None
+    # No RPE: only act on hard evidence — missed target by a lot → small back-off
+    if actual_reps<=prescribed_reps-3:
         new_w=round(prescribed_weight*0.95,1)
-        return new_w, f"Struggling (RPE {rpe}) — backing off to {new_w}{unit}"
+        return new_w, f"Missed target reps — backing off to {new_w}{unit}"
     return None,None
 
 def adapt_week(db,user_id,plan_id,from_week):
@@ -565,19 +571,31 @@ def adapt_week(db,user_id,plan_id,from_week):
         bump=bump_amount(ex_name,unit)
         new_weight=prescribed_w
         if completed:
-            avg_rpe=sum((s["rpe"] or 0) for s in completed)/max(1,len(completed))
+            # Only average RPE across sets that actually logged it
+            rpe_vals=[s["rpe"] for s in completed if s["rpe"] is not None]
+            has_rpe=len(rpe_vals)>0
+            avg_rpe=(sum(rpe_vals)/len(rpe_vals)) if has_rpe else None
             hit_all=all((s["actual_reps"] or 0)>=prescribed_r for s in completed)
             missed_badly=sum(1 for s in completed if (s["actual_reps"] or 0)<=prescribed_r-2)
-            if hit_all and avg_rpe<=7:
-                new_weight=prescribed_w+bump  # crushing it
-            elif hit_all and avg_rpe<=9:
-                new_weight=prescribed_w+(bump/2)  # small bump
-            elif hit_all and avg_rpe>=10:
-                new_weight=prescribed_w  # hold
-            elif missed_badly>=len(completed)//2:
-                new_weight=round(prescribed_w*DELOAD_PCT,1)  # deload
+            if has_rpe:
+                if hit_all and avg_rpe<=7:
+                    new_weight=prescribed_w+bump  # crushing it
+                elif hit_all and avg_rpe<=9:
+                    new_weight=prescribed_w+(bump/2)  # small bump
+                elif hit_all and avg_rpe>=10:
+                    new_weight=prescribed_w  # hold
+                elif missed_badly>=len(completed)//2:
+                    new_weight=round(prescribed_w*DELOAD_PCT,1)  # deload
+                else:
+                    new_weight=prescribed_w  # hold
             else:
-                new_weight=prescribed_w  # hold
+                # No RPE data — reps-only progression (more conservative)
+                if hit_all:
+                    new_weight=prescribed_w+(bump/2)  # modest bump when all reps hit
+                elif missed_badly>=len(completed)//2:
+                    new_weight=round(prescribed_w*DELOAD_PCT,1)  # deload
+                else:
+                    new_weight=prescribed_w  # hold
         # Seed next week's sets with the adapted weight
         for s in sets:
             db.execute("""INSERT INTO plan_sessions(plan_id,user_id,week,day,exercise,exercise_order,set_number,prescribed_weight,prescribed_reps,unit)
@@ -660,12 +678,17 @@ def log_session_set(session_id):
     try:
         actual_weight=float(data.get("actual_weight",0))
         actual_reps=int(data.get("actual_reps",0))
-        rpe=int(data.get("rpe",0))
+        # RPE is now OPTIONAL. Accept None / empty string / missing key.
+        rpe_raw=data.get("rpe")
+        if rpe_raw is None or rpe_raw=="" or rpe_raw==0:
+            rpe=None
+        else:
+            rpe=int(rpe_raw)
     except (ValueError,TypeError):
         return jsonify({"error":"Invalid values."}),400
     if actual_weight<0 or actual_weight>5000: return jsonify({"error":"Invalid weight."}),400
     if actual_reps<0 or actual_reps>100: return jsonify({"error":"Invalid reps."}),400
-    if rpe<1 or rpe>10: return jsonify({"error":"RPE must be 1-10."}),400
+    if rpe is not None and (rpe<1 or rpe>10): return jsonify({"error":"RPE must be 1-10."}),400
     db=get_db()
     db.execute("UPDATE plan_sessions SET actual_weight=?,actual_reps=?,rpe=?,completed=1,completed_at=strftime('%s','now') WHERE id=? AND user_id=?",
         (actual_weight,actual_reps,rpe,session_id,user["id"]))
