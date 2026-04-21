@@ -246,11 +246,13 @@ textarea:focus{outline:none;border-color:var(--orange-border);background:#0e1013
 .calc-btn:active{transform:scale(0.99)}
 .calc-btn:disabled{opacity:0.28;cursor:not-allowed;transform:none}
 .error{color:var(--red);font-size:13px;margin-top:10px;font-weight:500}
-.loading{display:none;align-items:center;gap:10px;color:var(--text-dim);font-size:14px;margin-top:14px}
-.dot{width:5px;height:5px;border-radius:50%;background:var(--orange);animation:pulse 1.2s infinite}
-.dot:nth-child(2){animation-delay:0.2s}
-.dot:nth-child(3){animation-delay:0.4s}
-@keyframes pulse{0%,80%,100%{opacity:0.12}40%{opacity:1}}
+.loading{display:none;flex-direction:column;align-items:center;gap:14px;padding:28px 20px;margin-top:10px}
+.spinner{width:42px;height:42px;border:3px solid var(--border);border-top-color:var(--orange);border-radius:50%;animation:spin 0.85s linear infinite;flex-shrink:0}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-text{color:var(--text-dim);font-size:14px;font-weight:500;text-align:center;min-height:20px;transition:opacity 0.3s}
+.loading-subtext{color:var(--text-dim);font-size:12px;opacity:0.6;text-align:center}
+.loading-progress{width:200px;height:3px;background:var(--border);border-radius:100px;overflow:hidden}
+.loading-progress-bar{height:100%;width:0%;background:var(--orange);border-radius:100px;transition:width 1s linear}
 
 /* RESULTS */
 .results-card{display:none;background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;margin-top:1rem}
@@ -872,8 +874,10 @@ footer a:hover{color:#fff}
 
   <div id="error" class="error"></div>
   <div id="loading" class="loading">
-    <div class="dot"></div><div class="dot"></div><div class="dot"></div>
-    <span id="loadingText">Building your training plan...</span>
+    <div class="spinner"></div>
+    <div class="loading-text" id="loadingText">Building your training plan...</div>
+    <div class="loading-subtext" id="loadingSubtext">This takes about 30–45 seconds</div>
+    <div class="loading-progress"><div class="loading-progress-bar" id="loadingBar"></div></div>
   </div>
 
   <div class="results-card" id="resultsCard">
@@ -2218,7 +2222,46 @@ function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPl
 // ═══════════════════════════════════════════════════════════
 // CALCULATE
 // ═══════════════════════════════════════════════════════════
-function setLoading(on,text='Building your training plan...'){ document.getElementById('loadingText').textContent=text; document.getElementById('loading').style.display=on?'flex':'none'; document.getElementById('calcBtn').disabled=on; }
+let _loadingTimer=null,_loadingBarTimer=null;
+const LOADING_MSGS=[
+  ['Calculating your 1-rep maxes...','Crunching your lift numbers'],
+  ['Designing your weekly split...','Picking the right structure for your goals'],
+  ['Writing your working sets...','Setting weights, reps, and rest periods'],
+  ['Building warm-up sequences...','Specific ramp-up sets for each main lift'],
+  ['Adding mobility work...','Tailored to your injuries and preferences'],
+  ['Generating structured tracking data...','Almost done — this is the last step'],
+  ['Almost ready...','Taking a little longer than usual — still going!'],
+];
+function setLoading(on){
+  const el=document.getElementById('loading');
+  const btn=document.getElementById('calcBtn');
+  el.style.display=on?'flex':'none';
+  btn.disabled=on;
+  clearInterval(_loadingTimer);
+  clearInterval(_loadingBarTimer);
+  if(!on){
+    document.getElementById('loadingBar').style.width='0%';
+    document.getElementById('loadingBar').style.transition='width 1s linear';
+    return;
+  }
+  // Kick off rotating messages
+  let step=0;
+  function showMsg(){
+    const [main,sub]=LOADING_MSGS[Math.min(step,LOADING_MSGS.length-1)];
+    const txt=document.getElementById('loadingText');
+    const sub_el=document.getElementById('loadingSubtext');
+    txt.style.opacity=0;
+    setTimeout(()=>{ txt.textContent=main; txt.style.opacity=1; },200);
+    sub_el.textContent=sub;
+    step++;
+  }
+  showMsg();
+  _loadingTimer=setInterval(showMsg,6000);
+  // Animate progress bar to ~90% over 45 seconds then stall
+  const bar=document.getElementById('loadingBar');
+  bar.style.transition='none'; bar.style.width='0%';
+  setTimeout(()=>{ bar.style.transition='width 42s cubic-bezier(0.25,0.1,0.25,1)'; bar.style.width='90%'; },50);
+}
 async function calculate(){
   const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
   if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; if(typeof showWizardStep==='function') showWizardStep(3); return; }
@@ -2300,7 +2343,7 @@ async function calculate(){
     }
     qaUsedThisPlan=0; updateQaLimit(); document.getElementById('qaSection').style.display='block';
   }catch(e){ err.textContent=e.message||'Something went wrong. Try again.'; document.getElementById('resultsCard').style.display='none'; }
-  finally{ setLoading(false); }
+  finally{ const bar=document.getElementById("loadingBar"); bar.style.transition="width 0.3s ease"; bar.style.width="100%"; setTimeout(()=>setLoading(false),300); }
 }
 
 // ═══════════════════════════════════════════════════════════
