@@ -222,21 +222,21 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-5"
         raise Exception("The generated plan was too long and got cut off. Try reducing the number of training days, or contact support.")
     return "".join(b.get("text","") for b in result.get("content",[]))
 
-PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks.
+PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks. Keep prose tight — no paragraphs, no filler.
 
 IMPORTANT: Under "## Where You're At" write ONLY 1 plain sentence. No sub-headers, no bullets, no dashes.
 
-WARM-UP RULES:
-- Every training day: 2-3 mobility moves (5 min), then 2 ramp-up sets per main compound lift with exact weights (e.g. 50% x 5, 75% x 3). No ramp-up for accessories.
+WARM-UP RULE:
+- Every training day: ONE light warm-up set of the first main lift, about 50% of the working weight x 5 reps. That's it. No mobility lists, no multi-set ramp-ups. Users are told to check the Exercise Catalog tab for form cues.
 
-WORKING SET RULES:
-- Add RIR (Reps In Reserve) to each working set: e.g. "Bench Press — 4x5 @ 185 lbs, RIR 2". Include rest periods.
+WORKING SET RULE:
+- Each working set line is ONE line, format: "Exercise — sets x reps @ weight unit, RIR X". Do not add coaching notes to individual sets. Example: "Bench Press — 4x5 @ 185 lbs, RIR 2".
 
 TITLE RULE: First line must be: TITLE: [3-7 word plan name]
 
 STRUCTURED_PLAN RULE: After the markdown plan write "STRUCTURED_PLAN:" then a valid JSON object for Week 1:
-{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press","type":"main","sets":4,"reps":5,"weight":185,"rir":2,"unit":"lbs"},{"name":"Bench Press Warm-up","type":"warmup","sets":2,"reps":5,"weight":95,"unit":"lbs"}]}]}
-JSON rules: exact unit (lbs/kg), bodyweight=0, rep ranges use midpoint, Week 1 only, valid JSON, no comments, exercise names match markdown exactly. Types: "warmup","main","accessory","mobility". Include rir on main/accessory only. Warm-up name: "{LiftName} Warm-up"."""
+{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press Warm-up","type":"warmup","sets":1,"reps":5,"weight":95,"unit":"lbs"},{"name":"Bench Press","type":"main","sets":4,"reps":5,"weight":185,"rir":2,"unit":"lbs"}]}]}
+JSON rules: exact unit (lbs/kg), bodyweight=0, rep ranges use midpoint, Week 1 only, valid JSON, no comments, exercise names match markdown exactly. Types: "warmup","main","accessory". Include rir on main/accessory only. Warm-up name: "{LiftName} Warm-up" — ONE warm-up per day on the first main lift."""
 
 def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text,injuries="",preferences="",log_context=""):
     extras = []
@@ -260,34 +260,32 @@ TITLE: [3-7 word plan name]
 ## Where You're At
 [1 sentence about their level vs goal.]
 
+_For exercise form and cues, see the Exercise Catalog tab._
+
 ## Weekly Program ({days}-Day {split})
 [For EACH training day:
 
 ### Day N — [Name]
 **Warm-up**
-- [2-3 mobility moves]
-- [2 ramp-up sets for main lift with exact weights]
+- [First main lift] Warm-up: 1x5 @ ~50% working weight
 
 **Main work**
-- [Main compound]: sets x reps @ weight, RIR X, rest time
-- [Secondary compound]: sets x reps @ weight, RIR X, rest time
+- [Main compound]: sets x reps @ weight, RIR X
+- [Secondary compound]: sets x reps @ weight, RIR X
 
 **Accessory work**
 - [3-4 accessories with sets x reps @ weight, RIR X]
 
 Repeat for each day.]
 
-## Week-by-Week Progression
-[Main lift progression over 4 weeks with exact weights for 2-3 lifts.]
-
 ## 4-Week Milestone
-[Specific numbers]
+[1 sentence with specific numbers.]
 
 ## 8-Week Milestone
-[Specific numbers]
+[1 sentence with specific numbers.]
 
 ## Key Tips
-[2 tips tailored to their situation]"""
+[2 short tips, one line each, tailored to their situation.]"""
 
 @app.route("/api/config", methods=["GET"])
 def config():
@@ -961,7 +959,7 @@ def plan():
                 log_context="\n".join(lines)
         except: pass
     try:
-        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=8000,cache_system=True)
+        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=4000,cache_system=True)
         # Parse AI-generated title out of the response
         plan_title=None
         plan_text=raw
@@ -1046,7 +1044,7 @@ def question():
         try:
             system=PLAN_SYSTEM + "\n\nYou are editing an EXISTING training plan based on user feedback. Keep the parts of the plan they didn't ask to change. Apply their requested change cleanly. Return the full modified plan using the same template and rules (TITLE line, STRUCTURED_PLAN JSON, markdown format)."
             user_msg=f"EXISTING PLAN:\n{plan_text}\n\nUSER'S REQUESTED CHANGE:\n{q}\n\nReturn the full updated plan following all the original template and STRUCTURED_PLAN rules."
-            raw=call_claude(system,user_msg,max_tokens=8000,cache_system=True)
+            raw=call_claude(system,user_msg,max_tokens=4000,cache_system=True)
             # Parse out TITLE and STRUCTURED_PLAN exactly like /api/plan does
             plan_title=None; new_plan_text=raw; structured=None
             sp_marker="STRUCTURED_PLAN:"
