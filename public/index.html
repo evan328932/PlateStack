@@ -134,6 +134,35 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .card-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.09em;color:var(--orange)}
 .card-meta{font-size:12px;color:var(--text-faint)}
 
+/* WIZARD STEPS */
+.wizard-step{display:none}
+.wizard-step.active{display:block;animation:fadeIn 0.2s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.wizard-progress{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 16px;margin-bottom:0.875rem;position:sticky;top:58px;z-index:10}
+.wizard-progress-text{display:flex;flex-direction:column;line-height:1.2;flex-shrink:0}
+.wizard-progress-step{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:0.07em;font-weight:700}
+.wizard-progress-title{font-size:13px;font-weight:700;color:var(--text);margin-top:2px}
+.wizard-dots{display:flex;gap:6px;flex:1;justify-content:center}
+.wizard-dot{width:34px;height:6px;background:var(--border);border-radius:100px;transition:all 0.25s}
+.wizard-dot.done{background:var(--orange);opacity:0.55}
+.wizard-dot.active{background:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,0.18)}
+.wizard-nav{display:flex;gap:10px;margin-top:0.25rem;margin-bottom:1rem}
+.wizard-back-btn{flex:0 0 auto;padding:14px 22px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s}
+.wizard-back-btn:hover{border-color:var(--border2);color:var(--text)}
+.wizard-next-btn{flex:1;padding:14px 22px;background:var(--orange);border:none;color:#fff;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
+.wizard-next-btn:hover{background:#ea580c;transform:translateY(-1px)}
+.wizard-step-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:900;color:#fff;margin-bottom:4px;letter-spacing:0.02em;padding:0 4px}
+.wizard-step-sub{font-size:13px;color:var(--text-muted);margin-bottom:0.875rem;padding:0 4px}
+
+/* CATALOG PAGINATION */
+.catalog-meta{max-width:820px;margin:0 auto 0.5rem;padding:0 1.5rem;font-size:12px;color:var(--text-dim);text-align:center}
+.catalog-pagination{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;max-width:820px;margin:0 auto;padding:1rem 1.5rem 4rem}
+.page-btn{background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:8px;padding:8px 14px;font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.15s;min-width:38px}
+.page-btn:hover:not(:disabled){border-color:var(--orange-border);color:var(--text)}
+.page-btn.active{background:var(--orange);color:#fff;border-color:var(--orange)}
+.page-btn:disabled{opacity:0.35;cursor:not-allowed}
+.page-ellipsis{color:var(--text-dim);padding:0 4px;font-size:13px}
+
 /* BANNERS */
 .saved-banner{display:none;align-items:center;gap:8px;background:rgba(249,115,22,0.06);border:1px solid var(--orange-border);border-radius:10px;padding:10px 14px;margin-bottom:1rem;font-size:13px;color:var(--text-muted)}
 .saved-banner b{color:var(--orange)}
@@ -634,6 +663,25 @@ footer a:hover{color:#fff}
     <div class="admin-status" id="adminStatus"></div>
   </div>
 
+  <!-- ═══ WIZARD PROGRESS BAR ═══ -->
+  <div class="wizard-progress" id="wizardProgress">
+    <div class="wizard-progress-text">
+      <div class="wizard-progress-step" id="wizStepLabel">Step 1 of 4</div>
+      <div class="wizard-progress-title" id="wizStepTitle">Basics</div>
+    </div>
+    <div class="wizard-dots">
+      <div class="wizard-dot active" data-step="1"></div>
+      <div class="wizard-dot" data-step="2"></div>
+      <div class="wizard-dot" data-step="3"></div>
+      <div class="wizard-dot" data-step="4"></div>
+    </div>
+  </div>
+
+  <!-- ═══ STEP 1: BASICS (units + about you) ═══ -->
+  <div class="wizard-step active" data-step="1">
+  <div class="wizard-step-title">Let's start with the basics</div>
+  <div class="wizard-step-sub">Pick your unit and tell us a bit about yourself. Everything except units is optional — but the more we know, the more dialed-in your plan.</div>
+
   <div class="card">
     <div class="card-header"><span class="card-label">Units</span></div>
     <div class="unit-toggle">
@@ -692,6 +740,18 @@ footer a:hover{color:#fff}
     </div>
   </div>
 
+  </div><!-- end step 1 -->
+
+  <!-- step 1 nav -->
+  <div class="wizard-nav" data-nav="1">
+    <button class="wizard-next-btn" onclick="wizardNext()">Continue →</button>
+  </div>
+
+  <!-- ═══ STEP 2: SCHEDULE & EXPERIENCE ═══ -->
+  <div class="wizard-step" data-step="2">
+  <div class="wizard-step-title">Your schedule &amp; experience</div>
+  <div class="wizard-step-sub">How often you train and where you're starting from.</div>
+
   <div class="card">
     <div class="card-header"><span class="card-label">Training schedule</span></div>
     <div style="margin-bottom:1rem">
@@ -720,6 +780,29 @@ footer a:hover{color:#fff}
   </div>
 
   <div class="card">
+    <div class="card-header"><span class="card-label">Experience level</span></div>
+    <div class="chip-row" id="expRow">
+      <div class="chip active" onclick="selectExp(this,'beginner')">Beginner</div>
+      <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
+      <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
+    </div>
+    <div class="exp-desc visible" id="expDesc"><strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.</div>
+  </div>
+
+  </div><!-- end step 2 -->
+
+  <!-- step 2 nav -->
+  <div class="wizard-nav" data-nav="2">
+    <button class="wizard-back-btn" onclick="wizardBack()">← Back</button>
+    <button class="wizard-next-btn" onclick="wizardNext()">Continue →</button>
+  </div>
+
+  <!-- ═══ STEP 3: YOUR LIFTS ═══ -->
+  <div class="wizard-step" data-step="3">
+  <div class="wizard-step-title">Your current lifts</div>
+  <div class="wizard-step-sub">The numbers we'll build the plan around. Use your best recent set — weight × reps. Don't know one? Skip it.</div>
+
+  <div class="card">
     <div class="card-header"><span class="card-label">Your lifts</span>
       <div style="display:flex;gap:6px;align-items:center">
         <span class="card-meta">weight × reps</span>
@@ -733,6 +816,19 @@ footer a:hover{color:#fff}
     </div>
   </div>
 
+  </div><!-- end step 3 -->
+
+  <!-- step 3 nav -->
+  <div class="wizard-nav" data-nav="3">
+    <button class="wizard-back-btn" onclick="wizardBack()">← Back</button>
+    <button class="wizard-next-btn" onclick="wizardNext()">Continue →</button>
+  </div>
+
+  <!-- ═══ STEP 4: GOAL & PREFERENCES ═══ -->
+  <div class="wizard-step" data-step="4">
+  <div class="wizard-step-title">Your goal &amp; preferences</div>
+  <div class="wizard-step-sub">What you're chasing and what to work around. Then we build your plan.</div>
+
   <div class="card">
     <div class="card-header"><span class="card-label">Your goal</span></div>
     <div class="chip-row" id="goalRow" style="margin-bottom:12px">
@@ -743,16 +839,6 @@ footer a:hover{color:#fff}
       <div class="chip" onclick="selectGoal(this,'custom')">Custom</div>
     </div>
     <textarea id="goalDetail" rows="2" placeholder="Optional: be specific — e.g. 'bench 225 lbs in 3 months' or 'first powerlifting meet'" oninput="autosave()"></textarea>
-  </div>
-
-  <div class="card">
-    <div class="card-header"><span class="card-label">Experience level</span></div>
-    <div class="chip-row" id="expRow">
-      <div class="chip active" onclick="selectExp(this,'beginner')">Beginner</div>
-      <div class="chip" onclick="selectExp(this,'intermediate')">Intermediate</div>
-      <div class="chip" onclick="selectExp(this,'advanced')">Advanced</div>
-    </div>
-    <div class="exp-desc visible" id="expDesc"><strong>Beginner (0–2 years)</strong> — Still building movement patterns and making consistent linear progress. You can add weight nearly every session.</div>
   </div>
 
   <div class="card">
@@ -776,7 +862,13 @@ footer a:hover{color:#fff}
     <textarea id="injuriesField" rows="2" placeholder="e.g. Bad left knee — avoid deep squats, shoulder impingement on right side" oninput="autosave()"></textarea>
   </div>
 
-  <button class="calc-btn" id="calcBtn" onclick="calculate()">Calculate My Max + Build My Plan</button>
+  <div style="display:flex;gap:10px;align-items:stretch">
+    <button class="wizard-back-btn" onclick="wizardBack()" style="padding:16px 22px">← Back</button>
+    <button class="calc-btn" id="calcBtn" onclick="calculate()" style="flex:1;margin-top:0">Calculate My Max + Build My Plan</button>
+  </div>
+
+  </div><!-- end step 4 -->
+
   <div id="error" class="error"></div>
   <div id="loading" class="loading">
     <div class="dot"></div><div class="dot"></div><div class="dot"></div>
@@ -940,10 +1032,12 @@ footer a:hover{color:#fff}
   <p>Every major lift — how to do it, what it works, and tips to do it right.</p>
 </div>
 <div class="catalog-search-wrap">
-  <input class="catalog-search" id="catalogSearch" placeholder="Search exercises..." oninput="filterCatalog()">
+  <input class="catalog-search" id="catalogSearch" placeholder="Search exercises..." oninput="catalogPage=1;filterCatalog()">
 </div>
 <div class="catalog-filters" id="catalogFilters"></div>
+<div class="catalog-meta" id="catalogMeta"></div>
 <div class="catalog-grid" id="catalogGrid"></div>
+<div class="catalog-pagination" id="catalogPagination"></div>
 </div><!-- end tab-catalog -->
 
 <!-- ═══════════════════ TAB 4: QUICK MAX CALC ═══════════════════ -->
@@ -1027,7 +1121,7 @@ footer a:hover{color:#fff}
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════════════
-const SAVE_KEY   = 'platestack_v1';
+const SAVE_KEY   = 'platestack_v2';
 const LOG_KEY    = 'platestack_progress_log';
 const ANON_LIMIT = 2;
 const USER_LIMIT = 4;
@@ -1046,6 +1140,8 @@ let chartInstance=null;
 let adminCode='', isAdmin=false;
 let currentUser=null; // {id, email, token}
 let catalogFilter='All';
+let catalogPage=1;
+const CATALOG_PAGE_SIZE=12;
 
 // ═══════════════════════════════════════════════════════════
 // EXERCISE CATALOG DATA
@@ -1418,6 +1514,44 @@ function goHome(){
   switchTab('planner');
   window.scrollTo({top:0,behavior:'smooth'});
 }
+
+// ═══════════════════════════════════════════════════════════
+// WIZARD (4-step form)
+// ═══════════════════════════════════════════════════════════
+let wizardStep = 1;
+const WIZARD_TOTAL = 4;
+const WIZARD_TITLES = {1:'Basics', 2:'Schedule & experience', 3:'Your lifts', 4:'Goal & preferences'};
+
+function showWizardStep(n){
+  if(n<1) n=1; if(n>WIZARD_TOTAL) n=WIZARD_TOTAL;
+  wizardStep = n;
+  // Show only the active step + matching nav
+  document.querySelectorAll('.wizard-step').forEach(el=>{
+    el.classList.toggle('active', parseInt(el.dataset.step)===n);
+  });
+  document.querySelectorAll('.wizard-nav').forEach(el=>{
+    el.style.display = parseInt(el.dataset.nav)===n ? 'flex' : 'none';
+  });
+  // Dots
+  document.querySelectorAll('.wizard-dot').forEach(d=>{
+    const s = parseInt(d.dataset.step);
+    d.classList.remove('active','done');
+    if(s<n) d.classList.add('done');
+    else if(s===n) d.classList.add('active');
+  });
+  // Label
+  document.getElementById('wizStepLabel').textContent = `Step ${n} of ${WIZARD_TOTAL}`;
+  document.getElementById('wizStepTitle').textContent = WIZARD_TITLES[n] || '';
+  // Scroll to top of step area so the user sees the new content
+  const prog = document.getElementById('wizardProgress');
+  if(prog){
+    const y = prog.getBoundingClientRect().top + window.scrollY - 70;
+    window.scrollTo({top: y, behavior:'smooth'});
+  }
+}
+
+function wizardNext(){ if(wizardStep < WIZARD_TOTAL) showWizardStep(wizardStep + 1); }
+function wizardBack(){ if(wizardStep > 1) showWizardStep(wizardStep - 1); }
 
 // ═══════════════════════════════════════════════════════════
 // MODALS
@@ -2069,7 +2203,7 @@ function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPl
 function setLoading(on,text='Building your training plan...'){ document.getElementById('loadingText').textContent=text; document.getElementById('loading').style.display=on?'flex':'none'; document.getElementById('calcBtn').disabled=on; }
 async function calculate(){
   const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
-  if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; return; }
+  if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; if(typeof showWizardStep==='function') showWizardStep(3); return; }
   if(!isAdmin&&serverPlanCount>=serverPlanLimit){
     err.textContent=currentUser
       ? `You've used all ${serverPlanLimit} plans on your free account. More plans coming soon!`
@@ -2440,24 +2574,44 @@ function renderCatalog(){
       const btn=document.createElement('button');
       btn.className='cat-filter'+(cat==='All'?' active':'');
       btn.textContent=cat;
-      btn.onclick=()=>{ catalogFilter=cat; filtersEl.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); filterCatalog(); };
+      btn.onclick=()=>{ catalogFilter=cat; catalogPage=1; filtersEl.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); filterCatalog(); };
       filtersEl.appendChild(btn);
     });
   }
   filterCatalog();
 }
 
-function filterCatalog(){
+function getFilteredCatalogItems(){
   const q=document.getElementById('catalogSearch').value.toLowerCase();
-  const grid=document.getElementById('catalogGrid');
-  grid.innerHTML='';
-  const items=CATALOG.filter(ex=>{
+  return CATALOG.filter(ex=>{
     const matchCat=catalogFilter==='All'||ex.category===catalogFilter;
     const matchQ=!q||ex.name.toLowerCase().includes(q)||ex.muscles.toLowerCase().includes(q)||ex.category.toLowerCase().includes(q);
     return matchCat&&matchQ;
   });
-  if(!items.length){ grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:3rem">No exercises found.</div>'; return; }
-  items.forEach(ex=>{
+}
+
+function filterCatalog(){
+  const grid=document.getElementById('catalogGrid');
+  const meta=document.getElementById('catalogMeta');
+  const pager=document.getElementById('catalogPagination');
+  grid.innerHTML='';
+  pager.innerHTML='';
+  const items=getFilteredCatalogItems();
+  if(!items.length){
+    grid.innerHTML='<div style="grid-column:1/-1;text-align:center;color:var(--text-dim);padding:3rem">No exercises found.</div>';
+    meta.textContent='';
+    return;
+  }
+  const totalPages=Math.max(1,Math.ceil(items.length/CATALOG_PAGE_SIZE));
+  if(catalogPage>totalPages) catalogPage=totalPages;
+  if(catalogPage<1) catalogPage=1;
+  const start=(catalogPage-1)*CATALOG_PAGE_SIZE;
+  const end=Math.min(start+CATALOG_PAGE_SIZE,items.length);
+  const pageItems=items.slice(start,end);
+
+  meta.textContent=`Showing ${start+1}–${end} of ${items.length} exercises`;
+
+  pageItems.forEach(ex=>{
     const card=document.createElement('div');
     card.className='catalog-card';
     card.onclick=()=>openCatalogEntry(ex.name);
@@ -2473,6 +2627,51 @@ function filterCatalog(){
       </div>`;
     grid.appendChild(card);
   });
+
+  renderCatalogPagination(totalPages);
+}
+
+function renderCatalogPagination(totalPages){
+  const pager=document.getElementById('catalogPagination');
+  pager.innerHTML='';
+  if(totalPages<=1) return;
+
+  const mkBtn=(label,page,opts={})=>{
+    const b=document.createElement('button');
+    b.className='page-btn'+(opts.active?' active':'');
+    b.textContent=label;
+    if(opts.disabled) b.disabled=true;
+    else b.onclick=()=>goToCatalogPage(page);
+    return b;
+  };
+  const mkEllipsis=()=>{
+    const s=document.createElement('span'); s.className='page-ellipsis'; s.textContent='…'; return s;
+  };
+
+  pager.appendChild(mkBtn('← Prev',catalogPage-1,{disabled:catalogPage===1}));
+
+  // Build a smart page list: always show 1, current±1, last; ellipsis for gaps
+  const pages=new Set([1,totalPages,catalogPage-1,catalogPage,catalogPage+1]);
+  const ordered=[...pages].filter(p=>p>=1&&p<=totalPages).sort((a,b)=>a-b);
+  let prev=0;
+  ordered.forEach(p=>{
+    if(p-prev>1) pager.appendChild(mkEllipsis());
+    pager.appendChild(mkBtn(String(p),p,{active:p===catalogPage}));
+    prev=p;
+  });
+
+  pager.appendChild(mkBtn('Next →',catalogPage+1,{disabled:catalogPage===totalPages}));
+}
+
+function goToCatalogPage(n){
+  catalogPage=n;
+  filterCatalog();
+  // Scroll back up so user sees the new page
+  const top=document.getElementById('catalogGrid');
+  if(top){
+    const y=top.getBoundingClientRect().top+window.scrollY-100;
+    window.scrollTo({top:y,behavior:'smooth'});
+  }
 }
 
 function openCatalogEntry(name){
