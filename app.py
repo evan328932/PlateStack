@@ -213,6 +213,13 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-5"
     except ValueError:
         raise Exception(f"Upstream returned non-JSON (status {response.status_code})")
     if "error" in result: raise Exception(result["error"].get("message","API error"))
+    # If Claude hit the token limit mid-response the output will be truncated.
+    # Log it server-side so we can spot it in Railway logs, then raise a clean error.
+    stop_reason=result.get("stop_reason","")
+    if stop_reason=="max_tokens":
+        usage=result.get("usage",{})
+        print(f"WARNING: Claude hit max_tokens limit (output_tokens={usage.get('output_tokens','?')}). Response was truncated.")
+        raise Exception("The generated plan was too long and got cut off. Try reducing the number of training days, or contact support.")
     return "".join(b.get("text","") for b in result.get("content",[]))
 
 PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks.
@@ -980,7 +987,7 @@ def plan():
                 log_context="\n".join(lines)
         except: pass
     try:
-        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=4500,cache_system=True)
+        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=8000,cache_system=True)
         # Parse AI-generated title out of the response
         plan_title=None
         plan_text=raw
@@ -1065,7 +1072,7 @@ def question():
         try:
             system=PLAN_SYSTEM + "\n\nYou are editing an EXISTING training plan based on user feedback. Keep the parts of the plan they didn't ask to change. Apply their requested change cleanly. Return the full modified plan using the same template and rules (TITLE line, STRUCTURED_PLAN JSON, markdown format)."
             user_msg=f"EXISTING PLAN:\n{plan_text}\n\nUSER'S REQUESTED CHANGE:\n{q}\n\nReturn the full updated plan following all the original template and STRUCTURED_PLAN rules."
-            raw=call_claude(system,user_msg,max_tokens=4500,cache_system=True)
+            raw=call_claude(system,user_msg,max_tokens=8000,cache_system=True)
             # Parse out TITLE and STRUCTURED_PLAN exactly like /api/plan does
             plan_title=None; new_plan_text=raw; structured=None
             sp_marker="STRUCTURED_PLAN:"
