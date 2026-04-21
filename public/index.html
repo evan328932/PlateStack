@@ -146,7 +146,8 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .wizard-dot{width:34px;height:6px;background:var(--border);border-radius:100px;transition:all 0.25s}
 .wizard-dot.done{background:var(--orange);opacity:0.55}
 .wizard-dot.active{background:var(--orange);box-shadow:0 0 0 3px rgba(249,115,22,0.18)}
-.wizard-nav{display:flex;gap:10px;margin-top:0.25rem;margin-bottom:1rem}
+.wizard-nav{display:none;gap:10px;margin-top:0.25rem;margin-bottom:1rem}
+.wizard-nav.active{display:flex}
 .wizard-back-btn{flex:0 0 auto;padding:14px 22px;background:var(--surface);border:1px solid var(--border);color:var(--text-muted);border-radius:12px;font-family:'DM Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.15s}
 .wizard-back-btn:hover{border-color:var(--border2);color:var(--text)}
 .wizard-next-btn{flex:1;padding:14px 22px;background:var(--orange);border:none;color:#fff;border-radius:12px;font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;cursor:pointer;transition:all 0.15s}
@@ -743,7 +744,7 @@ footer a:hover{color:#fff}
   </div><!-- end step 1 -->
 
   <!-- step 1 nav -->
-  <div class="wizard-nav" data-nav="1">
+  <div class="wizard-nav active" data-nav="1">
     <button class="wizard-next-btn" onclick="wizardNext()">Continue →</button>
   </div>
 
@@ -1530,7 +1531,7 @@ function showWizardStep(n){
     el.classList.toggle('active', parseInt(el.dataset.step)===n);
   });
   document.querySelectorAll('.wizard-nav').forEach(el=>{
-    el.style.display = parseInt(el.dataset.nav)===n ? 'flex' : 'none';
+    el.classList.toggle('active', parseInt(el.dataset.nav)===n);
   });
   // Dots
   document.querySelectorAll('.wizard-dot').forEach(d=>{
