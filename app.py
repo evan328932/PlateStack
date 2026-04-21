@@ -17,6 +17,33 @@ def add_security_headers(resp):
         resp.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
     return resp
 
+# ═══════════════════════════════════════════════════════════
+# GLOBAL ERROR HANDLERS
+# Ensures /api/* routes always return JSON, never HTML error pages.
+# Without this, any unhandled exception bubbles up as an HTML Werkzeug
+# page, and the frontend's `res.json()` call crashes with
+# "Unexpected token '<'". Every API response is JSON from now on.
+# For non-API routes we let Werkzeug's default handling produce the
+# normal HTML error pages (by returning the HTTPException directly).
+# ═══════════════════════════════════════════════════════════
+from werkzeug.exceptions import HTTPException
+
+@app.errorhandler(Exception)
+def handle_unhandled(e):
+    if request.path.startswith("/api/"):
+        # Log the real error server-side but never leak internals to the client
+        print(f"Unhandled API error on {request.path}: {type(e).__name__}: {e}")
+        if isinstance(e, HTTPException):
+            # Use the HTTPException's own status code/description for API errors
+            msg = e.description if e.code and e.code < 500 else "Server error. Please try again."
+            return jsonify({"error": msg}), e.code or 500
+        return jsonify({"error": "Server error. Please try again."}), 500
+    # Non-API route — return the HTTPException so Werkzeug renders its default page,
+    # or re-raise non-HTTP exceptions to get the normal 500 page.
+    if isinstance(e, HTTPException):
+        return e
+    raise e
+
 ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 ADMIN_CODE    = os.environ.get("ADMIN_CODE", "")
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # set in Railway env vars
@@ -24,6 +51,9 @@ DB_PATH       = os.environ.get("DB_PATH", "platestack.db")
 WAITLIST_FILE = "waitlist.txt"
 ANON_PLAN_LIMIT = 2    # no account
 USER_PLAN_LIMIT = 4    # free account
+# Plan tweaks regenerate a full plan (expensive). Limit per-user to prevent cost blowouts.
+ANON_TWEAK_LIMIT = 0   # anonymous users cannot tweak — encourages signup
+USER_TWEAK_LIMIT = 3   # free account gets 3 tweaks per IP/account lifetime
 
 RATE_LIMIT  = 30
 RATE_WINDOW = 3600
@@ -166,13 +196,22 @@ def increment_ip_plan_count(ip):
         db.commit()
     except: pass
 
-def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-20250514",cache_system=False):
+def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-5",cache_system=False):
+    # Fail fast and clearly if the API key isn't configured — otherwise Anthropic
+    # returns a 401 that surfaces as a confusing generic error.
+    if not ANTHROPIC_KEY:
+        raise Exception("Server is not configured for plan generation. Please contact support.")
     system_content=[{"type":"text","text":system_prompt,"cache_control":{"type":"ephemeral"}}] if cache_system else system_prompt
     headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"}
     if cache_system: headers["anthropic-beta"]="prompt-caching-2024-07-31"
     response=requests.post("https://api.anthropic.com/v1/messages",headers=headers,
-        json={"model":model,"max_tokens":max_tokens,"system":system_content,"messages":[{"role":"user","content":user_msg}]},timeout=35)
-    result=response.json()
+        json={"model":model,"max_tokens":max_tokens,"system":system_content,"messages":[{"role":"user","content":user_msg}]},timeout=55)
+    # If Anthropic returned HTML (e.g. 502, Cloudflare page), response.json() would raise —
+    # catch it and raise a clean exception instead
+    try:
+        result=response.json()
+    except ValueError:
+        raise Exception(f"Upstream returned non-JSON (status {response.status_code})")
     if "error" in result: raise Exception(result["error"].get("message","API error"))
     return "".join(b.get("text","") for b in result.get("content",[]))
 
@@ -734,12 +773,14 @@ def log_session_set(session_id):
     db=get_db()
     db.execute("UPDATE plan_sessions SET actual_weight=?,actual_reps=?,rpe=?,completed=1,completed_at=strftime('%s','now') WHERE id=? AND user_id=?",
         (actual_weight,actual_reps,rpe,session_id,user["id"]))
-    # Also mirror to workout_log so existing charts/history work
+    # Also mirror to workout_log so existing charts/history work.
+    # The note includes "#sid:<session_id>" so edit/delete can uniquely identify THIS row
+    # (critical when a user logs multiple identical sets of the same exercise).
     try:
         today=time.strftime("%Y-%m-%d")
         e1rm=int(actual_weight*(1+actual_reps/30)) if actual_reps>1 else int(actual_weight)
         db.execute("INSERT INTO workout_log(user_id,exercise,weight,reps,estimated1rm,unit,note,date) VALUES(?,?,?,?,?,?,?,?)",
-            (user["id"],row["exercise"],actual_weight,actual_reps,e1rm,row["unit"] or "lbs",f"Plan: W{row['week']}D{row['day']}",today))
+            (user["id"],row["exercise"],actual_weight,actual_reps,e1rm,row["unit"] or "lbs",f"Plan: W{row['week']}D{row['day']} #sid:{session_id}",today))
     except Exception as e:
         print(f"Mirror to workout_log failed: {e}")
     db.commit()
@@ -752,6 +793,75 @@ def log_session_set(session_id):
         db.commit()
         adjustment={"new_weight":new_weight,"reason":reason}
     return jsonify({"ok":True,"adjustment":adjustment}),200
+
+@app.route("/api/plan-sessions/<int:session_id>/log",methods=["PATCH"])
+def edit_session_log(session_id):
+    """Edit the logged values for a completed set. Also updates the mirrored workout_log entry."""
+    ip=get_ip()
+    if is_rate_limited(ip): return jsonify({"error":"Too many requests."}),429
+    user=get_auth_user()
+    if not user: return jsonify({"error":"Not logged in."}),401
+    if not is_premium_user(user): return jsonify({"error":"Plan tracking is a premium feature.","premium_required":True}),402
+    data=request.get_json(silent=True) or {}
+    db=get_db()
+    row=db.execute("SELECT id,exercise,unit,completed,completed_at,actual_weight,actual_reps FROM plan_sessions WHERE id=? AND user_id=?",(session_id,user["id"])).fetchone()
+    if not row: return jsonify({"error":"Session not found."}),404
+    if not row["completed"]: return jsonify({"error":"Set hasn't been logged yet."}),400
+    try:
+        actual_weight=float(data.get("actual_weight",0))
+        actual_reps=int(data.get("actual_reps",0))
+        rpe_raw=data.get("rpe")
+        if rpe_raw is None or rpe_raw=="" or rpe_raw==0:
+            rpe=None
+        else:
+            rpe=int(rpe_raw)
+    except (ValueError,TypeError):
+        return jsonify({"error":"Invalid values."}),400
+    if actual_weight<0 or actual_weight>5000: return jsonify({"error":"Invalid weight."}),400
+    if actual_reps<0 or actual_reps>100: return jsonify({"error":"Invalid reps."}),400
+    if rpe is not None and (rpe<1 or rpe>10): return jsonify({"error":"RPE must be 1-10."}),400
+    # Update the session row (do not touch completed_at — we want the original timestamp preserved for the chart)
+    db.execute("UPDATE plan_sessions SET actual_weight=?,actual_reps=?,rpe=? WHERE id=? AND user_id=?",
+        (actual_weight,actual_reps,rpe,session_id,user["id"]))
+    # Update the mirrored workout_log entry so charts stay accurate.
+    # Match by the "#sid:<session_id>" tag so we hit exactly one row even if
+    # the user has multiple identical logged sets of the same exercise.
+    try:
+        e1rm=int(actual_weight*(1+actual_reps/30)) if actual_reps>1 else int(actual_weight)
+        db.execute("""UPDATE workout_log SET weight=?,reps=?,estimated1rm=?
+            WHERE user_id=? AND note LIKE ?""",
+            (actual_weight,actual_reps,e1rm,user["id"],f"%#sid:{session_id}"))
+    except Exception as e:
+        print(f"workout_log update failed: {e}")
+    db.commit()
+    return jsonify({"ok":True}),200
+
+@app.route("/api/plan-sessions/<int:session_id>/log",methods=["DELETE"])
+def unlog_session_set(session_id):
+    """Clear a logged set (reset to 'not done yet'). Removes the mirrored workout_log entry too."""
+    ip=get_ip()
+    if is_rate_limited(ip): return jsonify({"error":"Too many requests."}),429
+    user=get_auth_user()
+    if not user: return jsonify({"error":"Not logged in."}),401
+    if not is_premium_user(user): return jsonify({"error":"Plan tracking is a premium feature.","premium_required":True}),402
+    db=get_db()
+    row=db.execute("SELECT id,exercise,actual_weight,actual_reps,completed FROM plan_sessions WHERE id=? AND user_id=?",(session_id,user["id"])).fetchone()
+    if not row: return jsonify({"error":"Session not found."}),404
+    if not row["completed"]: return jsonify({"ok":True}),200  # already unlogged, nothing to do
+    # Remove the mirrored workout_log entry using the unique #sid:<id> tag.
+    # Note: older logs mirrored before v6 won't have this tag — we leave those
+    # alone to avoid accidentally deleting the wrong row.
+    try:
+        db.execute("""DELETE FROM workout_log
+            WHERE user_id=? AND note LIKE ?""",
+            (user["id"],f"%#sid:{session_id}"))
+    except Exception as e:
+        print(f"workout_log cleanup failed: {e}")
+    # Reset the session row
+    db.execute("UPDATE plan_sessions SET actual_weight=NULL,actual_reps=NULL,rpe=NULL,completed=0,completed_at=NULL WHERE id=? AND user_id=?",
+        (session_id,user["id"]))
+    db.commit()
+    return jsonify({"ok":True}),200
 
 @app.route("/api/plans/<int:plan_id>/progress",methods=["GET"])
 def plan_progress(plan_id):
@@ -923,13 +1033,74 @@ def plan():
 
 @app.route("/api/question",methods=["POST"])
 def question():
+    """Two modes:
+    - mode='ask' (default): short answer to a question about the plan. Uses Haiku (cheap).
+    - mode='tweak': generate a modified full plan based on user feedback. Uses Sonnet (full plan output).
+      Tweaks are quota-limited separately to prevent cost blowouts.
+    """
     ip=get_ip()
     if is_rate_limited(ip): return jsonify({"error":"Too many requests."}),429
     data=request.get_json(silent=True)
     if not data: return jsonify({"error":"Invalid request."}),400
-    plan_text=sanitize(data.get("plan",""),3000); q=sanitize(data.get("question",""),300)
+    mode=sanitize(str(data.get("mode","ask")),10)
+    plan_text=sanitize(data.get("plan",""),8000); q=sanitize(data.get("question",""),500)
     if not plan_text or not q: return jsonify({"error":"Missing plan or question."}),400
     if not is_safe(q): return jsonify({"error":"Invalid input detected."}),400
+
+    if mode=="tweak":
+        # Tweaks regenerate a full plan — expensive. Gate by usage.
+        admin=verify_admin(str(data.get("adminCode","")))
+        user=get_auth_user()
+        if not admin:
+            if user:
+                usage_key=f"user:{user['id']}:tweak"
+                count=get_ip_plan_count(usage_key)
+                if count>=USER_TWEAK_LIMIT:
+                    return jsonify({"error":f"You've used all {USER_TWEAK_LIMIT} plan tweaks. Generate a new plan instead.","limit_hit":True}),403
+            else:
+                usage_key=f"ip:{ip}:tweak"
+                count=get_ip_plan_count(usage_key)
+                if count>=ANON_TWEAK_LIMIT:
+                    return jsonify({"error":"Plan tweaks require a free account.","limit_hit":True}),403
+        try:
+            system=PLAN_SYSTEM + "\n\nYou are editing an EXISTING training plan based on user feedback. Keep the parts of the plan they didn't ask to change. Apply their requested change cleanly. Return the full modified plan using the same template and rules (TITLE line, STRUCTURED_PLAN JSON, markdown format)."
+            user_msg=f"EXISTING PLAN:\n{plan_text}\n\nUSER'S REQUESTED CHANGE:\n{q}\n\nReturn the full updated plan following all the original template and STRUCTURED_PLAN rules."
+            raw=call_claude(system,user_msg,max_tokens=4500,cache_system=True)
+            # Parse out TITLE and STRUCTURED_PLAN exactly like /api/plan does
+            plan_title=None; new_plan_text=raw; structured=None
+            sp_marker="STRUCTURED_PLAN:"
+            if sp_marker in new_plan_text:
+                idx=new_plan_text.rfind(sp_marker)
+                json_part=new_plan_text[idx+len(sp_marker):].strip()
+                new_plan_text=new_plan_text[:idx].rstrip()
+                json_part=re.sub(r'^```(?:json)?\s*','',json_part)
+                json_part=re.sub(r'\s*```\s*$','',json_part).strip()
+                try:
+                    import json as _json
+                    structured=_json.loads(json_part)
+                except Exception as e:
+                    print(f"Tweak structured parse failed: {e}")
+                    structured=None
+            lines=new_plan_text.split("\n")
+            for i,line in enumerate(lines):
+                stripped=line.strip()
+                if stripped.startswith("TITLE:"):
+                    plan_title=stripped[6:].strip()
+                    rest=lines[i+1:]
+                    while rest and not rest[0].strip(): rest=rest[1:]
+                    new_plan_text="\n".join(rest)
+                    break
+            # Increment tweak quota
+            if not admin:
+                if user: increment_ip_plan_count(f"user:{user['id']}:tweak")
+                else: increment_ip_plan_count(f"ip:{ip}:tweak")
+            return jsonify({"plan":new_plan_text,"plan_title":plan_title,"structured":structured,"tweak":True})
+        except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
+        except Exception as e:
+            print(f"Tweak error: {e}")
+            return jsonify({"error":"Something went wrong tweaking your plan. Please try again."}),500
+
+    # Default: quick Q&A answer
     try:
         answer=call_claude("You are an expert strength coach answering a follow-up question about a training plan. Be concise — 2-4 sentences or a short bullet list. Never restate the full plan.",f"Training plan:\n{plan_text}\n\nQuestion: {q}",max_tokens=350,model="claude-haiku-4-5-20251001",cache_system=True)
         return jsonify({"answer":answer})
