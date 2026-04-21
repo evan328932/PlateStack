@@ -80,6 +80,8 @@ def init_db():
             CREATE TABLE IF NOT EXISTS page_visits(id INTEGER PRIMARY KEY AUTOINCREMENT,date TEXT NOT NULL,ip_hash TEXT NOT NULL,created INTEGER NOT NULL DEFAULT(strftime('%s','now')));
             CREATE INDEX IF NOT EXISTS idx_visits_date ON page_visits(date);
             CREATE UNIQUE INDEX IF NOT EXISTS idx_visits_unique ON page_visits(date,ip_hash);
+            CREATE TABLE IF NOT EXISTS excluded_emails(email TEXT PRIMARY KEY,created INTEGER NOT NULL DEFAULT(strftime('%s','now')));
+            CREATE TABLE IF NOT EXISTS excluded_ip_hashes(ip_hash TEXT PRIMARY KEY,note TEXT,created INTEGER NOT NULL DEFAULT(strftime('%s','now')));
         """)
         # Idempotent column adds for existing DBs (SQLite has no IF NOT EXISTS on ALTER)
         def _add_col(tbl,col,decl):
@@ -174,23 +176,39 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-20
     if "error" in result: raise Exception(result["error"].get("message","API error"))
     return "".join(b.get("text","") for b in result.get("content",[]))
 
-PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, - for bullets. No preamble. No closing remarks.
+PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks.
 
 IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences.
+
+WARM-UP & PREP RULES:
+- Every training day must include a structured warm-up before working sets, with TWO parts:
+  1. **General prep / mobility** — 3-5 minutes of movement-specific mobility (e.g. for squat day: hip circles, ankle rocks, leg swings). Tailor to any injuries the user listed.
+  2. **Specific warm-up sets** — for each main compound lift (squat/bench/deadlift/OHP and similar), prescribe 3-4 ramp-up sets with EXACT weights leading into their working weight. Use the standard pyramid: empty bar x 8, then ~40% x 5, ~60% x 3, ~80% x 2, then working sets. Calculate the actual numbers for THIS user.
+- Accessory and isolation work does not need ramp-up sets — one light feeler set is enough.
+
+WORKING SET RULES:
+- Add an RIR target (Reps In Reserve — how many reps you should have left in the tank) to each working set. Example: "Bench Press — 4 sets x 5 reps @ 185 lbs, RIR 2-3". RIR 0 = absolute failure, RIR 3 = 3 reps from failure.
+- Include rest periods between sets (e.g. "rest 2-3 min").
+
+COOL-DOWN RULES:
+- Each training day ends with a brief cool-down section: 2-4 stretches or mobility moves targeting what was just trained, with hold times. Tailor to injuries.
 
 TITLE RULE: The very first line of your response must be a TITLE line in this exact format:
 TITLE: [short punchy 3-7 word plan name that captures the goal and style, e.g. "Raw Strength: 4-Day Upper/Lower" or "5-Day PPL Mass Builder"]
 Then a blank line, then the rest of the plan.
 
 STRUCTURED_PLAN RULE: After the full markdown plan, on a new line, write "STRUCTURED_PLAN:" followed by a valid JSON object describing Week 1 of the plan in this exact schema:
-{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press","sets":4,"reps":5,"weight":185,"unit":"lbs"},{"name":"Barbell Row","sets":4,"reps":8,"weight":135,"unit":"lbs"}]},{"day":2,"name":"Lower","exercises":[...]}]}
+{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press","type":"main","sets":4,"reps":5,"weight":185,"rir":2,"unit":"lbs"},{"name":"Bench Press Warm-up","type":"warmup","sets":3,"reps":5,"weight":95,"unit":"lbs"},{"name":"Barbell Row","type":"main","sets":4,"reps":8,"weight":135,"rir":2,"unit":"lbs"}]},{"day":2,"name":"Lower","exercises":[...]}]}
 Rules for the JSON:
 - Use the exact unit the user specified (lbs or kg).
 - For bodyweight exercises, use weight: 0.
 - For rep ranges like "8-12", pick the midpoint (10).
 - Only include Week 1. Do NOT include every week.
 - The JSON must be valid and parseable. No comments, no trailing commas.
-- Exercise names must match the names used in the markdown plan exactly."""
+- Exercise names must match the names used in the markdown plan exactly.
+- Include `type` on every exercise: "warmup" for ramp-up sets, "main" for working compound lifts, "accessory" for isolation/accessory, "mobility" for prep/cool-down moves.
+- Include `rir` (integer 0-5) on main and accessory exercises only. Omit `rir` for warmup and mobility.
+- For warm-up entries: use the format "{LiftName} Warm-up" as the name and represent the ramp as a single multi-set entry where reps is the average of the ramp reps."""
 
 def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text,injuries="",preferences="",log_context=""):
     extras = []
@@ -215,7 +233,26 @@ TITLE: [3-7 word punchy plan name]
 [Write 2-3 plain prose sentences about their current level vs their goal. PLAIN TEXT ONLY — no dashes, no bullets, no sub-headers.]
 
 ## Weekly Program ({days}-Day {split})
-[Each training day labeled Day N - name. List exercises: Name - sets x reps @ weight. Include rest periods.]
+[For EACH training day, structure it like this:
+
+### Day N — [Name]
+**Warm-up** (5-8 min)
+- Mobility: [2-3 specific mobility moves with reps/time, tailored to the day and any injuries]
+- Specific ramp sets for [main lift]: [empty bar x 8, then exact weight ramp leading to working sets]
+
+**Main work**
+- [Main compound]: sets x reps @ exact weight, RIR X, rest 2-3 min
+- [Secondary compound]: sets x reps @ exact weight, RIR X, rest 2 min
+
+**Accessory work**
+- [Accessory 1]: sets x reps @ weight, RIR X, rest 60-90s
+- [Accessory 2]: sets x reps @ weight, RIR X
+- [Accessory 3 if applicable]
+
+**Cool-down** (3-5 min)
+- [2-4 stretches/mobility moves with hold times targeting what was trained]
+
+Repeat this exact structure for each day.]
 
 ## Week-by-Week Progression
 [Show exactly how to progress the main lifts over 4 weeks. E.g. "Week 1: Bench 225x5x4, Week 2: 230x5x4, Week 3: 235x4x4, Week 4: 240x5x4". Cover the 2-3 most important lifts.]
@@ -482,6 +519,9 @@ def save_plan():
                 if day_num<=0: continue
                 for ex_idx,ex in enumerate(day_obj.get("exercises",[])):
                     ex_name=sanitize(str(ex.get("name",""))[:100],100)
+                    # Only track main and accessory exercises — warm-ups and mobility are guidance only, not logged
+                    ex_type=str(ex.get("type","main")).lower()
+                    if ex_type in ("warmup","mobility","cooldown"): continue
                     sets=int(ex.get("sets",0) or 0)
                     reps=int(ex.get("reps",0) or 0)
                     weight=float(ex.get("weight",0) or 0)
@@ -650,6 +690,8 @@ def activate_plan(plan_id):
                 if day_num<=0: continue
                 for ex_idx,ex in enumerate(day_obj.get("exercises",[])):
                     ex_name=sanitize(str(ex.get("name",""))[:100],100)
+                    ex_type=str(ex.get("type","main")).lower()
+                    if ex_type in ("warmup","mobility","cooldown"): continue
                     sets=int(ex.get("sets",0) or 0)
                     reps=int(ex.get("reps",0) or 0)
                     weight=float(ex.get("weight",0) or 0)
@@ -828,7 +870,7 @@ def plan():
                 log_context="\n".join(lines)
         except: pass
     try:
-        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=2500,cache_system=True)
+        raw=call_claude(PLAN_SYSTEM,build_plan_prompt(profile,exp,days,split,goal,unit,lifts_text,injuries,preferences,log_context),max_tokens=4500,cache_system=True)
         # Parse AI-generated title out of the response
         plan_title=None
         plan_text=raw
@@ -915,25 +957,141 @@ def verify_admin_route():
     data=request.get_json(silent=True) or {}
     return jsonify({"valid":verify_admin(sanitize(str(data.get("code","")),100))}),200
 
+def get_excluded_emails(db):
+    """Returns set of lowercased emails to exclude from analytics."""
+    try:
+        rows=db.execute("SELECT email FROM excluded_emails").fetchall()
+        return {r["email"].lower() for r in rows}
+    except: return set()
+
+def get_excluded_ip_hashes(db):
+    """Returns set of ip_hashes to exclude from visit analytics."""
+    try:
+        rows=db.execute("SELECT ip_hash FROM excluded_ip_hashes").fetchall()
+        return {r["ip_hash"] for r in rows}
+    except: return set()
+
+def get_excluded_user_ids(db):
+    """Returns set of user_ids whose accounts are on the exclusion list."""
+    try:
+        excl=get_excluded_emails(db)
+        if not excl: return set()
+        # Build a parameterized IN clause safely
+        placeholders=",".join("?"*len(excl))
+        rows=db.execute(f"SELECT id FROM users WHERE LOWER(email) IN ({placeholders})",tuple(excl)).fetchall()
+        return {r["id"] for r in rows}
+    except: return set()
+
+@app.route("/api/admin/exclusions",methods=["GET"])
+def list_exclusions():
+    """Admin: list all excluded emails and IP hashes."""
+    if not verify_admin(request.args.get("code","")): return jsonify({"error":"Unauthorized"}),403
+    db=get_db()
+    emails=db.execute("SELECT email,datetime(created,'unixepoch') as ts FROM excluded_emails ORDER BY created DESC").fetchall()
+    ips=db.execute("SELECT ip_hash,note,datetime(created,'unixepoch') as ts FROM excluded_ip_hashes ORDER BY created DESC").fetchall()
+    return jsonify({"emails":[dict(r) for r in emails],"ips":[dict(r) for r in ips]}),200
+
+@app.route("/api/admin/exclusions/email",methods=["POST"])
+def add_excluded_email():
+    """Admin: add an email to the exclusion list."""
+    data=request.get_json(silent=True) or {}
+    if not verify_admin(str(data.get("code",""))): return jsonify({"error":"Unauthorized"}),403
+    email=sanitize(str(data.get("email","")),200).lower()
+    if not email or "@" not in email: return jsonify({"error":"Invalid email"}),400
+    db=get_db()
+    try: db.execute("INSERT OR IGNORE INTO excluded_emails(email) VALUES(?)",(email,)); db.commit()
+    except Exception as e: print(f"Add exclusion failed: {e}"); return jsonify({"error":"DB error"}),500
+    return jsonify({"ok":True}),200
+
+@app.route("/api/admin/exclusions/email",methods=["DELETE"])
+def remove_excluded_email():
+    """Admin: remove an email from the exclusion list."""
+    data=request.get_json(silent=True) or {}
+    if not verify_admin(str(data.get("code",""))): return jsonify({"error":"Unauthorized"}),403
+    email=sanitize(str(data.get("email","")),200).lower()
+    db=get_db(); db.execute("DELETE FROM excluded_emails WHERE email=?",(email,)); db.commit()
+    return jsonify({"ok":True}),200
+
+@app.route("/api/admin/exclusions/my-ip",methods=["POST"])
+def exclude_my_ip():
+    """Admin: hash the caller's current IP and add it to the exclusion list. Convenient for the owner."""
+    data=request.get_json(silent=True) or {}
+    if not verify_admin(str(data.get("code",""))): return jsonify({"error":"Unauthorized"}),403
+    note=sanitize(str(data.get("note","Owner")),100)
+    ip=get_ip()
+    ip_hash=hashlib.sha256(ip.encode()).hexdigest()[:32]
+    db=get_db()
+    try: db.execute("INSERT OR IGNORE INTO excluded_ip_hashes(ip_hash,note) VALUES(?,?)",(ip_hash,note)); db.commit()
+    except Exception as e: return jsonify({"error":"DB error"}),500
+    return jsonify({"ok":True}),200
+
+@app.route("/api/admin/exclusions/ip",methods=["DELETE"])
+def remove_excluded_ip():
+    data=request.get_json(silent=True) or {}
+    if not verify_admin(str(data.get("code",""))): return jsonify({"error":"Unauthorized"}),403
+    ip_hash=sanitize(str(data.get("ip_hash","")),64)
+    db=get_db(); db.execute("DELETE FROM excluded_ip_hashes WHERE ip_hash=?",(ip_hash,)); db.commit()
+    return jsonify({"ok":True}),200
+
 @app.route("/api/emails",methods=["GET"])
 def view_emails():
     code=request.args.get("code","")
     if not verify_admin(code): return "Unauthorized",403
     db=get_db()
-    wl=db.execute("SELECT email,datetime(created,'unixepoch') as ts FROM waitlist ORDER BY created DESC").fetchall()
-    ur=db.execute("SELECT email,datetime(created,'unixepoch') as ts FROM users ORDER BY created DESC").fetchall()
-    # Visit analytics
-    total_visits=db.execute("SELECT COUNT(*) as c FROM page_visits").fetchone()["c"]
+    excl_emails=get_excluded_emails(db)
+    excl_ips=get_excluded_ip_hashes(db)
+    excl_user_ids=get_excluded_user_ids(db)
+    # Build SQL fragments for filtering
+    def email_excl_sql(col_alias):
+        if not excl_emails: return "",[]
+        ph=",".join("?"*len(excl_emails))
+        return f" AND LOWER({col_alias}) NOT IN ({ph})",list(excl_emails)
+    def ip_excl_sql():
+        if not excl_ips: return "",[]
+        ph=",".join("?"*len(excl_ips))
+        return f" AND ip_hash NOT IN ({ph})",list(excl_ips)
+    def user_excl_sql(col_alias="user_id"):
+        if not excl_user_ids: return "",[]
+        ph=",".join("?"*len(excl_user_ids))
+        return f" AND {col_alias} NOT IN ({ph})",list(excl_user_ids)
+
+    # Lists (filtered)
+    e_sql,e_params=email_excl_sql("email")
+    wl=db.execute(f"SELECT email,datetime(created,'unixepoch') as ts FROM waitlist WHERE 1=1{e_sql} ORDER BY created DESC",tuple(e_params)).fetchall()
+    ur=db.execute(f"SELECT id,email,datetime(created,'unixepoch') as ts FROM users WHERE 1=1{e_sql} ORDER BY created DESC",tuple(e_params)).fetchall()
+
+    # Visit stats (filter excluded IPs)
+    ip_sql,ip_params=ip_excl_sql()
     today=time.strftime("%Y-%m-%d")
-    visits_today=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date=?",(today,)).fetchone()["c"]
-    visits_7d=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-7 days')").fetchone()["c"]
-    visits_30d=db.execute("SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-30 days')").fetchone()["c"]
-    # Daily breakdown for last 14 days
-    daily=db.execute("SELECT date,COUNT(*) as visits FROM page_visits WHERE date>=date('now','-14 days') GROUP BY date ORDER BY date DESC").fetchall()
-    # Plan generation totals
-    plans_made=db.execute("SELECT COALESCE(SUM(count),0) as total FROM ip_plan_usage").fetchone()["total"]
-    plans_saved=db.execute("SELECT COUNT(*) as c FROM saved_plans").fetchone()["c"]
-    workouts_logged=db.execute("SELECT COUNT(*) as c FROM workout_log").fetchone()["c"]
+    total_visits=db.execute(f"SELECT COUNT(*) as c FROM page_visits WHERE 1=1{ip_sql}",tuple(ip_params)).fetchone()["c"]
+    visits_today=db.execute(f"SELECT COUNT(*) as c FROM page_visits WHERE date=?{ip_sql}",(today,*ip_params)).fetchone()["c"]
+    visits_7d=db.execute(f"SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-7 days'){ip_sql}",tuple(ip_params)).fetchone()["c"]
+    visits_30d=db.execute(f"SELECT COUNT(*) as c FROM page_visits WHERE date>=date('now','-30 days'){ip_sql}",tuple(ip_params)).fetchone()["c"]
+    daily=db.execute(f"SELECT date,COUNT(*) as visits FROM page_visits WHERE date>=date('now','-30 days'){ip_sql} GROUP BY date ORDER BY date ASC",tuple(ip_params)).fetchall()
+
+    # Plan/workout stats (filter excluded users)
+    u_sql,u_params=user_excl_sql("user_id")
+    plans_saved=db.execute(f"SELECT COUNT(*) as c FROM saved_plans WHERE 1=1{u_sql}",tuple(u_params)).fetchone()["c"]
+    plans_active=db.execute(f"SELECT COUNT(*) as c FROM saved_plans WHERE is_active=1{u_sql}",tuple(u_params)).fetchone()["c"]
+    workouts_logged=db.execute(f"SELECT COUNT(*) as c FROM workout_log WHERE 1=1{u_sql}",tuple(u_params)).fetchone()["c"]
+
+    # Plans generated — ip_plan_usage uses "user:{id}" or raw IP. Filter the user-keyed rows by excluded users.
+    if excl_user_ids:
+        excl_keys=tuple(f"user:{i}" for i in excl_user_ids)
+        ph=",".join("?"*len(excl_keys))
+        plans_made=db.execute(f"SELECT COALESCE(SUM(count),0) as total FROM ip_plan_usage WHERE ip NOT IN ({ph})",excl_keys).fetchone()["total"]
+    else:
+        plans_made=db.execute("SELECT COALESCE(SUM(count),0) as total FROM ip_plan_usage").fetchone()["total"]
+
+    # Engagement metrics (more useful than raw totals)
+    # New accounts in last 7 days (filtered)
+    new_accts_7d=db.execute(f"SELECT COUNT(*) as c FROM users WHERE created>=strftime('%s','now','-7 days'){e_sql}",tuple(e_params)).fetchone()["c"]
+    # Active users = logged at least one set in the last 7 days
+    u_sql_w,u_params_w=user_excl_sql("user_id")
+    active_7d=db.execute(f"SELECT COUNT(DISTINCT user_id) as c FROM workout_log WHERE created>=strftime('%s','now','-7 days'){u_sql_w}",tuple(u_params_w)).fetchone()["c"]
+    # Plan activation rate = active plans / total accounts
+    activation_rate = round(100*plans_active/len(ur),1) if len(ur)>0 else 0.0
+
     fmt=request.args.get("format","html")
     if fmt=="json":
         return jsonify({
@@ -944,36 +1102,174 @@ def view_emails():
                 "visits_today":visits_today,
                 "visits_7d":visits_7d,
                 "visits_30d":visits_30d,
-                "daily_last_14":[dict(r) for r in daily],
+                "daily_last_30":[dict(r) for r in daily],
                 "plans_generated":plans_made,
                 "plans_saved":plans_saved,
+                "plans_active":plans_active,
                 "workouts_logged":workouts_logged,
+                "new_accounts_7d":new_accts_7d,
+                "active_users_7d":active_7d,
+                "plan_activation_rate_pct":activation_rate,
+            },
+            "exclusions":{
+                "emails":sorted(excl_emails),
+                "excluded_ip_count":len(excl_ips),
             }
         })
-    def tbl(rows,title):
+
+    # ── HTML rendering ─────────────────────────────────────────────
+    def tbl(rows,title,with_remove=False):
         if not rows: return f"<h2>{title}</h2><p style='color:#999'>None yet.</p>"
-        trs="".join(f"<tr><td>{i+1}</td><td>{r['email']}</td><td style='color:#999'>{r['ts']}</td></tr>" for i,r in enumerate(rows))
-        return f"<h2>{title} ({len(rows)})</h2><table><thead><tr><th>#</th><th>Email</th><th>Date</th></tr></thead><tbody>{trs}</tbody></table>"
-    # Stat cards
-    stat_cards=f"""<div class="stats-grid">
-        <div class="stat-card"><div class="stat-value">{visits_today}</div><div class="stat-label">Visits today</div></div>
-        <div class="stat-card"><div class="stat-value">{visits_7d}</div><div class="stat-label">Last 7 days</div></div>
-        <div class="stat-card"><div class="stat-value">{visits_30d}</div><div class="stat-label">Last 30 days</div></div>
-        <div class="stat-card"><div class="stat-value">{total_visits}</div><div class="stat-label">All time</div></div>
-    </div>
-    <div class="stats-grid">
-        <div class="stat-card"><div class="stat-value">{len(ur)}</div><div class="stat-label">Accounts</div></div>
-        <div class="stat-card"><div class="stat-value">{plans_made}</div><div class="stat-label">Plans generated</div></div>
-        <div class="stat-card"><div class="stat-value">{plans_saved}</div><div class="stat-label">Plans saved</div></div>
-        <div class="stat-card"><div class="stat-value">{workouts_logged}</div><div class="stat-label">Workouts logged</div></div>
-    </div>"""
-    # Daily visits table
+        trs=""
+        for i,r in enumerate(rows):
+            email=r['email']
+            remove_btn=f'<td><button class="rm-btn" onclick="excludeEmail(\'{email}\')">Exclude</button></td>' if with_remove else ''
+            trs+=f"<tr><td>{i+1}</td><td>{email}</td><td style='color:#999'>{r['ts']}</td>{remove_btn}</tr>"
+        head=f"<th>#</th><th>Email</th><th>Date</th>"+("<th></th>" if with_remove else "")
+        return f"<h2>{title} ({len(rows)})</h2><table><thead><tr>{head}</tr></thead><tbody>{trs}</tbody></table>"
+
+    # 30-day SVG bar chart
     if daily:
-        daily_rows="".join(f"<tr><td>{r['date']}</td><td>{r['visits']}</td></tr>" for r in daily)
-        daily_tbl=f'<h2>Daily visits (last 14 days)</h2><table><thead><tr><th>Date</th><th>Unique visitors</th></tr></thead><tbody>{daily_rows}</tbody></table>'
+        # Build a map of date->visits and fill gaps with 0 for last 30 days
+        import datetime as _dt
+        visit_map={r["date"]:r["visits"] for r in daily}
+        days_back=[]
+        for i in range(29,-1,-1):
+            d=(_dt.date.today()-_dt.timedelta(days=i)).isoformat()
+            days_back.append((d,visit_map.get(d,0)))
+        max_v=max(v for _,v in days_back) or 1
+        chart_w=720; chart_h=180; bar_w=chart_w/30; pad=2
+        bars=""
+        for i,(d,v) in enumerate(days_back):
+            h=int((v/max_v)*(chart_h-30))
+            x=i*bar_w
+            y=chart_h-h-20
+            color="#f97316" if v>0 else "#1e2026"
+            label=f"{d}: {v}"
+            bars+=f'<rect x="{x+pad}" y="{y}" width="{bar_w-pad*2}" height="{h}" fill="{color}" rx="2"><title>{label}</title></rect>'
+            if i%5==0:
+                bars+=f'<text x="{x+bar_w/2}" y="{chart_h-5}" text-anchor="middle" font-size="9" fill="#888">{d[5:]}</text>'
+        chart_svg=f'<svg width="100%" viewBox="0 0 {chart_w} {chart_h}" style="display:block">{bars}</svg>'
     else:
-        daily_tbl='<h2>Daily visits</h2><p style="color:#999">No visits tracked yet.</p>'
-    return f"""<!DOCTYPE html><html><head><title>PlateStack Admin</title><style>body{{font-family:system-ui;padding:2rem;max-width:800px;margin:0 auto;background:#f9f9f9}}h1{{font-size:22px}}h2{{font-size:16px;margin:2rem 0 0.5rem}}table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.1)}}th{{text-align:left;padding:10px 14px;background:#f0f0f0;border-bottom:2px solid #ddd}}td{{padding:9px 14px;border-bottom:1px solid #eee}}a{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}.stats-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:1rem 0}}.stat-card{{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);text-align:center}}.stat-value{{font-size:28px;font-weight:700;color:#f97316;line-height:1}}.stat-label{{font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-top:6px}}@media(max-width:600px){{.stats-grid{{grid-template-columns:repeat(2,1fr)}}}}</style></head><body><h1>🏋️ PlateStack Admin</h1>{stat_cards}{daily_tbl}{tbl(ur,"Accounts")}{tbl(wl,"Waitlist")}<a href="?code={code}&format=json">JSON</a></body></html>"""
+        chart_svg='<p style="color:#999">No visits tracked yet.</p>'
+
+    # Exclusion management UI
+    excl_emails_html=""
+    for em in sorted(excl_emails):
+        excl_emails_html+=f'<span class="chip">{em} <a href="#" onclick="rmExcludeEmail(\'{em}\');return false">×</a></span>'
+    if not excl_emails_html: excl_emails_html='<span style="color:#999;font-size:13px">None — your stats include everyone.</span>'
+
+    excl_ip_count=len(excl_ips)
+    excl_ip_html=f'<span style="color:#999;font-size:13px">{excl_ip_count} IP(s) excluded.</span>'
+
+    return f"""<!DOCTYPE html><html><head><title>PlateStack Admin</title><style>
+body{{font-family:system-ui;padding:1.5rem;max-width:900px;margin:0 auto;background:#f9f9f9;color:#222}}
+h1{{font-size:22px;margin-bottom:4px}}
+h2{{font-size:15px;margin:1.75rem 0 0.5rem;color:#333;text-transform:uppercase;letter-spacing:0.04em;font-weight:700}}
+.subtitle{{color:#666;font-size:13px;margin-bottom:1rem}}
+table{{width:100%;border-collapse:collapse;font-size:14px;background:#fff;border-radius:8px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}}
+th{{text-align:left;padding:9px 14px;background:#f0f0f0;border-bottom:1px solid #ddd;font-size:11px;text-transform:uppercase;letter-spacing:0.04em;color:#555}}
+td{{padding:9px 14px;border-bottom:1px solid #eee}}
+tr:last-child td{{border-bottom:none}}
+.stats-grid{{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:0.5rem 0 1rem}}
+.stat-card{{background:#fff;padding:0.9rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);text-align:center}}
+.stat-value{{font-size:26px;font-weight:700;color:#f97316;line-height:1}}
+.stat-label{{font-size:10px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-top:5px;font-weight:600}}
+.stat-sub{{font-size:11px;color:#999;margin-top:2px}}
+.chart-card{{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:1rem}}
+.exclusion-card{{background:#fff;padding:1rem;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.08);margin-bottom:1rem;border-left:3px solid #f97316}}
+.chip{{display:inline-block;background:#fff5eb;color:#c2410c;border:1px solid #fed7aa;border-radius:12px;padding:3px 10px;font-size:12px;margin:3px 4px 3px 0}}
+.chip a{{color:#c2410c;text-decoration:none;font-weight:700;margin-left:4px}}
+.input-row{{display:flex;gap:6px;margin-top:8px}}
+.input-row input{{flex:1;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:13px}}
+.input-row button{{padding:7px 14px;background:#f97316;color:#fff;border:none;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600}}
+.input-row button:hover{{background:#ea580c}}
+.rm-btn{{padding:3px 8px;background:#fff;color:#c2410c;border:1px solid #fed7aa;border-radius:5px;font-size:11px;cursor:pointer}}
+.rm-btn:hover{{background:#fff5eb}}
+.note{{font-size:12px;color:#666;line-height:1.5}}
+a.json-link{{font-size:13px;color:#888;margin-top:1.5rem;display:inline-block}}
+@media(max-width:680px){{.stats-grid{{grid-template-columns:repeat(2,1fr)}}}}
+</style></head><body>
+<h1>🏋️ PlateStack Admin</h1>
+<div class="subtitle">{('<strong>'+str(len(excl_emails))+' email(s) excluded</strong> + '+str(excl_ip_count)+' IP(s) excluded') if (excl_emails or excl_ips) else 'No exclusions active — stats reflect all users.'}</div>
+
+<h2>Visitors</h2>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-value">{visits_today}</div><div class="stat-label">Today</div></div>
+  <div class="stat-card"><div class="stat-value">{visits_7d}</div><div class="stat-label">Last 7 days</div></div>
+  <div class="stat-card"><div class="stat-value">{visits_30d}</div><div class="stat-label">Last 30 days</div></div>
+  <div class="stat-card"><div class="stat-value">{total_visits}</div><div class="stat-label">All time</div></div>
+</div>
+<div class="chart-card">
+  <div style="font-size:11px;color:#666;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px;font-weight:600">Daily unique visitors — last 30 days</div>
+  {chart_svg}
+</div>
+
+<h2>Engagement</h2>
+<div class="stats-grid">
+  <div class="stat-card"><div class="stat-value">{len(ur)}</div><div class="stat-label">Total accounts</div><div class="stat-sub">+{new_accts_7d} this week</div></div>
+  <div class="stat-card"><div class="stat-value">{active_7d}</div><div class="stat-label">Active (7d)</div><div class="stat-sub">logged a set</div></div>
+  <div class="stat-card"><div class="stat-value">{plans_active}</div><div class="stat-label">Active plans</div><div class="stat-sub">{activation_rate}% activation</div></div>
+  <div class="stat-card"><div class="stat-value">{plans_made}</div><div class="stat-label">Plans generated</div><div class="stat-sub">{plans_saved} saved</div></div>
+</div>
+<div class="stats-grid" style="grid-template-columns:repeat(2,1fr)">
+  <div class="stat-card"><div class="stat-value">{workouts_logged}</div><div class="stat-label">Sets logged (all time)</div></div>
+  <div class="stat-card"><div class="stat-value">{len(wl)}</div><div class="stat-label">Waitlist signups</div></div>
+</div>
+
+<h2>Exclude accounts from analytics</h2>
+<div class="exclusion-card">
+  <p class="note">Exclude your own accounts (or test accounts) so they don't inflate your stats. Filtering applies to visit counts, plan/workout counts, and account totals.</p>
+  <div style="margin-top:10px">{excl_emails_html}</div>
+  <div class="input-row">
+    <input id="exclEmail" type="email" placeholder="email@example.com" />
+    <button onclick="addExclude()">Exclude email</button>
+  </div>
+  <div style="margin-top:14px;padding-top:14px;border-top:1px solid #eee">
+    <p class="note">Visit tracking only stores hashed IPs (not your raw IP), so to exclude your own browsing you click the button below from the device/network you browse from.</p>
+    <div style="margin-top:6px">{excl_ip_html}</div>
+    <button onclick="excludeMyIp()" style="padding:7px 14px;background:#fff;color:#f97316;border:1px solid #f97316;border-radius:6px;cursor:pointer;font-size:13px;font-weight:600;margin-top:8px">Exclude my current IP</button>
+  </div>
+</div>
+
+{tbl(ur,"Accounts",with_remove=True)}
+{tbl(wl,"Waitlist",with_remove=False)}
+
+<a class="json-link" href="?code={code}&format=json">JSON export</a>
+
+<script>
+const CODE={_repr_admin_code(code)};
+async function api(path,method,body){{
+  const r=await fetch(path,{{method,headers:{{'Content-Type':'application/json'}},body:JSON.stringify(body||{{}})}});
+  return r.json();
+}}
+async function addExclude(){{
+  const em=document.getElementById('exclEmail').value.trim();
+  if(!em) return;
+  await api('/api/admin/exclusions/email','POST',{{code:CODE,email:em}});
+  location.reload();
+}}
+async function excludeEmail(em){{
+  if(!confirm('Exclude '+em+' from all analytics?')) return;
+  await api('/api/admin/exclusions/email','POST',{{code:CODE,email:em}});
+  location.reload();
+}}
+async function rmExcludeEmail(em){{
+  await api('/api/admin/exclusions/email','DELETE',{{code:CODE,email:em}});
+  location.reload();
+}}
+async function excludeMyIp(){{
+  await api('/api/admin/exclusions/my-ip','POST',{{code:CODE,note:'Owner '+new Date().toISOString().slice(0,10)}});
+  alert('Your current IP is now excluded from visit counts.');
+  location.reload();
+}}
+</script>
+</body></html>"""
+
+def _repr_admin_code(code):
+    """Safely embed admin code as a JS string literal."""
+    import json as _json
+    return _json.dumps(code)
 
 if __name__=="__main__":
     app.run(debug=False)
