@@ -776,6 +776,7 @@ footer a:hover{color:#fff}
         <div class="chip" onclick="selectSplit(this,'upper_lower')">Upper / lower</div>
         <div class="chip" onclick="selectSplit(this,'ppl')">Push / pull / legs</div>
         <div class="chip" onclick="selectSplit(this,'bro_split')">Bro split</div>
+        <div class="chip" onclick="selectSplit(this,'531')">5/3/1</div>
         <div class="chip" onclick="selectSplit(this,'custom')">Custom</div>
       </div>
       <textarea id="splitCustom" rows="1" placeholder="Describe your split or any schedule notes..." style="margin-top:10px;min-height:50px" oninput="autosave()"></textarea>
@@ -890,7 +891,7 @@ footer a:hover{color:#fff}
     </div>
     <div class="maxes-grid" id="maxesGrid"></div>
     <div class="plan-section">
-      <div class="plan-label">Your training plan <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(click any exercise name to see how to do it)</span></div>
+      <div class="plan-label">Your training plan <span style="font-size:11px;color:var(--text-dim);font-weight:400;text-transform:none;letter-spacing:0">(for exercise form and cues, see the Exercise Catalog tab)</span></div>
       <div id="planTitle" style="display:none;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;margin-bottom:0.75rem;letter-spacing:0.01em"></div>
       <div class="plan-text" id="planText"></div>
     </div>
@@ -2360,7 +2361,7 @@ async function calculate(){
   document.getElementById('resultsCard').style.display='block'; document.getElementById('planText').innerHTML=''; document.getElementById('resultsFooter').textContent=''; document.getElementById('qaSection').style.display='none'; document.getElementById('qaMessages').innerHTML=''; qaUsedThisPlan=0; setLoading(true);
   document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'nearest'});
   const goalLabels={strength:'Build maximum strength',muscle:'Build muscle and size',endurance:'Build muscular endurance',lose_weight:'Lose weight while maintaining muscle',custom:'Custom goal'};
-  const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split',custom:'Custom split'};
+  const splitLabels={full_body:'Full body',upper_lower:'Upper / lower split',ppl:'Push / pull / legs',bro_split:'Bro split','531':'5/3/1 style',custom:'Custom split'};
   const goalDetail=document.getElementById('goalDetail').value.trim();
   const splitCustom=document.getElementById('splitCustom').value.trim();
   const injuries=document.getElementById('injuriesField').value.trim();
