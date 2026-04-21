@@ -1580,6 +1580,16 @@ function switchAuthTab(tab){
 
 function getToken(){ try{ return localStorage.getItem('ll_token'); }catch(e){ return null; } }
 function setToken(t){ try{ if(t) localStorage.setItem('ll_token',t); else localStorage.removeItem('ll_token'); }catch(e){} }
+// Safely parse JSON from a fetch response.
+// If the server returns HTML (e.g. a Railway 502 page or cold-start error),
+// calling .json() throws "Unexpected token '<'" — this throws a clean message instead.
+async function safeJson(res){
+  const ct=res.headers.get('content-type')||'';
+  if(!ct.includes('application/json')){
+    throw new Error(`Server returned an unexpected response (status ${res.status}). Please try again.`);
+  }
+  return res.json();
+}
 
 async function doRegister(){
   const email=document.getElementById('signupEmail').value.trim();
@@ -1592,7 +1602,7 @@ async function doRegister(){
   btn.disabled=true; btn.textContent='Creating account...';
   try{
     const res=await fetch('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(d.error){ msg.textContent=d.error; return; }
     setToken(d.token);
     currentUser={id:null,email:d.email,token:d.token};
@@ -1614,7 +1624,7 @@ async function doLogin(){
   btn.disabled=true; btn.textContent='Signing in...';
   try{
     const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(d.error){ msg.textContent=d.error; return; }
     setToken(d.token);
     currentUser={id:null,email:d.email,token:d.token};
@@ -1682,7 +1692,7 @@ async function checkAuth(){
   if(!token){ updateHeaderAuth(); return; }
   try{
     const res=await fetch('/api/auth/me',{headers:{'X-Auth-Token':token}});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(d.user){ currentUser={...d.user,token}; }
     else { setToken(null); currentUser=null; }
   }catch(e){ currentUser=null; }
@@ -1703,7 +1713,7 @@ function checkProgressNudge(){
 async function fetchPlanUsage(){
   try{
     const headers={}; const t=getToken(); if(t) headers['X-Auth-Token']=t;
-    const res=await fetch('/api/plan-usage',{headers}); const d=await res.json();
+    const res=await fetch('/api/plan-usage',{headers}); const d=await safeJson(res);
     serverPlanCount=d.count||0; serverPlanLimit=d.limit||ANON_LIMIT; serverHasAccount=!!d.has_account;
     updateUsageBanner();
   }catch(e){}
@@ -1736,7 +1746,7 @@ async function verifyAdmin(){
   const st=document.getElementById('adminStatus'); st.textContent='Checking...'; st.className='admin-status';
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(d.valid){ isAdmin=true; adminCode=code; localStorage.setItem('platestack_admin',code); st.textContent='Unlocked — unlimited plans active'; st.className='admin-status ok'; document.getElementById('adminCodeInput').value=''; updateUsageBanner(); }
     else{ st.textContent='Invalid code.'; st.className='admin-status err'; adminCode=''; localStorage.removeItem('platestack_admin'); }
   }catch(e){ st.textContent='Error. Try again.'; st.className='admin-status err'; }
@@ -1745,7 +1755,7 @@ async function tryRestoreAdmin(){
   const stored=localStorage.getItem('platestack_admin'); if(!stored)return;
   try{
     const res=await fetch('/api/verify-admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code:stored})});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(d.valid){ isAdmin=true; adminCode=stored; updateUsageBanner(); } else localStorage.removeItem('platestack_admin');
   }catch(e){}
 }
@@ -2241,7 +2251,7 @@ async function calculate(){
       preferences:prefs.length?prefs.join(', '):null,
       adminCode:adminCode||undefined
     })});
-    const data=await res.json();
+    const data=await safeJson(res);
     if(data.limit_hit){ err.textContent=data.error; document.getElementById('resultsCard').style.display='none'; if(!currentUser) openModal('authModal'); return; }
     if(data.error) throw new Error(data.error);
     // Show AI-generated title if present
@@ -2284,7 +2294,7 @@ async function calculate(){
         const saveRes=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
           body:JSON.stringify({title:_lastGenerated.title,plan_text:data.plan,lifts_json:JSON.stringify(lifts),structured:data.structured||null,unit:_lastGenerated.unit,activate:false})
         });
-        const sd=await saveRes.json();
+        const sd=await safeJson(saveRes);
         if(sd && sd.id) _lastGenerated.savedPlanId=sd.id;
       }catch(e){}
     }
@@ -2426,7 +2436,7 @@ async function askQuestion(){
     addQaMessage('assistant','Regenerating your plan with that change — this takes ~30 seconds...');
     try{
       const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'tweak',adminCode:adminCode||undefined})});
-      const data=await res.json();
+      const data=await safeJson(res);
       if(data.limit_hit){ addQaMessage('assistant',data.error); return; }
       if(data.error) throw new Error(data.error);
       // Replace the plan on screen
@@ -2446,7 +2456,7 @@ async function askQuestion(){
         try{
           const saveRes=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
             body:JSON.stringify({title:(_lastGenerated&&_lastGenerated.title)||(data.plan_title||'Tweaked plan'),plan_text:data.plan,lifts_json:JSON.stringify((_lastGenerated&&_lastGenerated.lifts)||[]),structured:data.structured||null,unit:(_lastGenerated&&_lastGenerated.unit)||'lbs',activate:false})});
-          const sd=await saveRes.json();
+          const sd=await safeJson(saveRes);
           if(sd&&sd.id&&_lastGenerated) _lastGenerated.savedPlanId=sd.id;
         }catch(e){}
       }
@@ -2460,7 +2470,7 @@ async function askQuestion(){
   if(qaUsedThisPlan>=QA_LIMIT)return;
   input.value=''; qaUsedThisPlan++; updateQaLimit(); addQaMessage('user',q);
   send.textContent='...'; send.disabled=true;
-  try{ const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'ask'})}); const data=await res.json(); if(data.error)throw new Error(data.error); addQaMessage('assistant',data.answer); }
+  try{ const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'ask'})}); const data=await safeJson(res); if(data.error)throw new Error(data.error); addQaMessage('assistant',data.answer); }
   catch(e){ addQaMessage('assistant','Sorry, something went wrong. Try again.'); qaUsedThisPlan--; updateQaLimit(); }
   finally{ send.textContent='Ask'; if(qaUsedThisPlan<QA_LIMIT)send.disabled=false; }
 }
@@ -2477,7 +2487,7 @@ async function getLog(){
   if(currentUser){
     try{
       const res=await fetch('/api/log',{headers:authHeaders()});
-      const d=await res.json();
+      const d=await safeJson(res);
       if(d.log) return d.log;
     }catch(e){}
   }
@@ -2505,7 +2515,7 @@ async function logWorkout(){
   if(currentUser){
     try{
       const res=await fetch('/api/log',{method:'POST',headers:authHeaders(),body:JSON.stringify({exercise:ex,weight:w,reps:r,estimated1rm:e1rm,unit,note,date})});
-      const d=await res.json();
+      const d=await safeJson(res);
       if(d.id) entry.id=d.id;
     }catch(e){}
   } else {
@@ -2910,7 +2920,7 @@ async function confirmDeleteAccount(){
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
       body:JSON.stringify({password:pw})
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ msg.textContent=d.error||'Could not delete account.'; btn.disabled=false; btn.textContent='Delete forever'; return; }
     // Success — clear everything local and reload
     setToken(null); currentUser=null;
@@ -2946,14 +2956,14 @@ async function startTrackingCurrentPlan(){
     let planId=_lastGenerated.savedPlanId;
     if(planId){
       const res=await fetch(`/api/plans/${planId}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
-      const d=await res.json();
+      const d=await safeJson(res);
       if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
       if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
     } else {
       const res=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
         body:JSON.stringify({title:_lastGenerated.title,plan_text:_lastGenerated.plan_text,lifts_json:JSON.stringify(_lastGenerated.lifts||[]),structured:_lastGenerated.structured,unit:_lastGenerated.unit||'lbs',activate:true})
       });
-      const d=await res.json();
+      const d=await safeJson(res);
       if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
       if(!res.ok || !d.ok){ throw new Error(d.error||'Could not save plan.'); }
       _lastGenerated.savedPlanId=d.id;
@@ -2975,7 +2985,7 @@ async function loadActivePlan(){
   if(!currentUser){ card.style.display='none'; return; }
   try{
     const res=await fetch('/api/active-plan',{headers:{'X-Auth-Token':getToken()}});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!d.active_plan){ card.style.display='none'; _activePlan=null; return; }
     _activePlan=d;
     card.style.display='block';
@@ -3017,7 +3027,7 @@ async function loadPlanProgress(planId){
   try{
     const res=await fetch(`/api/plans/${planId}/progress`,{headers:{'X-Auth-Token':getToken()}});
     if(!res.ok){ section.style.display='none'; return; }
-    const d=await res.json();
+    const d=await safeJson(res);
     _planProgressData=d.progress||{};
     // Only show section if at least one exercise has 2+ weeks of completed data
     const exercises=Object.keys(_planProgressData).filter(ex=>_planProgressData[ex].length>=2);
@@ -3236,7 +3246,7 @@ async function logSet(sessionId,wIn,rIn,rpeSel,btn){
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
       body:JSON.stringify(payload)
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ throw new Error(d.error||'Failed to log.'); }
     const msg=document.getElementById('activePlanMsg');
     if(d.adjustment){
@@ -3265,7 +3275,7 @@ async function logSetAsPrescribed(s, btn){
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
       body:JSON.stringify(payload)
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ throw new Error(d.error||'Failed to log.'); }
     await loadActivePlan();
   }catch(e){
@@ -3313,7 +3323,7 @@ async function saveEditedSet(sessionId,wIn,rIn,rpeSel,btn){
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
       body:JSON.stringify(payload)
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ throw new Error(d.error||'Failed to save.'); }
     await loadActivePlan();
   }catch(e){
@@ -3330,7 +3340,7 @@ async function clearLoggedSet(sessionId,btn){
       method:'DELETE',
       headers:{'X-Auth-Token':getToken()}
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ throw new Error(d.error||'Failed to clear.'); }
     await loadActivePlan();
   }catch(e){
@@ -3348,7 +3358,7 @@ async function advanceToNextWeek(fromWeek){
       headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
       body:JSON.stringify({from_week:fromWeek})
     });
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!res.ok){ throw new Error(d.error||'Failed to advance week.'); }
     await loadActivePlan();
   }catch(e){ alert(e.message||'Failed to advance week.'); }
@@ -3380,7 +3390,7 @@ async function openSavedPlansModal(){
   if(!currentUser){ list.innerHTML='<div style="text-align:center;color:var(--text-dim);padding:2rem">Sign in to see your saved plans.</div>'; return; }
   try{
     const res=await fetch('/api/plans',{headers:authHeaders()});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(!d.plans||!d.plans.length){ list.innerHTML='<div style="color:var(--text-dim);font-size:14px">No saved plans yet. Generate a training plan and it will be saved here automatically.</div>'; return; }
     list.innerHTML='';
     _planCache.clear();
@@ -3432,7 +3442,7 @@ async function activateSavedPlan(id,event){
   if(btn){ btn.disabled=true; btn.textContent='Starting...'; }
   try{
     const res=await fetch(`/api/plans/${id}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
-    const d=await res.json();
+    const d=await safeJson(res);
     if(res.status===402){ alert('Plan tracking is a premium feature.'); if(btn){ btn.disabled=false; btn.textContent='Track this'; } return; }
     if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
     closeModal('savedPlansModal');
@@ -3503,7 +3513,7 @@ tryRestoreAdmin();
 updateExerciseSelectors();
 
 // Load contact email in footer
-fetch('/api/config').then(r=>r.json()).then(d=>{
+fetch('/api/config').then(r=>safeJson(r)).then(d=>{
   if(d.contact_email){
     const el=document.getElementById('contactEmailFooter');
     const link=document.getElementById('contactEmailLink');
