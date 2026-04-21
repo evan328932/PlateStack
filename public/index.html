@@ -907,6 +907,13 @@ footer a:hover{color:#fff}
     <div class="qa-section" id="qaSection" style="display:none">
       <div class="qa-label">Ask about your plan</div>
       <div class="qa-limit" id="qaLimit"><b>2 questions</b> remaining for this plan</div>
+      <div class="qa-mode-row" style="display:flex;gap:8px;margin-bottom:8px">
+        <button class="chip active" id="qaModeAsk" onclick="setQaMode('ask')" type="button" style="font-size:12px">Ask question</button>
+        <button class="chip" id="qaModeTweak" onclick="setQaMode('tweak')" type="button" style="font-size:12px">Tweak plan</button>
+      </div>
+      <div id="qaTweakHelp" style="display:none;font-size:12px;color:var(--text-muted);margin-bottom:8px;padding:8px 10px;background:rgba(255,107,0,0.06);border:1px solid rgba(255,107,0,0.2);border-radius:6px">
+        Describe the change you want — e.g. "swap bench for dumbbell press" or "add a 5th day focused on arms". We'll regenerate the full plan. <b id="tweakRemainLabel"></b>
+      </div>
       <div class="qa-messages" id="qaMessages"></div>
       <div class="qa-input-row">
         <input class="qa-input" id="qaInput" placeholder="e.g. Can I swap RDL for leg curl?" onkeydown="if(event.key==='Enter')askQuestion()">
@@ -2390,11 +2397,70 @@ function copyResults(){
 // ═══════════════════════════════════════════════════════════
 function updateQaLimit(){ const rem=QA_LIMIT-qaUsedThisPlan; const el=document.getElementById('qaLimit'); if(rem<=0){el.innerHTML='<b>No questions remaining</b> for this plan — generate a new plan to ask more.';document.getElementById('qaInput').disabled=true;document.getElementById('qaSend').disabled=true;}else{el.innerHTML=`<b>${rem} question${rem===1?'':'s'}</b> remaining for this plan`;document.getElementById('qaInput').disabled=false;document.getElementById('qaSend').disabled=false;} }
 function addQaMessage(role,text){ const msgs=document.getElementById('qaMessages'); const div=document.createElement('div'); div.className=`qa-msg ${role}`; if(role==='assistant'){const inner=renderMarkdown(text);inner.className='';div.appendChild(inner);}else{div.textContent=text;} msgs.appendChild(div); div.scrollIntoView({behavior:'smooth',block:'nearest'}); }
+
+// Q&A mode: 'ask' = quick text answer, 'tweak' = regenerate the plan with requested change
+let qaMode='ask';
+function setQaMode(m){
+  qaMode=m;
+  document.getElementById('qaModeAsk').classList.toggle('active',m==='ask');
+  document.getElementById('qaModeTweak').classList.toggle('active',m==='tweak');
+  document.getElementById('qaTweakHelp').style.display=m==='tweak'?'block':'none';
+  const input=document.getElementById('qaInput'); const send=document.getElementById('qaSend');
+  if(m==='tweak'){
+    input.placeholder='e.g. Swap bench for dumbbell press, or add a 5th arms day';
+    send.textContent='Tweak plan';
+  } else {
+    input.placeholder='e.g. Can I swap RDL for leg curl?';
+    send.textContent='Ask';
+  }
+}
+
 async function askQuestion(){
-  const input=document.getElementById('qaInput'); const q=input.value.trim(); if(!q||!currentPlanContext)return; if(qaUsedThisPlan>=QA_LIMIT)return;
+  const input=document.getElementById('qaInput'); const q=input.value.trim(); if(!q||!currentPlanContext)return;
+  const send=document.getElementById('qaSend');
+  if(qaMode==='tweak'){
+    // Tweak mode: regenerate the plan
+    if(!currentUser){ addQaMessage('assistant','Plan tweaks require a free account. Create one to edit plans.'); openModal('authModal'); return; }
+    input.value=''; addQaMessage('user',`[Tweak] ${q}`);
+    send.textContent='...'; send.disabled=true; input.disabled=true;
+    addQaMessage('assistant','Regenerating your plan with that change — this takes ~30 seconds...');
+    try{
+      const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'tweak',adminCode:adminCode||undefined})});
+      const data=await res.json();
+      if(data.limit_hit){ addQaMessage('assistant',data.error); return; }
+      if(data.error) throw new Error(data.error);
+      // Replace the plan on screen
+      const titleEl=document.getElementById('planTitle');
+      if(data.plan_title){ titleEl.textContent=data.plan_title; titleEl.style.display='block'; } else { titleEl.style.display='none'; }
+      document.getElementById('planText').replaceChildren(renderMarkdown(data.plan,true));
+      currentPlanContext=data.plan; autosave(data.plan);
+      // Update _lastGenerated so "Start tracking" uses the new plan
+      if(_lastGenerated){
+        _lastGenerated.plan_text=data.plan;
+        _lastGenerated.structured=data.structured||_lastGenerated.structured;
+        if(data.plan_title) _lastGenerated.title=data.plan_title;
+        _lastGenerated.savedPlanId=null; // force a fresh save since this is a new version
+      }
+      // Save the updated plan silently if logged in
+      if(currentUser){
+        try{
+          const saveRes=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+            body:JSON.stringify({title:(_lastGenerated&&_lastGenerated.title)||(data.plan_title||'Tweaked plan'),plan_text:data.plan,lifts_json:JSON.stringify((_lastGenerated&&_lastGenerated.lifts)||[]),structured:data.structured||null,unit:(_lastGenerated&&_lastGenerated.unit)||'lbs',activate:false})});
+          const sd=await saveRes.json();
+          if(sd&&sd.id&&_lastGenerated) _lastGenerated.savedPlanId=sd.id;
+        }catch(e){}
+      }
+      addQaMessage('assistant','Plan updated. Scroll up to see the changes.');
+      document.getElementById('resultsCard').scrollIntoView({behavior:'smooth',block:'start'});
+    }catch(e){ addQaMessage('assistant',`Sorry, that didn't work: ${e.message||'Try again.'}`); }
+    finally{ send.textContent='Tweak plan'; send.disabled=false; input.disabled=false; }
+    return;
+  }
+  // Ask mode: quick text answer
+  if(qaUsedThisPlan>=QA_LIMIT)return;
   input.value=''; qaUsedThisPlan++; updateQaLimit(); addQaMessage('user',q);
-  const send=document.getElementById('qaSend'); send.textContent='...'; send.disabled=true;
-  try{ const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:currentPlanContext,question:q})}); const data=await res.json(); if(data.error)throw new Error(data.error); addQaMessage('assistant',data.answer); }
+  send.textContent='...'; send.disabled=true;
+  try{ const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'ask'})}); const data=await res.json(); if(data.error)throw new Error(data.error); addQaMessage('assistant',data.answer); }
   catch(e){ addQaMessage('assistant','Sorry, something went wrong. Try again.'); qaUsedThisPlan--; updateQaLimit(); }
   finally{ send.textContent='Ask'; if(qaUsedThisPlan<QA_LIMIT)send.disabled=false; }
 }
@@ -2466,7 +2532,7 @@ function updateExerciseSelectors(log=null){
   const exercises=getExercises(log);
   ['chartLift','historyFilter'].forEach(id=>{
     const sel=document.getElementById(id); const cur=sel.value;
-    sel.innerHTML='<option value="">All exercises</option>'+exercises.map(e=>`<option value="${e}"${e===cur?' selected':''}>${e}</option>`).join('');
+    sel.innerHTML='<option value="">All exercises</option>'+exercises.map(e=>`<option value="${esc(e)}"${e===cur?' selected':''}>${esc(e)}</option>`).join('');
   });
 }
 
@@ -3087,7 +3153,19 @@ function renderActiveSession(){
         const done=document.createElement('div');
         done.style.cssText='font-size:12px;color:var(--green);display:flex;gap:8px;align-items:center;flex-wrap:wrap';
         const rpeText = (s.rpe!==null && s.rpe!==undefined && s.rpe!=='') ? ` @ RPE ${s.rpe}` : '';
-        done.innerHTML=`<span>✓ ${s.actual_weight}${s.unit} × ${s.actual_reps}${rpeText}</span>`;
+        const summary=document.createElement('span');
+        summary.textContent=`✓ ${s.actual_weight}${s.unit} × ${s.actual_reps}${rpeText}`;
+        done.appendChild(summary);
+        const editBtn=document.createElement('button');
+        editBtn.textContent='Edit'; editBtn.title='Edit this logged set';
+        editBtn.style.cssText='padding:2px 8px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:var(--text-dim);font-size:11px;cursor:pointer';
+        editBtn.onclick=()=>openEditSetInline(row,s);
+        done.appendChild(editBtn);
+        const clearBtn=document.createElement('button');
+        clearBtn.textContent='Clear'; clearBtn.title='Remove this set from the log';
+        clearBtn.style.cssText='padding:2px 8px;background:transparent;border:1px solid rgba(255,255,255,0.2);border-radius:4px;color:var(--text-dim);font-size:11px;cursor:pointer';
+        clearBtn.onclick=()=>clearLoggedSet(s.id,clearBtn);
+        done.appendChild(clearBtn);
         row.appendChild(done);
       } else {
         const wIn=document.createElement('input'); wIn.type='number'; wIn.step='any'; wIn.min='0';
@@ -3193,6 +3271,71 @@ async function logSetAsPrescribed(s, btn){
   }catch(e){
     btn.disabled=false; btn.textContent='✓ As prescribed';
     alert(e.message||'Failed to log set.');
+  }
+}
+
+// Edit a logged set inline — replace the ✓ row with editable inputs
+function openEditSetInline(row, s){
+  // Clear everything in the row except the "Set N" label (first child)
+  while(row.children.length > 1) row.removeChild(row.lastChild);
+  const wIn=document.createElement('input'); wIn.type='number'; wIn.step='any'; wIn.min='0';
+  wIn.value=s.actual_weight||''; wIn.placeholder='weight';
+  wIn.style.cssText='width:72px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+  const rIn=document.createElement('input'); rIn.type='number'; rIn.min='0'; rIn.max='100';
+  rIn.value=s.actual_reps||''; rIn.placeholder='reps';
+  rIn.style.cssText='width:56px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+  const rpeSel=document.createElement('select');
+  rpeSel.style.cssText='width:90px;padding:4px 6px;background:rgba(0,0,0,0.3);border:1px solid rgba(255,255,255,0.1);border-radius:4px;color:#fff;font-size:13px';
+  const opt0=document.createElement('option'); opt0.value=''; opt0.textContent='RPE (opt)'; rpeSel.appendChild(opt0);
+  for(let v=5;v<=10;v+=0.5){ const o=document.createElement('option'); o.value=v; o.textContent=v; if(s.rpe!==null&&s.rpe!==undefined&&parseFloat(s.rpe)===v)o.selected=true; rpeSel.appendChild(o); }
+  const saveBtn=document.createElement('button'); saveBtn.textContent='Save';
+  saveBtn.style.cssText='padding:4px 10px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-size:12px;cursor:pointer';
+  saveBtn.onclick=()=>saveEditedSet(s.id,wIn,rIn,rpeSel,saveBtn);
+  const cancelBtn=document.createElement('button'); cancelBtn.textContent='Cancel';
+  cancelBtn.style.cssText='padding:4px 10px;background:transparent;color:var(--text-dim);border:1px solid rgba(255,255,255,0.2);border-radius:4px;font-size:12px;cursor:pointer';
+  cancelBtn.onclick=()=>loadActivePlan();
+  [wIn,rIn,rpeSel,saveBtn,cancelBtn].forEach(el=>row.appendChild(el));
+  wIn.focus();
+}
+
+async function saveEditedSet(sessionId,wIn,rIn,rpeSel,btn){
+  const weight=parseFloat(wIn.value); const reps=parseInt(rIn.value,10);
+  const rpeRaw=rpeSel.value;
+  const rpe = rpeRaw==='' ? null : parseFloat(rpeRaw);
+  if(!(weight>=0) || !(reps>=0)){ alert('Enter weight and reps.'); return; }
+  if(rpe!==null && !(rpe>=1 && rpe<=10)){ alert('RPE must be 1–10 if provided.'); return; }
+  btn.disabled=true; btn.textContent='...';
+  try{
+    const payload={actual_weight:weight,actual_reps:reps};
+    if(rpe!==null) payload.rpe=Math.round(rpe);
+    const res=await fetch(`/api/plan-sessions/${sessionId}/log`,{
+      method:'PATCH',
+      headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
+      body:JSON.stringify(payload)
+    });
+    const d=await res.json();
+    if(!res.ok){ throw new Error(d.error||'Failed to save.'); }
+    await loadActivePlan();
+  }catch(e){
+    btn.disabled=false; btn.textContent='Save';
+    alert(e.message||'Failed to save.');
+  }
+}
+
+async function clearLoggedSet(sessionId,btn){
+  if(!confirm('Clear this logged set? This also removes it from your progress history.')) return;
+  btn.disabled=true; btn.textContent='...';
+  try{
+    const res=await fetch(`/api/plan-sessions/${sessionId}/log`,{
+      method:'DELETE',
+      headers:{'X-Auth-Token':getToken()}
+    });
+    const d=await res.json();
+    if(!res.ok){ throw new Error(d.error||'Failed to clear.'); }
+    await loadActivePlan();
+  }catch(e){
+    btn.disabled=false; btn.textContent='Clear';
+    alert(e.message||'Failed to clear.');
   }
 }
 
