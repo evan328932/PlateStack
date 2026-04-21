@@ -222,46 +222,28 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-5"
         raise Exception("The generated plan was too long and got cut off. Try reducing the number of training days, or contact support.")
     return "".join(b.get("text","") for b in result.get("content",[]))
 
-PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps, and percentages of their 1RM. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks.
+PLAN_SYSTEM = """You are an expert strength and conditioning coach. Fill in the training plan template exactly. Be specific — use exact weights, sets, reps. Use markdown: ## for section headers, ### for sub-headers, - for bullets. No preamble. No closing remarks.
 
-IMPORTANT: Under "## Where You're At" write ONLY 2-3 plain sentences of flowing prose. No sub-headers, no bullets, no dashes — just sentences.
+IMPORTANT: Under "## Where You're At" write ONLY 1 plain sentence. No sub-headers, no bullets, no dashes.
 
-WARM-UP & PREP RULES:
-- Every training day must include a structured warm-up before working sets, with TWO parts:
-  1. **General prep / mobility** — 3-5 minutes of movement-specific mobility (e.g. for squat day: hip circles, ankle rocks, leg swings). Tailor to any injuries the user listed.
-  2. **Specific warm-up sets** — for each main compound lift (squat/bench/deadlift/OHP and similar), prescribe 3-4 ramp-up sets with EXACT weights leading into their working weight. Use the standard pyramid: empty bar x 8, then ~40% x 5, ~60% x 3, ~80% x 2, then working sets. Calculate the actual numbers for THIS user.
-- Accessory and isolation work does not need ramp-up sets — one light feeler set is enough.
+WARM-UP RULES:
+- Every training day: 2-3 mobility moves (5 min), then 2 ramp-up sets per main compound lift with exact weights (e.g. 50% x 5, 75% x 3). No ramp-up for accessories.
 
 WORKING SET RULES:
-- Add an RIR target (Reps In Reserve — how many reps you should have left in the tank) to each working set. Example: "Bench Press — 4 sets x 5 reps @ 185 lbs, RIR 2-3". RIR 0 = absolute failure, RIR 3 = 3 reps from failure.
-- Include rest periods between sets (e.g. "rest 2-3 min").
+- Add RIR (Reps In Reserve) to each working set: e.g. "Bench Press — 4x5 @ 185 lbs, RIR 2". Include rest periods.
 
-COOL-DOWN RULES:
-- Each training day ends with a brief cool-down section: 2-4 stretches or mobility moves targeting what was just trained, with hold times. Tailor to injuries.
+TITLE RULE: First line must be: TITLE: [3-7 word plan name]
 
-TITLE RULE: The very first line of your response must be a TITLE line in this exact format:
-TITLE: [short punchy 3-7 word plan name that captures the goal and style, e.g. "Raw Strength: 4-Day Upper/Lower" or "5-Day PPL Mass Builder"]
-Then a blank line, then the rest of the plan.
-
-STRUCTURED_PLAN RULE: After the full markdown plan, on a new line, write "STRUCTURED_PLAN:" followed by a valid JSON object describing Week 1 of the plan in this exact schema:
-{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press","type":"main","sets":4,"reps":5,"weight":185,"rir":2,"unit":"lbs"},{"name":"Bench Press Warm-up","type":"warmup","sets":3,"reps":5,"weight":95,"unit":"lbs"},{"name":"Barbell Row","type":"main","sets":4,"reps":8,"weight":135,"rir":2,"unit":"lbs"}]},{"day":2,"name":"Lower","exercises":[...]}]}
-Rules for the JSON:
-- Use the exact unit the user specified (lbs or kg).
-- For bodyweight exercises, use weight: 0.
-- For rep ranges like "8-12", pick the midpoint (10).
-- Only include Week 1. Do NOT include every week.
-- The JSON must be valid and parseable. No comments, no trailing commas.
-- Exercise names must match the names used in the markdown plan exactly.
-- Include `type` on every exercise: "warmup" for ramp-up sets, "main" for working compound lifts, "accessory" for isolation/accessory, "mobility" for prep/cool-down moves.
-- Include `rir` (integer 0-5) on main and accessory exercises only. Omit `rir` for warmup and mobility.
-- For warm-up entries: use the format "{LiftName} Warm-up" as the name and represent the ramp as a single multi-set entry where reps is the average of the ramp reps."""
+STRUCTURED_PLAN RULE: After the markdown plan write "STRUCTURED_PLAN:" then a valid JSON object for Week 1:
+{"days":[{"day":1,"name":"Upper","exercises":[{"name":"Bench Press","type":"main","sets":4,"reps":5,"weight":185,"rir":2,"unit":"lbs"},{"name":"Bench Press Warm-up","type":"warmup","sets":2,"reps":5,"weight":95,"unit":"lbs"}]}]}
+JSON rules: exact unit (lbs/kg), bodyweight=0, rep ranges use midpoint, Week 1 only, valid JSON, no comments, exercise names match markdown exactly. Types: "warmup","main","accessory","mobility". Include rir on main/accessory only. Warm-up name: "{LiftName} Warm-up"."""
 
 def build_plan_prompt(profile,experience,days,split,goal,unit,lifts_text,injuries="",preferences="",log_context=""):
     extras = []
     if injuries: extras.append(f"Injuries/limitations: {injuries}")
     if preferences: extras.append(f"Equipment/preferences: {preferences}")
     extra_block = ("\n" + "\n".join(extras)) if extras else ""
-    log_block = f"\nRecent training history (use for progression context):\n{log_context}" if log_context else ""
+    log_block = f"\nRecent training history (use for context):\n{log_context}" if log_context else ""
     return f"""ATHLETE:
 Profile: {profile}
 Experience: {experience}
@@ -273,47 +255,39 @@ Lifts:
 
 TEMPLATE TO FILL:
 
-TITLE: [3-7 word punchy plan name]
+TITLE: [3-7 word plan name]
 
 ## Where You're At
-[Write 2-3 plain prose sentences about their current level vs their goal. PLAIN TEXT ONLY — no dashes, no bullets, no sub-headers.]
+[1 sentence about their level vs goal.]
 
 ## Weekly Program ({days}-Day {split})
-[For EACH training day, structure it like this:
+[For EACH training day:
 
 ### Day N — [Name]
-**Warm-up** (5-8 min)
-- Mobility: [2-3 specific mobility moves with reps/time, tailored to the day and any injuries]
-- Specific ramp sets for [main lift]: [empty bar x 8, then exact weight ramp leading to working sets]
+**Warm-up**
+- [2-3 mobility moves]
+- [2 ramp-up sets for main lift with exact weights]
 
 **Main work**
-- [Main compound]: sets x reps @ exact weight, RIR X, rest 2-3 min
-- [Secondary compound]: sets x reps @ exact weight, RIR X, rest 2 min
+- [Main compound]: sets x reps @ weight, RIR X, rest time
+- [Secondary compound]: sets x reps @ weight, RIR X, rest time
 
 **Accessory work**
-- [Accessory 1]: sets x reps @ weight, RIR X, rest 60-90s
-- [Accessory 2]: sets x reps @ weight, RIR X
-- [Accessory 3 if applicable]
+- [3-4 accessories with sets x reps @ weight, RIR X]
 
-**Cool-down** (3-5 min)
-- [2-4 stretches/mobility moves with hold times targeting what was trained]
-
-Repeat this exact structure for each day.]
+Repeat for each day.]
 
 ## Week-by-Week Progression
-[Show exactly how to progress the main lifts over 4 weeks. E.g. "Week 1: Bench 225x5x4, Week 2: 230x5x4, Week 3: 235x4x4, Week 4: 240x5x4". Cover the 2-3 most important lifts.]
+[Main lift progression over 4 weeks with exact weights for 2-3 lifts.]
 
 ## 4-Week Milestone
-[Specific numbers to hit]
+[Specific numbers]
 
 ## 8-Week Milestone
-[Specific numbers to hit]
-
-## 12-Week Milestone
-[Specific numbers to hit]
+[Specific numbers]
 
 ## Key Tips
-[2-3 tips tailored to their specific situation and any injuries or preferences noted]"""
+[2 tips tailored to their situation]"""
 
 @app.route("/api/config", methods=["GET"])
 def config():
