@@ -205,7 +205,7 @@ def call_claude(system_prompt,user_msg,max_tokens=1500,model="claude-sonnet-4-5"
     headers={"x-api-key":ANTHROPIC_KEY,"anthropic-version":"2023-06-01","content-type":"application/json"}
     if cache_system: headers["anthropic-beta"]="prompt-caching-2024-07-31"
     response=requests.post("https://api.anthropic.com/v1/messages",headers=headers,
-        json={"model":model,"max_tokens":max_tokens,"system":system_content,"messages":[{"role":"user","content":user_msg}]},timeout=55)
+        json={"model":model,"max_tokens":max_tokens,"system":system_content,"messages":[{"role":"user","content":user_msg}]},timeout=110)
     # If Anthropic returned HTML (e.g. 502, Cloudflare page), response.json() would raise —
     # catch it and raise a clean exception instead
     try:
@@ -1032,7 +1032,7 @@ def plan():
         else:
             new_count,new_limit=get_ip_plan_count(ip),ANON_PLAN_LIMIT
         return jsonify({"plan":plan_text,"plan_title":plan_title,"structured":structured,"admin":admin,"plan_count":new_count,"plan_limit":new_limit,"has_account":bool(user)})
-    except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
+    except requests.exceptions.Timeout: return jsonify({"error":"The AI is taking longer than usual — try fewer training days, or try again in a moment."}),504
     except Exception as e:
         # Log internally but don't expose stack traces or internal details to the client
         print(f"Plan generation error: {e}")
@@ -1102,7 +1102,7 @@ def question():
                 if user: increment_ip_plan_count(f"user:{user['id']}:tweak")
                 else: increment_ip_plan_count(f"ip:{ip}:tweak")
             return jsonify({"plan":new_plan_text,"plan_title":plan_title,"structured":structured,"tweak":True})
-        except requests.exceptions.Timeout: return jsonify({"error":"Request timed out. Try again."}),504
+        except requests.exceptions.Timeout: return jsonify({"error":"The AI is taking longer than usual — try fewer training days, or try again in a moment."}),504
         except Exception as e:
             print(f"Tweak error: {e}")
             return jsonify({"error":"Something went wrong tweaking your plan. Please try again."}),500
@@ -1111,7 +1111,7 @@ def question():
     try:
         answer=call_claude("You are an expert strength coach answering a follow-up question about a training plan. Be concise — 2-4 sentences or a short bullet list. Never restate the full plan.",f"Training plan:\n{plan_text}\n\nQuestion: {q}",max_tokens=350,model="claude-haiku-4-5-20251001",cache_system=True)
         return jsonify({"answer":answer})
-    except requests.exceptions.Timeout: return jsonify({"error":"Request timed out."}),504
+    except requests.exceptions.Timeout: return jsonify({"error":"The AI is taking longer than usual — try fewer training days, or try again in a moment."}),504
     except Exception as e:
         print(f"Question error: {e}")
         return jsonify({"error":"Something went wrong. Please try again."}),500
