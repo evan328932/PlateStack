@@ -49,7 +49,7 @@ ADMIN_CODE    = os.environ.get("ADMIN_CODE", "")
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "")  # set in Railway env vars
 DB_PATH       = os.environ.get("DB_PATH", "platestack.db")
 WAITLIST_FILE = "waitlist.txt"
-ANON_PLAN_LIMIT = 2    # no account
+ANON_PLAN_LIMIT = 1    # no account — one taste, then signup required
 USER_PLAN_LIMIT = 4    # free account
 # Plan tweaks regenerate a full plan (expensive). Limit per-user to prevent cost blowouts.
 ANON_TWEAK_LIMIT = 0   # anonymous users cannot tweak — encourages signup
@@ -117,7 +117,7 @@ def init_db():
         def _add_col(tbl,col,decl):
             try: db.execute(f"ALTER TABLE {tbl} ADD COLUMN {col} {decl}")
             except sqlite3.OperationalError: pass  # already exists
-        _add_col("users","is_premium","INTEGER NOT NULL DEFAULT 1")  # defaulting everyone premium for launch; flip to 0 when paid tier ships
+        _add_col("users","is_premium","INTEGER NOT NULL DEFAULT 0")  # free tier by default; paid users get flipped to 1 after purchase
         _add_col("saved_plans","is_active","INTEGER NOT NULL DEFAULT 0")
         _add_col("saved_plans","structured_plan","TEXT")
         _add_col("saved_plans","days_per_week","INTEGER NOT NULL DEFAULT 0")
@@ -149,9 +149,8 @@ def get_auth_user():
     return get_user_from_token(token)
 
 def is_premium_user(user):
-    """Check if user has premium features. Right now everyone is premium=1 by default.
-    When paid tier launches: flip the default on the users table to 0, and this function
-    becomes the gate for all premium features without any other code changes."""
+    """Gate for paid features. Free accounts have is_premium=0 (default on register).
+    To grant Pro access to a user manually: UPDATE users SET is_premium=1 WHERE email='...'."""
     if not user: return False
     try:
         row=get_db().execute("SELECT is_premium FROM users WHERE id=?",(user["id"],)).fetchone()
@@ -321,7 +320,8 @@ def register():
     if len(pw)<6: return jsonify({"error":"Password must be at least 6 characters."}),400
     db=get_db()
     try:
-        db.execute("INSERT INTO users(email,password) VALUES(?,?)",(email,hash_password(pw))); db.commit()
+        # New signups are FREE tier (is_premium=0). Paid tier gets flipped to 1 after purchase.
+        db.execute("INSERT INTO users(email,password,is_premium) VALUES(?,?,0)",(email,hash_password(pw))); db.commit()
     except sqlite3.IntegrityError:
         return jsonify({"error":"An account with that email already exists."}),409
     user_id=db.execute("SELECT id FROM users WHERE email=?",(email,)).fetchone()["id"]
@@ -1049,11 +1049,13 @@ def question():
     if not is_safe(q): return jsonify({"error":"Invalid input detected."}),400
 
     if mode=="tweak":
-        # Tweaks regenerate a full plan — expensive. Gate by usage.
+        # Tweaks regenerate a full plan — expensive. Pro-only for logged-in users; anon users blocked entirely.
         admin=verify_admin(str(data.get("adminCode","")))
         user=get_auth_user()
         if not admin:
             if user:
+                if not is_premium_user(user):
+                    return jsonify({"error":"Plan tweaks are a Pro feature. Upgrade to edit and regenerate plans.","premium_required":True}),402
                 usage_key=f"user:{user['id']}:tweak"
                 count=get_ip_plan_count(usage_key)
                 if count>=USER_TWEAK_LIMIT:
@@ -1114,11 +1116,13 @@ def question():
 def waitlist():
     data=request.get_json(silent=True) or {}
     email=sanitize(str(data.get("email","")),200).lower()
+    source=sanitize(str(data.get("source","general")),50).lower()  # e.g. "pro" for Pro-tier waitlist
     if not email or "@" not in email or "." not in email: return jsonify({"ok":False}),400
-    try: get_db().execute("INSERT INTO waitlist(email) VALUES(?)",(email,)); get_db().commit()
+    tagged=f"{source}:{email}" if source and source!="general" else email
+    try: get_db().execute("INSERT INTO waitlist(email) VALUES(?)",(tagged,)); get_db().commit()
     except sqlite3.IntegrityError: pass
     try:
-        with open(WAITLIST_FILE,"a") as f: f.write(f"{email}\n")
+        with open(WAITLIST_FILE,"a") as f: f.write(f"{tagged}\n")
     except: pass
     return jsonify({"ok":True}),200
 
