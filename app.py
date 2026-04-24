@@ -905,6 +905,7 @@ def plan():
         if count>=ANON_PLAN_LIMIT:
             return jsonify({"error":f"You've used your {ANON_PLAN_LIMIT} free plans. Create a free account to get {USER_PLAN_LIMIT} plans.","limit_hit":True}),403
     lifts=data.get("lifts",[]); unit=data.get("unit","lbs")
+    beginner_no_lifts = bool(data.get("beginner_no_lifts"))
     goal=sanitize(data.get("goal",""),400); exp=sanitize(data.get("experience","beginner"),50)
     days=sanitize(str(data.get("days","3")),5); split=sanitize(data.get("split","Full body"),100)
     age=sanitize(str(data.get("age","")),3) if data.get("age") else None
@@ -915,9 +916,13 @@ def plan():
     preferences=sanitize(data.get("preferences",""),300) if data.get("preferences") else ""
     if unit not in ("lbs","kg"): unit="lbs"
     if exp not in ("beginner","intermediate","advanced"): exp="beginner"
+    # Force experience to "beginner" when the user selected brand-new.
+    # This prevents a garbage combo like "advanced + no lifts" from slipping through.
+    if beginner_no_lifts: exp = "beginner"
     for field in [goal,split,injuries,preferences]:
         if not is_safe(field): return jsonify({"error":"Invalid input detected."}),400
-    if not isinstance(lifts,list) or not lifts: return jsonify({"error":"No lifts provided."}),400
+    if not isinstance(lifts,list): return jsonify({"error":"No lifts provided."}),400
+    if not lifts and not beginner_no_lifts: return jsonify({"error":"No lifts provided."}),400
     if len(lifts)>20: return jsonify({"error":"Maximum 20 lifts allowed."}),400
     clean_lifts=[]
     for l in lifts:
@@ -927,7 +932,7 @@ def plan():
             if name and 0<weight<5000 and 0<reps<=50 and is_safe(name):
                 clean_lifts.append({"name":name,"weight":weight,"reps":reps,"max":max_v})
         except: continue
-    if not clean_lifts: return jsonify({"error":"No valid lifts provided."}),400
+    if not clean_lifts and not beginner_no_lifts: return jsonify({"error":"No valid lifts provided."}),400
     parts=[]
     if age: parts.append(f"Age {age}")
     if bw: parts.append(f"BW {bw}")
@@ -935,6 +940,25 @@ def plan():
     if sex: parts.append(sex.capitalize())
     profile=", ".join(parts) if parts else "Not specified"
     lifts_text="\n".join([f"- {l['name']}: {l['weight']}{unit} x {l['reps']} reps → 1RM ~{l['max']}{unit}" for l in clean_lifts])
+    if beginner_no_lifts:
+        # Brand-new lifter — no numbers to work from. Tell the AI to prescribe conservative
+        # starting weights based on bodyweight/sex/age, and flag this is a Week-1 baseline.
+        bw_note = f" (bodyweight {bw})" if bw else " (no bodyweight given — use very conservative empty-barbell-level starting loads)"
+        sex_note = f", {sex}" if sex else ""
+        lifts_text = (
+            "NO CURRENT LIFT DATA — the athlete is a complete novice"
+            f"{bw_note}{sex_note}.\n"
+            "Prescribe CONSERVATIVE starting weights appropriate for a first-time lifter:\n"
+            "- For compound barbell lifts, start at or near the empty 45 lb / 20 kg bar and scale "
+            "lightly off bodyweight only if bodyweight is provided. Do NOT use aggressive BW ratios.\n"
+            "- Prioritize technique, full range of motion, and linear progression (add ~2.5–5 lb / 1–2.5 kg "
+            "per session only after clean technique).\n"
+            "- Include warm-up sets that are truly light (empty bar x 10, then add small jumps).\n"
+            "- Explicitly label this as a 'Week-1 baseline' plan — the athlete should log their first "
+            "sessions and recalibrate from real data before progressing aggressively.\n"
+            "- In 'Key Tips', include a safety line reminding them to drop the weight 10–20% if any "
+            "warm-up feels heavy, and to learn form from reputable video sources before loading up."
+        )
     # Build log context from user's recent history if logged in
     log_context=""
     if user:
