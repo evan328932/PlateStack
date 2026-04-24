@@ -93,6 +93,25 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .badge-green{color:var(--green);background:var(--green-dim);border:1px solid var(--green-border)}
 .badge-yellow{color:var(--yellow);background:rgba(251,191,36,0.1);border:1px solid rgba(251,191,36,0.2)}
 .badge-blue{color:var(--blue);background:rgba(96,165,250,0.1);border:1px solid rgba(96,165,250,0.2)}
+/* ── PRICING GRID ────────────────────────────────────────── */
+.pricing-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:8px}
+@media (max-width:540px){.pricing-grid{grid-template-columns:1fr}}
+.pricing-tier{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px 16px;position:relative;display:flex;flex-direction:column}
+.pricing-tier-pro{border-color:var(--orange-border);background:linear-gradient(180deg,rgba(249,115,22,0.06),rgba(249,115,22,0.01))}
+.pricing-tier-badge{position:absolute;top:-10px;right:12px;background:var(--orange);color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:100px;letter-spacing:0.04em;text-transform:uppercase}
+.pricing-tier-name{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;color:#fff;letter-spacing:0.02em;text-transform:uppercase}
+.pricing-tier-price{margin:6px 0 2px;display:flex;align-items:baseline;gap:3px}
+.pp-amount{font-family:'Barlow Condensed',sans-serif;font-size:36px;font-weight:900;color:#fff;line-height:1}
+.pp-period{font-size:13px;color:var(--text-muted);font-weight:600}
+.pricing-tier-sub{font-size:11px;color:var(--text-dim);margin-bottom:14px}
+.pricing-features{list-style:none;padding:0;margin:0 0 16px;display:flex;flex-direction:column;gap:7px;flex:1}
+.pricing-features li{font-size:13px;color:var(--text-muted);line-height:1.4}
+.pricing-features li.pf-dim{color:var(--text-dim);opacity:0.6}
+.pricing-cta{width:100%;padding:10px 14px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;border:1px solid var(--border);background:var(--surface);color:#fff;transition:background 0.15s,border-color 0.15s}
+.pricing-cta:hover{background:var(--surface2);border-color:var(--border2)}
+.pricing-cta-pro{background:var(--orange);border-color:var(--orange);color:#fff}
+.pricing-cta-pro:hover{background:#ea6a0e;border-color:#ea6a0e}
+.pp-note{font-size:11px;color:var(--text-dim);margin-top:8px;min-height:14px;text-align:center}
 .tos-section{margin-bottom:1.25rem}
 .tos-section h3{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
 .tos-section p{font-size:13px;color:#555;line-height:1.7;margin-bottom:0}
@@ -124,6 +143,45 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .hero h1{font-family:'Barlow Condensed',sans-serif;font-size:54px;font-weight:900;letter-spacing:0.01em;line-height:1;color:#fff;margin-bottom:1rem}
 .hero h1 em{font-style:normal;color:var(--orange)}
 .hero p{font-size:16px;color:var(--text-muted);max-width:400px;margin:0 auto 2rem;line-height:1.65}
+
+/* ── SAMPLE PLAN SHOWCASE (landing-page proof) ─────────────── */
+.sample-block{background:linear-gradient(180deg,rgba(249,115,22,0.04),transparent 90%);border:1px solid var(--orange-border);border-radius:14px;padding:1.25rem 1.25rem 1.5rem;margin-bottom:1.5rem;position:relative}
+.sample-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:1rem}
+.sample-eyebrow{font-size:10px;font-weight:800;letter-spacing:0.09em;text-transform:uppercase;color:var(--orange);margin-bottom:4px}
+.sample-title{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:#fff;line-height:1.1;margin-bottom:4px;letter-spacing:0.02em}
+.sample-sub{font-size:13px;color:var(--text-muted);line-height:1.5;max-width:540px}
+.sample-collapse{background:transparent;border:1px solid var(--border);color:var(--text-muted);font-size:11px;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0}
+.sample-collapse:hover{background:var(--surface);color:#fff}
+.sample-body{transition:max-height 0.3s ease,opacity 0.3s ease;overflow:hidden}
+.sample-body.collapsed{max-height:0;opacity:0}
+.sample-maxes{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:1rem}
+@media (max-width:540px){.sample-maxes{grid-template-columns:1fr}}
+.sm-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 12px;text-align:center}
+.sm-lift{font-size:10px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:3px}
+.sm-val{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:900;color:var(--orange);line-height:1}
+.sm-unit{font-size:10px;color:var(--text-dim);margin-top:2px}
+.sample-title-pill{display:inline-block;background:var(--orange);color:#fff;font-size:12px;font-weight:700;padding:5px 12px;border-radius:100px;letter-spacing:0.03em;margin-bottom:0.75rem}
+.sample-plan-text{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem 1.1rem;margin-bottom:1rem}
+.sp-week{margin-bottom:1rem;padding-bottom:0.9rem;border-bottom:1px solid var(--border)}
+.sp-week:last-child{margin-bottom:0;padding-bottom:0;border-bottom:none}
+.sp-week-head{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;color:#fff;letter-spacing:0.03em;text-transform:uppercase;margin-bottom:0.65rem}
+.sp-week-note{color:var(--orange);font-size:12px;font-weight:600;text-transform:none;letter-spacing:0}
+.sp-week-dim .sp-week-head{color:var(--text-muted)}
+.sp-day{margin-bottom:0.75rem}
+.sp-day:last-child{margin-bottom:0}
+.sp-day-head{font-size:11px;font-weight:700;color:var(--orange);text-transform:uppercase;letter-spacing:0.07em;margin-bottom:5px}
+.sp-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:4px}
+.sp-list li{font-size:13px;color:var(--text);line-height:1.5}
+.sp-list li b{color:#fff;font-weight:600}
+.sp-note{color:var(--text-dim);font-size:11px;margin-left:4px}
+.sp-ellipsis{font-size:12px;color:var(--text-dim);font-style:italic;padding-left:4px}
+.sample-footer{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.sample-footer-left{flex:1;min-width:240px}
+.sff-label{font-size:11px;font-weight:700;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px}
+.sff-chips{display:flex;flex-wrap:wrap;gap:5px}
+.sff-chip{font-size:11px;color:var(--text);background:var(--surface);border:1px solid var(--border);padding:3px 9px;border-radius:100px;font-weight:500}
+.sample-cta{background:var(--orange);color:#fff;border:none;font-size:14px;font-weight:700;padding:10px 18px;border-radius:8px;cursor:pointer;font-family:inherit;letter-spacing:0.02em;white-space:nowrap;transition:background 0.15s}
+.sample-cta:hover{background:#ea6a0e}
 
 /* MAIN */
 .main{max-width:820px;margin:0 auto;padding:1.5rem 1.5rem 6rem}
@@ -577,13 +635,50 @@ footer a:hover{color:#fff}
 
 <!-- PRICING -->
 <div class="modal-overlay" id="pricingModal" onclick="closeModal('pricingModal')">
-<div class="modal" onclick="event.stopPropagation()">
+<div class="modal" onclick="event.stopPropagation()" style="max-width:540px">
   <button class="modal-close" onclick="closeModal('pricingModal')">×</button>
-  <div class="modal-badge badge-green">Free during beta</div>
-  <h2>Completely free right now</h2>
-  <p>PlateStack is in early access — create a free account to sync everything across devices. AI plans are free with a limit.</p>
-  <p>A paid tier may launch in future for unlimited plans, advanced periodization, and coaching tools. Core features stay free forever.</p>
-  <button class="auth-submit" onclick="closeModal('pricingModal');openModal('authModal')" style="margin-top:1rem;width:100%">Create free account</button>
+  <div class="modal-badge badge-orange">Pricing</div>
+  <h2 style="margin-bottom:4px">Simple pricing</h2>
+  <p style="color:var(--text-muted);font-size:13px;margin-bottom:1rem">Pay once you know it works for you. No trial traps.</p>
+
+  <div class="pricing-grid">
+    <!-- FREE -->
+    <div class="pricing-tier">
+      <div class="pricing-tier-name">Free</div>
+      <div class="pricing-tier-price"><span class="pp-amount">$0</span></div>
+      <div class="pricing-tier-sub">With free account</div>
+      <ul class="pricing-features">
+        <li>✓ 4 AI training plans (lifetime)</li>
+        <li>✓ Full exercise catalog</li>
+        <li>✓ Export plans to PDF</li>
+        <li>✓ Ask 2 questions per plan</li>
+        <li class="pf-dim">✗ Log workouts &amp; track progress</li>
+        <li class="pf-dim">✗ Auto-adjust weights week to week</li>
+        <li class="pf-dim">✗ Tweak &amp; regenerate plans</li>
+      </ul>
+      <button class="pricing-cta pricing-cta-free" onclick="closeModal('pricingModal');openModal('authModal')">Create free account</button>
+    </div>
+    <!-- PRO -->
+    <div class="pricing-tier pricing-tier-pro">
+      <div class="pricing-tier-badge">Recommended</div>
+      <div class="pricing-tier-name">Pro</div>
+      <div class="pricing-tier-price"><span class="pp-amount">$6</span><span class="pp-period">/mo</span></div>
+      <div class="pricing-tier-sub">Or $48/year (2 months free)</div>
+      <ul class="pricing-features">
+        <li>✓ <b>Unlimited</b> AI plans</li>
+        <li>✓ Full exercise catalog</li>
+        <li>✓ Export plans to PDF</li>
+        <li>✓ <b>Unlimited</b> questions per plan</li>
+        <li>✓ Log every set &amp; rep</li>
+        <li>✓ Auto-adjust weights each week based on performance</li>
+        <li>✓ Tweak &amp; regenerate any plan</li>
+        <li>✓ Progress charts across all lifts</li>
+      </ul>
+      <button class="pricing-cta pricing-cta-pro" onclick="joinProWaitlist()">Join Pro waitlist</button>
+      <div class="pp-note" id="proWaitlistStatus"></div>
+    </div>
+  </div>
+  <div style="font-size:11px;color:var(--text-dim);margin-top:14px;text-align:center">Pro launches soon. Waitlist members get a launch discount.</div>
 </div>
 </div>
 
@@ -674,9 +769,88 @@ footer a:hover{color:#fff}
 <div class="hero">
   <div class="hero-badge">AI-powered training</div>
   <h1>Know your max.<br><em>Hit your goals.</em></h1>
-  <p>Enter your lifts, set your goal, get a personalized plan built around your actual numbers.</p>
+  <p>Plans built around <b>your</b> 1RMs, equipment, experience, and injuries — not a one-size-fits-all template. Free to try.</p>
 </div>
 <div class="main">
+
+  <!-- ═══ SAMPLE PLAN — shown to fresh visitors, hidden once user has data ═══ -->
+  <div class="sample-block" id="sampleBlock">
+    <div class="sample-head">
+      <div>
+        <div class="sample-eyebrow">Example output</div>
+        <div class="sample-title">Here's what a plan looks like</div>
+        <div class="sample-sub">Generated for a <b>intermediate lifter, 3 days/week, full body, goal: build strength</b>. Yours will be built around <i>your</i> numbers.</div>
+      </div>
+      <button class="sample-collapse" onclick="toggleSample()" id="sampleToggleBtn" aria-label="Collapse">Hide example ▲</button>
+    </div>
+    <div class="sample-body" id="sampleBody">
+      <div class="sample-maxes">
+        <div class="sm-card"><div class="sm-lift">Bench Press</div><div class="sm-val">245</div><div class="sm-unit">lbs est. 1RM</div></div>
+        <div class="sm-card"><div class="sm-lift">Back Squat</div><div class="sm-val">315</div><div class="sm-unit">lbs est. 1RM</div></div>
+        <div class="sm-card"><div class="sm-lift">Deadlift</div><div class="sm-val">405</div><div class="sm-unit">lbs est. 1RM</div></div>
+      </div>
+      <div class="sample-title-pill">Strength Block — 4 Weeks · Full Body</div>
+      <div class="sample-plan-text">
+<div class="sp-week">
+  <div class="sp-week-head">Week 1 — Accumulation</div>
+  <div class="sp-day">
+    <div class="sp-day-head">Day 1 — Full Body A</div>
+    <ul class="sp-list">
+      <li><b>Back Squat</b> — 4 × 5 @ 235 lbs <span class="sp-note">(RPE 7, 3 min rest)</span></li>
+      <li><b>Bench Press</b> — 4 × 5 @ 185 lbs <span class="sp-note">(RPE 7)</span></li>
+      <li><b>Barbell Row</b> — 3 × 8 @ 135 lbs</li>
+      <li><b>Romanian Deadlift</b> — 3 × 8 @ 225 lbs</li>
+      <li><b>Plank</b> — 3 × 45 sec</li>
+    </ul>
+  </div>
+  <div class="sp-day">
+    <div class="sp-day-head">Day 2 — Full Body B</div>
+    <ul class="sp-list">
+      <li><b>Deadlift</b> — 3 × 4 @ 315 lbs <span class="sp-note">(RPE 8, 4 min rest)</span></li>
+      <li><b>Overhead Press</b> — 4 × 5 @ 115 lbs</li>
+      <li><b>Front Squat</b> — 3 × 6 @ 185 lbs</li>
+      <li><b>Pull-ups</b> — 3 × AMRAP</li>
+      <li><b>Hanging Leg Raise</b> — 3 × 10</li>
+    </ul>
+  </div>
+  <div class="sp-day">
+    <div class="sp-day-head">Day 3 — Full Body C</div>
+    <ul class="sp-list">
+      <li><b>Back Squat</b> — 3 × 8 @ 205 lbs <span class="sp-note">(volume day)</span></li>
+      <li><b>Incline Bench</b> — 4 × 6 @ 155 lbs</li>
+      <li><b>Weighted Chin-up</b> — 4 × 5 @ +25 lbs</li>
+      <li><b>Walking Lunge</b> — 3 × 10/leg @ 50 lbs</li>
+      <li><b>Face Pull</b> — 3 × 15</li>
+    </ul>
+  </div>
+</div>
+<div class="sp-week sp-week-dim">
+  <div class="sp-week-head">Week 2 — Progress · <span class="sp-week-note">+2.5–5 lbs on main lifts</span></div>
+  <div class="sp-ellipsis">Same structure, slightly heavier. Weights adjust based on how Week 1 felt.</div>
+</div>
+<div class="sp-week sp-week-dim">
+  <div class="sp-week-head">Week 3 — Intensity · <span class="sp-week-note">Heavy triples</span></div>
+  <div class="sp-ellipsis">Top sets drop to 3 reps, secondary work keeps volume.</div>
+</div>
+<div class="sp-week sp-week-dim">
+  <div class="sp-week-head">Week 4 — Deload · <span class="sp-week-note">Light, recover for re-test</span></div>
+  <div class="sp-ellipsis">~60% intensity. Ends with an optional 1RM test.</div>
+</div>
+      </div>
+      <div class="sample-footer">
+        <div class="sample-footer-left">
+          <div class="sff-label">What you'd also get:</div>
+          <div class="sff-chips">
+            <span class="sff-chip">Export to PDF</span>
+            <span class="sff-chip">Ask questions about your plan</span>
+            <span class="sff-chip">Adapts to your equipment</span>
+            <span class="sff-chip">Avoids injured movements</span>
+          </div>
+        </div>
+        <button class="sample-cta" onclick="document.getElementById('wizardProgress').scrollIntoView({behavior:'smooth',block:'start'})">Build mine ↓</button>
+      </div>
+    </div>
+  </div>
 
   <div class="saved-banner" id="savedBanner">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
@@ -685,7 +859,7 @@ footer a:hover{color:#fff}
   </div>
 
   <div class="usage-banner" id="usageBanner">
-    <span class="usage-label" id="usageLabel">0 / 2 free plans used</span>
+    <span class="usage-label" id="usageLabel">0 / 1 free plan used</span>
     <div class="usage-bar-track"><div class="usage-bar-fill" id="usageBarFill" style="width:0%"></div></div>
     <button class="usage-cta" onclick="openModal('pricingModal')">Pricing →</button>
   </div>
@@ -956,9 +1130,9 @@ footer a:hover{color:#fff}
         <span id="trackingCtaStatus" style="font-size:12px;color:var(--text-dim);margin-left:10px"></span>
       </div>
       <div id="trackingCtaAnon" style="display:none">
-        <div style="font-weight:700;color:#fff;margin-bottom:4px;font-size:15px">🔒 Create a free account to track this plan</div>
-        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Signed-in users can log each set of this plan and PlateStack will auto-adapt weights based on actual performance.</div>
-        <button class="action-btn" onclick="openModal('authModal')" style="background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700">Sign up — it's free</button>
+        <div style="font-weight:700;color:#fff;margin-bottom:4px;font-size:15px">🔒 Don't lose this plan — create a free account</div>
+        <div style="font-size:13px;color:var(--text-muted);margin-bottom:10px">Save to your account and open it on any device. Plus, get 3 more free plan generations, ask unlimited questions, and export to PDF.</div>
+        <button class="action-btn" onclick="openModal('authModal')" style="background:var(--orange);color:#fff;border-color:var(--orange);font-weight:700">Save this plan — it's free</button>
       </div>
     </div>
     <div class="results-footer" id="resultsFooter"></div>
@@ -1189,7 +1363,7 @@ footer a:hover{color:#fff}
 // ═══════════════════════════════════════════════════════════
 const SAVE_KEY   = 'platestack_v4';
 const LOG_KEY    = 'platestack_progress_log';
-const ANON_LIMIT = 2;
+const ANON_LIMIT = 1;
 const USER_LIMIT = 4;
 const QA_LIMIT   = 2;
 // Escape user-supplied strings before inserting into innerHTML
@@ -1675,8 +1849,87 @@ function wizardBack(){ if(wizardStep > 1) showWizardStep(wizardStep - 1); }
 // ═══════════════════════════════════════════════════════════
 // MODALS
 // ═══════════════════════════════════════════════════════════
+// Shown whenever a free user hits a premium gate. Opens the pricing modal and
+// flashes a one-line context note at the top so it's clear WHY the modal appeared.
+function showPremiumUpgrade(contextMsg){
+  const modal=document.getElementById('pricingModal');
+  if(!modal){ alert(contextMsg||'This is a Pro feature.'); return; }
+  // Inject/replace a context line at the top of the modal body
+  const body=modal.querySelector('.modal');
+  if(body){
+    let note=document.getElementById('pricingContextNote');
+    if(!note){
+      note=document.createElement('div');
+      note.id='pricingContextNote';
+      note.style.cssText='background:var(--orange-dim);border:1px solid var(--orange-border);border-radius:8px;padding:9px 12px;margin-bottom:14px;font-size:13px;color:#fff;font-weight:600';
+      const badge=body.querySelector('.modal-badge');
+      if(badge && badge.nextSibling) body.insertBefore(note,badge.nextSibling);
+      else body.insertBefore(note,body.firstChild);
+    }
+    note.textContent=contextMsg||'Upgrade to Pro to unlock this feature.';
+  }
+  openModal('pricingModal');
+}
+
 function openModal(id){ document.getElementById(id).classList.add('open'); }
 function closeModal(id){ document.getElementById(id).classList.remove('open'); }
+
+// Sample plan showcase — collapses when the user has their own plan, persistent via localStorage.
+function toggleSample(){
+  const body=document.getElementById('sampleBody');
+  const btn=document.getElementById('sampleToggleBtn');
+  if(!body||!btn) return;
+  const isCollapsed=body.classList.toggle('collapsed');
+  btn.textContent=isCollapsed?'Show example ▼':'Hide example ▲';
+  try{ localStorage.setItem('platestack_sample_collapsed',isCollapsed?'1':'0'); }catch(e){}
+}
+function hideSampleIfAppropriate(){
+  // Auto-collapse when the user has generated a plan, autosaved data, or dismissed before.
+  const body=document.getElementById('sampleBody');
+  const btn=document.getElementById('sampleToggleBtn');
+  if(!body||!btn) return;
+  let shouldCollapse=false;
+  try{
+    if(localStorage.getItem('platestack_sample_collapsed')==='1') shouldCollapse=true;
+    if(localStorage.getItem('platestack_autosave')) shouldCollapse=true;  // returning user with saved data
+  }catch(e){}
+  if(serverPlanCount>0) shouldCollapse=true;  // user has generated at least one plan
+  if(shouldCollapse){
+    body.classList.add('collapsed');
+    btn.textContent='Show example ▼';
+  }
+}
+
+// Pro-tier waitlist signup. Uses logged-in email if available, otherwise asks for one.
+// Tagged with source='pro' server-side so you can email just this segment at launch.
+async function joinProWaitlist(){
+  const statusEl=document.getElementById('proWaitlistStatus');
+  const btn=document.querySelector('.pricing-cta-pro');
+  let email = (currentUser && currentUser.email) ? currentUser.email : '';
+  if(!email){
+    email = (prompt('Enter your email for the Pro waitlist:') || '').trim().toLowerCase();
+    if(!email || !email.includes('@') || !email.includes('.')){
+      if(statusEl){ statusEl.textContent='Please enter a valid email.'; statusEl.style.color='var(--red)'; }
+      return;
+    }
+  }
+  if(btn) btn.disabled=true;
+  if(statusEl){ statusEl.textContent='Adding you...'; statusEl.style.color='var(--text-dim)'; }
+  try{
+    const res=await fetch('/api/waitlist',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,source:'pro'})});
+    const d=await safeJson(res);
+    if(d && d.ok){
+      if(statusEl){ statusEl.textContent=`✓ You're on the list (${email})`; statusEl.style.color='var(--green)'; }
+      if(btn){ btn.textContent='On the waitlist'; }
+    } else {
+      if(statusEl){ statusEl.textContent='Something went wrong. Try again.'; statusEl.style.color='var(--red)'; }
+      if(btn) btn.disabled=false;
+    }
+  }catch(e){
+    if(statusEl){ statusEl.textContent='Network error. Try again.'; statusEl.style.color='var(--red)'; }
+    if(btn) btn.disabled=false;
+  }
+}
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') document.querySelectorAll('.modal-overlay').forEach(m=>m.classList.remove('open')); });
 
 // ═══════════════════════════════════════════════════════════
@@ -1827,6 +2080,7 @@ async function fetchPlanUsage(){
     const res=await fetch('/api/plan-usage',{headers}); const d=await safeJson(res);
     serverPlanCount=d.count||0; serverPlanLimit=d.limit||ANON_LIMIT; serverHasAccount=!!d.has_account;
     updateUsageBanner();
+    hideSampleIfAppropriate();
   }catch(e){}
 }
 
@@ -1840,10 +2094,11 @@ function updateUsageBanner(){
   }
   const pct=Math.min(100,Math.round(serverPlanCount/serverPlanLimit*100));
   const hasAccount=serverHasAccount;
+  const planWord = serverPlanLimit===1 ? 'plan' : 'plans';
   if(!hasAccount){
-    usedEl.innerHTML=`${serverPlanCount} / ${serverPlanLimit} plans used &nbsp;<button class="usage-account-cta" onclick="openModal('authModal')">Create account for 2 more →</button>`;
+    usedEl.innerHTML=`${serverPlanCount} / ${serverPlanLimit} free ${planWord} used &nbsp;<button class="usage-account-cta" onclick="openModal('authModal')">Create free account for 4 total →</button>`;
   } else {
-    usedEl.textContent=`${serverPlanCount} / ${serverPlanLimit} plans used`;
+    usedEl.textContent=`${serverPlanCount} / ${serverPlanLimit} ${planWord} used`;
   }
   fillEl.style.width=pct+'%';
   fillEl.style.background=pct>=80?'var(--red)':pct>=60?'var(--yellow)':'var(--orange)';
@@ -2636,6 +2891,16 @@ async function calculate(){
     if(typeof data.plan_count==='number') serverPlanCount=data.plan_count;
     if(typeof data.plan_limit==='number') serverPlanLimit=data.plan_limit;
     updateUsageBanner();
+    // Collapse the sample block — they've seen their own plan now, don't need the example
+    try{
+      const sb=document.getElementById('sampleBody');
+      const btn=document.getElementById('sampleToggleBtn');
+      if(sb && !sb.classList.contains('collapsed')){
+        sb.classList.add('collapsed');
+        if(btn) btn.textContent='Show example ▼';
+        localStorage.setItem('platestack_sample_collapsed','1');
+      }
+    }catch(e){}
     // Stash the raw generation results so "Start tracking" can use them
     _lastGenerated = {
       title: data.plan_title || `${splitLabels[selectedSplit]} · ${new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`,
@@ -2655,7 +2920,8 @@ async function calculate(){
     if(status) status.textContent='';
     if(data.structured && currentUser){
       cta.style.display='block'; ctaAuth.style.display='block'; ctaAnon.style.display='none';
-    } else if(data.structured && !currentUser){
+    } else if(!currentUser){
+      // Anon users always get the save-CTA — save is universal, tracking is bonus
       cta.style.display='block'; ctaAuth.style.display='none'; ctaAnon.style.display='block';
     } else {
       cta.style.display='none';
@@ -2809,6 +3075,7 @@ async function askQuestion(){
     try{
       const res=await fetch('/api/question',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({plan:currentPlanContext,question:q,mode:'tweak',adminCode:adminCode||undefined})});
       const data=await safeJson(res);
+      if(res.status===402 && data.premium_required){ addQaMessage('assistant','Plan tweaks are a Pro feature.'); showPremiumUpgrade('Editing and regenerating plans is a Pro feature. Upgrade to tweak any plan on demand.'); return; }
       if(data.limit_hit){ addQaMessage('assistant',data.error); return; }
       if(data.error) throw new Error(data.error);
       // Replace the plan on screen
@@ -3329,14 +3596,14 @@ async function startTrackingCurrentPlan(){
     if(planId){
       const res=await fetch(`/api/plans/${planId}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
       const d=await safeJson(res);
-      if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
+      if(res.status===402){ showPremiumUpgrade('Tracking workouts is a Pro feature. Upgrade to log sets, auto-adjust weights, and chart your progress.'); btn.disabled=false; btn.textContent='Start tracking this plan'; status.textContent=''; return; }
       if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
     } else {
       const res=await fetch('/api/plans',{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()},
         body:JSON.stringify({title:_lastGenerated.title,plan_text:_lastGenerated.plan_text,lifts_json:JSON.stringify(_lastGenerated.lifts||[]),structured:_lastGenerated.structured,unit:_lastGenerated.unit||'lbs',activate:true})
       });
       const d=await safeJson(res);
-      if(res.status===402){ throw new Error('Plan tracking is a premium feature. Upgrade to track plans.'); }
+      if(res.status===402){ showPremiumUpgrade('Tracking workouts is a Pro feature. Upgrade to log sets, auto-adjust weights, and chart your progress.'); btn.disabled=false; btn.textContent='Start tracking this plan'; status.textContent=''; return; }
       if(!res.ok || !d.ok){ throw new Error(d.error||'Could not save plan.'); }
       _lastGenerated.savedPlanId=d.id;
     }
@@ -3815,7 +4082,7 @@ async function activateSavedPlan(id,event){
   try{
     const res=await fetch(`/api/plans/${id}/activate`,{method:'POST',headers:{'Content-Type':'application/json','X-Auth-Token':getToken()}});
     const d=await safeJson(res);
-    if(res.status===402){ alert('Plan tracking is a premium feature.'); if(btn){ btn.disabled=false; btn.textContent='Track this'; } return; }
+    if(res.status===402){ showPremiumUpgrade('Tracking workouts is a Pro feature. Upgrade to log sets, auto-adjust weights, and chart your progress.'); if(btn){ btn.disabled=false; btn.textContent='Track this'; } return; }
     if(!res.ok){ throw new Error(d.error||'Could not activate plan.'); }
     closeModal('savedPlansModal');
     await loadActivePlan();
