@@ -1381,6 +1381,22 @@ let selectedGoal='strength', selectedExp='beginner', selectedDays='4', selectedS
 let currentPlanContext=null, qaUsedThisPlan=0, savedPlanText=null;
 let chartInstance=null;
 let adminCode='', isAdmin=false;
+
+// Patch fetch globally so that once admin unlocks, every request carries the X-Admin-Code
+// header automatically. Lets the server's is_premium_user() bypass Pro gates for admin
+// without needing to modify every fetch call site.
+(function(){
+  const origFetch = window.fetch.bind(window);
+  window.fetch = function(url, opts){
+    opts = opts || {};
+    if(adminCode){
+      const h = new Headers(opts.headers || {});
+      if(!h.has('X-Admin-Code')) h.set('X-Admin-Code', adminCode);
+      opts.headers = h;
+    }
+    return origFetch(url, opts);
+  };
+})();
 let currentUser=null; // {id, email, token}
 let catalogFilter='All';
 let catalogPage=1;
