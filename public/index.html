@@ -198,12 +198,45 @@ nav a:hover{color:var(--text);background:var(--surface2)}
 .field-input::placeholder{color:var(--text-faint)}
 .field-input:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
 select.field-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px}
-.combo-wrap{display:flex;flex-direction:column;gap:0}
-.combo-select{background:var(--surface2);border:1px solid var(--border);border-radius:9px 9px 0 0;padding:9px 32px 9px 12px;font-family:'DM Sans',sans-serif;font-size:14px;color:var(--text);cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23555' stroke-width='2'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;width:100%;border-bottom:none}
-.combo-select:focus{outline:none;border-color:var(--orange-border)}
-.combo-manual{background:var(--surface2);border:1px solid var(--border);border-radius:0 0 9px 9px;padding:9px 12px;font-family:'DM Sans',sans-serif;font-size:13px;color:var(--text);width:100%;border-top:1px solid var(--border2)}
-.combo-manual::placeholder{color:var(--text-faint)}
-.combo-manual:focus{outline:none;border-color:var(--orange-border);background:#0e1013}
+/* Live-validate inputs */
+.field-input.live-validate.valid{border-color:rgba(34,197,94,0.45)}
+.field-input.live-validate.invalid{border-color:rgba(239,68,68,0.55)}
+.field-msg{font-size:11px;min-height:14px;line-height:1.2;margin-top:2px;color:var(--text-dim)}
+.field-msg.ok{color:var(--green)}
+.field-msg.err{color:var(--red)}
+/* Bodyweight unit toggle */
+.bw-input-wrap{position:relative}
+.bw-input-wrap .field-input{padding-right:78px}
+.bw-unit-toggle{position:absolute;top:50%;right:5px;transform:translateY(-50%);display:flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;padding:2px}
+.bw-unit-btn{background:none;border:none;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:11px;font-weight:600;padding:3px 8px;cursor:pointer;border-radius:4px}
+.bw-unit-btn.active{background:var(--orange);color:#fff}
+/* Height unit toggle (inline with label) */
+.height-unit-toggle{display:inline-flex;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:6px;overflow:hidden;padding:2px;margin-left:8px;vertical-align:middle}
+.height-unit-btn{background:none;border:none;color:var(--text-dim);font-family:'DM Sans',sans-serif;font-size:10px;font-weight:700;padding:2px 7px;cursor:pointer;border-radius:4px;letter-spacing:0.02em}
+.height-unit-btn.active{background:var(--orange);color:#fff}
+/* Height scroll picker */
+.height-picker{background:var(--surface2);border:1px solid var(--border);border-radius:9px;padding:6px;display:flex;justify-content:center;align-items:center;user-select:none}
+.height-reels{display:flex;align-items:center;gap:4px}
+.height-reel{position:relative;width:56px;height:108px;overflow:hidden;background:var(--surface);border-radius:7px;cursor:ns-resize;-webkit-tap-highlight-color:transparent}
+.height-reel-wide{width:76px}
+.height-reel-overlay{position:absolute;left:0;right:0;top:36px;height:36px;border-top:1px solid var(--orange-border);border-bottom:1px solid var(--orange-border);background:rgba(249,115,22,0.06);pointer-events:none;z-index:2}
+.height-reel-list{position:absolute;left:0;right:0;top:0;padding-top:36px;padding-bottom:36px;transition:transform 0.18s cubic-bezier(0.22,0.61,0.36,1)}
+.height-reel-list.dragging{transition:none}
+.height-reel-item{height:36px;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--text-dim);line-height:1}
+.height-reel-item.selected{color:var(--orange);font-size:26px}
+.height-reel-sep{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:700;color:var(--text-muted);padding:0 2px}
+
+/* Brand-new lifter toggle */
+.new-lifter-toggle{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:12px;transition:border-color 0.15s,background 0.15s}
+.new-lifter-toggle.active{border-color:var(--orange-border);background:rgba(249,115,22,0.06)}
+.new-lifter-label{display:flex;gap:12px;align-items:flex-start;cursor:pointer}
+.new-lifter-label input[type="checkbox"]{position:absolute;opacity:0;pointer-events:none}
+.new-lifter-check{width:20px;height:20px;border:1.5px solid var(--border2);border-radius:5px;flex-shrink:0;margin-top:1px;background:var(--surface2);position:relative;transition:all 0.15s}
+.new-lifter-toggle.active .new-lifter-check{background:var(--orange);border-color:var(--orange)}
+.new-lifter-toggle.active .new-lifter-check::after{content:'';position:absolute;top:3px;left:6px;width:5px;height:10px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg)}
+.new-lifter-text{display:flex;flex-direction:column;gap:3px;font-size:14px;line-height:1.4;color:var(--text)}
+.new-lifter-text strong{font-weight:600}
+.new-lifter-sub{font-size:12px;color:var(--text-dim)}
 
 /* LIFTS */
 .lifts-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
@@ -697,29 +730,18 @@ footer a:hover{color:#fff}
     <div class="card-header"><span class="card-label">About you</span><span class="card-meta">optional — improves your plan</span></div>
     <div class="info-grid">
       <div class="info-field"><span class="field-label">Age</span>
-        <div class="combo-wrap">
-          <select class="combo-select" id="userAgeSelect" onchange="comboSync('userAgeSelect','userAge');autosave()">
-            <option value="">Select age...</option>
-            <option>13</option><option>14</option><option>15</option><option>16</option><option>17</option>
-            <option>18</option><option>19</option><option>20</option><option>21</option><option>22</option>
-            <option>23</option><option>24</option><option>25</option><option>26</option><option>27</option>
-            <option>28</option><option>29</option><option>30</option><option>32</option><option>35</option>
-            <option>38</option><option>40</option><option>45</option><option>50</option><option>55</option><option>60</option>
-          </select>
-          <input class="combo-manual" id="userAge" type="number" min="13" max="99" placeholder="Or type age manually" oninput="autosave()">
-        </div>
+        <input class="field-input live-validate" id="userAge" type="number" inputmode="numeric" min="13" max="99" placeholder="e.g. 31" oninput="validateAge();autosave()">
+        <div class="field-msg" id="userAgeMsg"></div>
       </div>
       <div class="info-field"><span class="field-label">Bodyweight</span>
-        <div class="combo-wrap">
-          <select class="combo-select" id="userWeightSelect" onchange="comboSync('userWeightSelect','userWeight');autosave()">
-            <option value="">Select weight...</option>
-            <option>100</option><option>110</option><option>120</option><option>130</option><option>140</option>
-            <option>150</option><option>160</option><option>170</option><option>175</option><option>180</option>
-            <option>185</option><option>190</option><option>195</option><option>200</option><option>210</option>
-            <option>220</option><option>230</option><option>240</option><option>250</option><option>275</option><option>300</option>
-          </select>
-          <input class="combo-manual" id="userWeight" type="number" min="50" max="700" placeholder="Or type weight manually" oninput="autosave()">
+        <div class="bw-input-wrap">
+          <input class="field-input live-validate" id="userWeight" type="number" inputmode="decimal" step="0.1" placeholder="e.g. 175" oninput="validateBw();autosave()">
+          <div class="bw-unit-toggle">
+            <button type="button" class="bw-unit-btn active" id="bwLbsBtn" onclick="setBwUnit('lbs')">lbs</button>
+            <button type="button" class="bw-unit-btn" id="bwKgBtn" onclick="setBwUnit('kg')">kg</button>
+          </div>
         </div>
+        <div class="field-msg" id="userWeightMsg"></div>
       </div>
       <div class="info-field"><span class="field-label">Sex</span>
         <select class="field-input" id="userSex" onchange="autosave()">
@@ -728,17 +750,36 @@ footer a:hover{color:#fff}
           <option value="female">Female</option>
         </select>
       </div>
-      <div class="info-field"><span class="field-label">Height</span>
-        <div class="combo-wrap">
-          <select class="combo-select" id="userHeightSelect" onchange="comboSync('userHeightSelect','userHeight');autosave()">
-            <option value="">Select height...</option>
-            <option>5'0"</option><option>5'1"</option><option>5'2"</option><option>5'3"</option><option>5'4"</option>
-            <option>5'5"</option><option>5'6"</option><option>5'7"</option><option>5'8"</option><option>5'9"</option>
-            <option>5'10"</option><option>5'11"</option><option>6'0"</option><option>6'1"</option><option>6'2"</option>
-            <option>6'3"</option><option>6'4"</option><option>6'5"</option>
-          </select>
-          <input class="combo-manual" id="userHeight" type="text" placeholder="Or type (e.g. 180cm)" oninput="autosave()">
+      <div class="info-field"><span class="field-label">Height
+        <span class="height-unit-toggle">
+          <button type="button" class="height-unit-btn active" id="heightFtBtn" onclick="setHeightUnit('ft')">ft/in</button>
+          <button type="button" class="height-unit-btn" id="heightCmBtn" onclick="setHeightUnit('cm')">cm</button>
+        </span>
+      </span>
+        <div class="height-picker" id="heightPicker">
+          <!-- ft/in mode -->
+          <div class="height-reels" id="heightReelsFt">
+            <div class="height-reel" data-reel="ft">
+              <div class="height-reel-overlay"></div>
+              <div class="height-reel-list" id="heightFtList"></div>
+            </div>
+            <div class="height-reel-sep">'</div>
+            <div class="height-reel" data-reel="in">
+              <div class="height-reel-overlay"></div>
+              <div class="height-reel-list" id="heightInList"></div>
+            </div>
+            <div class="height-reel-sep">"</div>
+          </div>
+          <!-- cm mode -->
+          <div class="height-reels" id="heightReelsCm" style="display:none">
+            <div class="height-reel height-reel-wide" data-reel="cm">
+              <div class="height-reel-overlay"></div>
+              <div class="height-reel-list" id="heightCmList"></div>
+            </div>
+            <div class="height-reel-sep">cm</div>
+          </div>
         </div>
+        <input type="hidden" id="userHeight">
       </div>
     </div>
   </div>
@@ -804,12 +845,24 @@ footer a:hover{color:#fff}
   <!-- ═══ STEP 3: YOUR LIFTS ═══ -->
   <div class="wizard-step" data-step="3">
   <div class="wizard-step-title">Your current lifts</div>
-  <div class="wizard-step-sub">The numbers we'll build the plan around. Use your best recent set — weight × reps. Don't know one? Skip it.</div>
+  <div class="wizard-step-sub">The numbers we'll build the plan around. Use your best recent set — weight × reps.</div>
 
-  <div class="card">
+  <!-- Brand-new toggle -->
+  <div class="new-lifter-toggle" id="newLifterToggle">
+    <label class="new-lifter-label">
+      <input type="checkbox" id="newLifterCheckbox" onchange="toggleBeginnerNoLifts()">
+      <span class="new-lifter-check"></span>
+      <span class="new-lifter-text">
+        <strong>I'm brand new — I don't have lift numbers yet</strong>
+        <span class="new-lifter-sub">We'll build a beginner plan with conservative starting weights based on your stats.</span>
+      </span>
+    </label>
+  </div>
+
+  <div class="card" id="liftsCard">
     <div class="card-header"><span class="card-label">Your lifts</span>
       <div style="display:flex;gap:6px;align-items:center">
-        <span class="card-meta">weight × reps</span>
+        <span class="card-meta">weight × reps (skip any you don't know)</span>
         <button class="action-btn" onclick="autoFillFromProgress()" title="Fill with your best logged lifts" style="font-size:11px;padding:4px 10px">Auto-fill from history</button>
       </div>
     </div>
@@ -1134,7 +1187,7 @@ footer a:hover{color:#fff}
 // ═══════════════════════════════════════════════════════════
 // CONSTANTS & STATE
 // ═══════════════════════════════════════════════════════════
-const SAVE_KEY   = 'platestack_v3';
+const SAVE_KEY   = 'platestack_v4';
 const LOG_KEY    = 'platestack_progress_log';
 const ANON_LIMIT = 2;
 const USER_LIMIT = 4;
@@ -1147,6 +1200,9 @@ let serverHasAccount = false; // updated from server
 const PRESET_LIFTS = ['Bench press','Squat','Deadlift','Overhead press','Barbell row'];
 
 let unit='lbs', qmcUnit='lbs';
+let bwUnit='lbs';          // bodyweight unit, independent of lifting unit
+let heightUnit='ft';       // 'ft' or 'cm'
+let beginnerNoLifts=false; // "I'm brand new" toggle on step 3
 let selectedGoal='strength', selectedExp='beginner', selectedDays='4', selectedSplit='full_body';
 let currentPlanContext=null, qaUsedThisPlan=0, savedPlanText=null;
 let chartInstance=null;
@@ -2193,7 +2249,140 @@ function selectExp(el,v){
     advanced:'<strong>Advanced (5+ years)</strong> — Progress is hard-won and measured in months. You need carefully periodized programming.'};
   const desc=document.getElementById('expDesc'); desc.innerHTML=descs[v]||''; desc.classList.add('visible');
 }
-function comboSync(selectId,inputId){ const v=document.getElementById(selectId).value; if(v) document.getElementById(inputId).value=v; }
+// ═══════════════════════════════════════════════════════════
+// LIVE-VALIDATE INPUTS (Age, Bodyweight) + HEIGHT PICKER
+// ═══════════════════════════════════════════════════════════
+function setFieldMsg(id,text,cls){
+  const el=document.getElementById(id); if(!el)return;
+  el.textContent=text||''; el.classList.remove('ok','err');
+  if(cls) el.classList.add(cls);
+}
+function setFieldState(inputId,state){
+  const el=document.getElementById(inputId); if(!el)return;
+  el.classList.remove('valid','invalid');
+  if(state) el.classList.add(state);
+}
+function validateAge(){
+  const inp=document.getElementById('userAge'); const v=inp.value.trim();
+  if(!v){ setFieldState('userAge',null); setFieldMsg('userAgeMsg','',null); return true; }
+  const n=parseInt(v,10);
+  if(isNaN(n)||n<13||n>99){ setFieldState('userAge','invalid'); setFieldMsg('userAgeMsg','Enter an age between 13 and 99','err'); return false; }
+  setFieldState('userAge','valid'); setFieldMsg('userAgeMsg','Looks good','ok'); return true;
+}
+function validateBw(){
+  const inp=document.getElementById('userWeight'); const v=inp.value.trim();
+  if(!v){ setFieldState('userWeight',null); setFieldMsg('userWeightMsg','',null); return true; }
+  const n=parseFloat(v);
+  // Accept 30–250 kg or 66–550 lbs. Catches the common "I typed my weight in the wrong unit" slip.
+  const lo = bwUnit==='kg' ? 30 : 66;
+  const hi = bwUnit==='kg' ? 250 : 550;
+  if(isNaN(n)||n<lo||n>hi){ setFieldState('userWeight','invalid'); setFieldMsg('userWeightMsg',`Enter a weight between ${lo} and ${hi} ${bwUnit}`,'err'); return false; }
+  setFieldState('userWeight','valid'); setFieldMsg('userWeightMsg','Looks good','ok'); return true;
+}
+function setBwUnit(u){
+  if(u===bwUnit)return;
+  const inp=document.getElementById('userWeight'); const cur=parseFloat(inp.value);
+  // Convert displayed value when switching units so the number stays meaningful
+  if(!isNaN(cur)&&cur>0){
+    if(bwUnit==='lbs'&&u==='kg') inp.value=(cur*0.453592).toFixed(1);
+    else if(bwUnit==='kg'&&u==='lbs') inp.value=Math.round(cur/0.453592);
+  }
+  bwUnit=u;
+  document.getElementById('bwLbsBtn').classList.toggle('active',u==='lbs');
+  document.getElementById('bwKgBtn').classList.toggle('active',u==='kg');
+  validateBw(); autosave();
+}
+// ── HEIGHT SCROLL PICKER ────────────────────────────────────
+const HEIGHT_ITEM_H = 36; // must match CSS
+let heightState = {ft:5, in:10, cm:175}; // sensible defaults
+function buildHeightReels(){
+  // Feet reel: 4'–7'
+  const ftList=document.getElementById('heightFtList'); ftList.innerHTML='';
+  for(let f=4;f<=7;f++){ const d=document.createElement('div'); d.className='height-reel-item'; d.dataset.val=f; d.textContent=f; ftList.appendChild(d); }
+  // Inches reel: 0–11
+  const inList=document.getElementById('heightInList'); inList.innerHTML='';
+  for(let i=0;i<=11;i++){ const d=document.createElement('div'); d.className='height-reel-item'; d.dataset.val=i; d.textContent=i; inList.appendChild(d); }
+  // Cm reel: 120–230
+  const cmList=document.getElementById('heightCmList'); cmList.innerHTML='';
+  for(let c=120;c<=230;c++){ const d=document.createElement('div'); d.className='height-reel-item'; d.dataset.val=c; d.textContent=c; cmList.appendChild(d); }
+  attachReel('heightFtList', 4, 7, v=>{heightState.ft=v;syncHeight();});
+  attachReel('heightInList', 0, 11, v=>{heightState.in=v;syncHeight();});
+  attachReel('heightCmList', 120, 230, v=>{heightState.cm=v;syncHeight();});
+  setReel('heightFtList', heightState.ft, 4);
+  setReel('heightInList', heightState.in, 0);
+  setReel('heightCmList', heightState.cm, 120);
+  syncHeight();
+}
+function setReel(listId, value, minVal){
+  const list=document.getElementById(listId);
+  const idx = value - minVal;
+  list.style.transition='none';
+  list.style.transform=`translateY(${-idx*HEIGHT_ITEM_H}px)`;
+  requestAnimationFrame(()=>{ list.style.transition=''; });
+  list.querySelectorAll('.height-reel-item').forEach((it,i)=>it.classList.toggle('selected',i===idx));
+}
+function attachReel(listId, minVal, maxVal, onChange){
+  const list=document.getElementById(listId);
+  const reel=list.closest('.height-reel');
+  let startY=0, startIdx=0, currentIdx=0, dragging=false;
+  function currentValue(){ return currentIdx+minVal; }
+  function applyIdx(idx,animate){
+    idx=Math.max(0,Math.min(maxVal-minVal,idx));
+    currentIdx=idx;
+    list.classList.toggle('dragging',!animate);
+    list.style.transform=`translateY(${-idx*HEIGHT_ITEM_H}px)`;
+    list.querySelectorAll('.height-reel-item').forEach((it,i)=>it.classList.toggle('selected',i===idx));
+  }
+  function onStart(clientY){ dragging=true; startY=clientY; startIdx=currentIdx; list.classList.add('dragging'); }
+  function onMove(clientY){ if(!dragging)return; const dy=clientY-startY; const rawIdx=startIdx - dy/HEIGHT_ITEM_H; applyIdx(Math.round(rawIdx), false); }
+  function onEnd(){ if(!dragging)return; dragging=false; applyIdx(currentIdx, true); onChange(currentValue()); autosave(); }
+  // Touch
+  reel.addEventListener('touchstart', e=>{ onStart(e.touches[0].clientY); }, {passive:true});
+  reel.addEventListener('touchmove',  e=>{ onMove(e.touches[0].clientY); e.preventDefault(); }, {passive:false});
+  reel.addEventListener('touchend', onEnd);
+  reel.addEventListener('touchcancel', onEnd);
+  // Mouse drag
+  reel.addEventListener('mousedown', e=>{ onStart(e.clientY); e.preventDefault(); });
+  window.addEventListener('mousemove', e=>{ if(dragging) onMove(e.clientY); });
+  window.addEventListener('mouseup', onEnd);
+  // Mouse wheel
+  reel.addEventListener('wheel', e=>{ e.preventDefault(); const step=e.deltaY>0?1:-1; applyIdx(currentIdx+step,true); onChange(currentValue()); autosave(); }, {passive:false});
+  // Click on an item to select it directly
+  list.addEventListener('click', e=>{
+    const it=e.target.closest('.height-reel-item'); if(!it)return;
+    const items=[...list.querySelectorAll('.height-reel-item')]; const idx=items.indexOf(it);
+    applyIdx(idx,true); onChange(currentValue()); autosave();
+  });
+  // Initialize
+  currentIdx=0;
+}
+function syncHeight(){
+  // Write a canonical string into the hidden input so the rest of the app (and autosave/backend) works unchanged
+  let s='';
+  if(heightUnit==='ft'){ s = `${heightState.ft}'${heightState.in}"`; }
+  else { s = `${heightState.cm}cm`; }
+  document.getElementById('userHeight').value = s;
+}
+function setHeightUnit(u){
+  if(u===heightUnit)return;
+  // Convert current selection when flipping units so the user doesn't lose their value
+  if(heightUnit==='ft'&&u==='cm'){
+    const totalIn = heightState.ft*12 + heightState.in;
+    heightState.cm = Math.max(120, Math.min(230, Math.round(totalIn*2.54)));
+  } else if(heightUnit==='cm'&&u==='ft'){
+    const totalIn = Math.round(heightState.cm/2.54);
+    heightState.ft = Math.max(4, Math.min(7, Math.floor(totalIn/12)));
+    heightState.in = Math.max(0, Math.min(11, totalIn - heightState.ft*12));
+  }
+  heightUnit=u;
+  document.getElementById('heightFtBtn').classList.toggle('active',u==='ft');
+  document.getElementById('heightCmBtn').classList.toggle('active',u==='cm');
+  document.getElementById('heightReelsFt').style.display = u==='ft'?'flex':'none';
+  document.getElementById('heightReelsCm').style.display = u==='cm'?'flex':'none';
+  if(u==='ft'){ setReel('heightFtList',heightState.ft,4); setReel('heightInList',heightState.in,0); }
+  else { setReel('heightCmList',heightState.cm,120); }
+  syncHeight(); autosave();
+}
 
 // ═══════════════════════════════════════════════════════════
 // UNITS
@@ -2256,6 +2445,28 @@ function makeLiftRow(name,weight='',reps=''){
 function initLifts(saved){ const g=document.getElementById('liftsGrid'); g.innerHTML=''; if(saved&&saved.length) saved.forEach(l=>g.appendChild(makeLiftRow(l.name,l.weight,l.reps))); else PRESET_LIFTS.forEach(n=>g.appendChild(makeLiftRow(n))); }
 function addCustomLift(){ const inp=document.getElementById('customLiftName'); const name=inp.value.trim(); if(!name)return; document.getElementById('liftsGrid').appendChild(makeLiftRow(name)); inp.value=''; autosave(); }
 function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>{ const name=row.querySelector('.lift-name').textContent; const w=parseFloat(row.querySelector('.lift-weight').value); const r=parseInt(row.querySelector('.lift-reps').value); if(w>0&&r>0)lifts.push({name,weight:w,reps:r,max:calc1RM(w,r)}); }); return lifts; }
+function toggleBeginnerNoLifts(){
+  const cb=document.getElementById('newLifterCheckbox');
+  beginnerNoLifts = cb.checked;
+  const wrap=document.getElementById('newLifterToggle');
+  const card=document.getElementById('liftsCard');
+  wrap.classList.toggle('active', beginnerNoLifts);
+  card.style.display = beginnerNoLifts ? 'none' : '';
+  // If user flipped this on, snap experience to "beginner" — it would be a contradiction otherwise
+  if(beginnerNoLifts && selectedExp!=='beginner'){
+    const chip=document.querySelector(`#expRow .chip[onclick*="'beginner'"]`);
+    if(chip) selectExp(chip,'beginner');
+  }
+  autosave();
+}
+function syncBeginnerToggleUI(){
+  const cb=document.getElementById('newLifterCheckbox'); if(!cb)return;
+  cb.checked = !!beginnerNoLifts;
+  const wrap=document.getElementById('newLifterToggle');
+  const card=document.getElementById('liftsCard');
+  if(wrap) wrap.classList.toggle('active', beginnerNoLifts);
+  if(card) card.style.display = beginnerNoLifts ? 'none' : '';
+}
 
 // ═══════════════════════════════════════════════════════════
 // SAVE / LOAD
@@ -2263,7 +2474,7 @@ function getLifts(){ const lifts=[]; document.querySelectorAll('#liftsGrid .lift
 function autosave(planToSave){
   const lifts=[]; document.querySelectorAll('#liftsGrid .lift-row').forEach(row=>lifts.push({name:row.querySelector('.lift-name').textContent,weight:row.querySelector('.lift-weight').value,reps:row.querySelector('.lift-reps').value}));
   if(planToSave!==undefined) savedPlanText=planToSave;
-  const data={v:10,unit,selectedGoal,selectedExp,selectedDays,selectedSplit,
+  const data={v:11,unit,bwUnit,heightUnit,heightState,beginnerNoLifts,selectedGoal,selectedExp,selectedDays,selectedSplit,
     age:document.getElementById('userAge').value,bodyweight:document.getElementById('userWeight').value,
     sex:document.getElementById('userSex').value,height:document.getElementById('userHeight').value,
     goalDetail:document.getElementById('goalDetail').value,splitCustom:document.getElementById('splitCustom').value,
@@ -2275,8 +2486,12 @@ function autosave(planToSave){
 function loadSaved(){
   try{
     const raw=localStorage.getItem(SAVE_KEY); if(!raw)return false;
-    const d=JSON.parse(raw); if(!d||d.v!==9)return false;
+    const d=JSON.parse(raw); if(!d||d.v!==11)return false;
     setUnit(d.unit||'lbs');
+    if(d.bwUnit){ bwUnit=d.bwUnit; document.getElementById('bwLbsBtn').classList.toggle('active',bwUnit==='lbs'); document.getElementById('bwKgBtn').classList.toggle('active',bwUnit==='kg'); }
+    if(d.heightUnit){ heightUnit=d.heightUnit; document.getElementById('heightFtBtn').classList.toggle('active',heightUnit==='ft'); document.getElementById('heightCmBtn').classList.toggle('active',heightUnit==='cm'); document.getElementById('heightReelsFt').style.display = heightUnit==='ft'?'flex':'none'; document.getElementById('heightReelsCm').style.display = heightUnit==='cm'?'flex':'none'; }
+    if(d.heightState) heightState=Object.assign(heightState,d.heightState);
+    if(d.beginnerNoLifts) beginnerNoLifts=true;
     if(d.age) document.getElementById('userAge').value=d.age;
     if(d.bodyweight) document.getElementById('userWeight').value=d.bodyweight;
     if(d.sex) document.getElementById('userSex').value=d.sex;
@@ -2290,6 +2505,7 @@ function loadSaved(){
       if(chip){ selectChipIn(rowId,chip); if(key==='selectedGoal')selectedGoal=val; if(key==='selectedExp'){selectedExp=val;selectExp(chip,val);} if(key==='selectedDays')selectedDays=val; if(key==='selectedSplit')selectedSplit=val; }
     });
     initLifts(d.lifts&&d.lifts.length?d.lifts:null);
+    syncBeginnerToggleUI();
     if(d.plan){
       savedPlanText=d.plan; currentPlanContext=d.plan;
       if(d.lifts&&d.lifts.length){ const g=document.getElementById('maxesGrid'); g.innerHTML=''; d.lifts.filter(l=>l.weight&&l.reps).forEach(l=>{ const max=calc1RM(parseFloat(l.weight),parseInt(l.reps)); const c=document.createElement('div'); c.className='max-card'; c.innerHTML=`<div class="max-lift-name">${esc(l.name)}</div><div class="max-value">${max}</div><div class="max-unit">${esc(d.unit||'lbs')} estimated 1RM</div><div class="max-reps">${esc(l.weight)} ${esc(d.unit||'lbs')} × ${esc(l.reps)} reps</div>`; g.appendChild(c); }); }
@@ -2300,7 +2516,24 @@ function loadSaved(){
     return true;
   }catch(e){ return false; }
 }
-function clearSaved(){ try{localStorage.removeItem(SAVE_KEY);}catch(e){} savedPlanText=null; document.getElementById('savedBanner').style.display='none'; document.getElementById('resultsCard').style.display='none'; ['userAge','userWeight','userHeight','goalDetail','splitCustom','injuriesField'].forEach(id=>document.getElementById(id).value=''); document.getElementById('userSex').value=''; document.querySelectorAll('#prefsRow .pref-chip').forEach(el=>el.classList.remove('active')); initLifts(null); }
+function clearSaved(){
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+  savedPlanText=null;
+  document.getElementById('savedBanner').style.display='none';
+  document.getElementById('resultsCard').style.display='none';
+  ['userAge','userWeight','userHeight','goalDetail','splitCustom','injuriesField'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('userSex').value='';
+  document.querySelectorAll('#prefsRow .pref-chip').forEach(el=>el.classList.remove('active'));
+  // Reset new inputs to defaults
+  setFieldState('userAge',null); setFieldState('userWeight',null);
+  setFieldMsg('userAgeMsg','',null); setFieldMsg('userWeightMsg','',null);
+  beginnerNoLifts=false; syncBeginnerToggleUI();
+  heightState={ft:5,in:10,cm:175};
+  if(heightUnit==='ft'){ setReel('heightFtList',heightState.ft,4); setReel('heightInList',heightState.in,0); }
+  else { setReel('heightCmList',heightState.cm,120); }
+  syncHeight();
+  initLifts(null);
+}
 
 // ═══════════════════════════════════════════════════════════
 // CALCULATE
@@ -2347,7 +2580,15 @@ function setLoading(on){
 }
 async function calculate(){
   const lifts=getLifts(); const err=document.getElementById('error'); err.textContent='';
-  if(!lifts.length){ err.textContent='Enter at least one lift with weight and reps.'; if(typeof showWizardStep==='function') showWizardStep(3); return; }
+  // Pre-flight validation for the free-text fields. Blocks submit if user typed a bad age/weight.
+  if(!validateAge()){ err.textContent='Please fix your age before continuing.'; showWizardStep(1); return; }
+  if(!validateBw()){ err.textContent='Please fix your bodyweight before continuing.'; showWizardStep(1); return; }
+  // Lifts required UNLESS brand-new toggle is on
+  if(!beginnerNoLifts && !lifts.length){
+    err.textContent='Enter at least one lift with weight and reps — or check "I\'m brand new" on step 3.';
+    if(typeof showWizardStep==='function') showWizardStep(3);
+    return;
+  }
   if(!isAdmin&&serverPlanCount>=serverPlanLimit){
     err.textContent=currentUser
       ? `You've used all ${serverPlanLimit} plans on your free account. More plans coming soon!`
@@ -2366,12 +2607,15 @@ async function calculate(){
   const splitCustom=document.getElementById('splitCustom').value.trim();
   const injuries=document.getElementById('injuriesField').value.trim();
   const prefs=getSelectedPrefs();
+  const bwVal=document.getElementById('userWeight').value;
   try{
     const res=await fetch('/api/plan',{method:'POST',headers:{'Content-Type':'application/json',...(getToken()?{'X-Auth-Token':getToken()}:{})},body:JSON.stringify({
-      lifts,unit,goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
+      lifts,unit,
+      beginner_no_lifts: beginnerNoLifts || undefined,
+      goal:goalDetail?`${goalLabels[selectedGoal]} — specifically: ${goalDetail}`:goalLabels[selectedGoal],
       experience:selectedExp,days:selectedDays,split:splitLabels[selectedSplit]+(splitCustom?` (${splitCustom})`:''),
       age:document.getElementById('userAge').value||null,
-      bodyweight:document.getElementById('userWeight').value?`${document.getElementById('userWeight').value} ${unit}`:null,
+      bodyweight: bwVal ? `${bwVal} ${bwUnit}` : null,
       sex:document.getElementById('userSex').value||null,height:document.getElementById('userHeight').value||null,
       injuries:injuries||null,
       preferences:prefs.length?prefs.join(', '):null,
@@ -2385,7 +2629,9 @@ async function calculate(){
     if(data.plan_title){ titleEl.textContent=data.plan_title; titleEl.style.display='block'; }
     else { titleEl.style.display='none'; }
     document.getElementById('planText').replaceChildren(renderMarkdown(data.plan,true));
-    document.getElementById('resultsFooter').textContent=`${lifts.length} lift${lifts.length>1?'s':''} · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
+    document.getElementById('resultsFooter').textContent=
+      (beginnerNoLifts ? 'brand-new beginner' : `${lifts.length} lift${lifts.length>1?'s':''}`)
+      + ` · ${selectedExp} · ${selectedDays} days/week · ${splitLabels[selectedSplit].toLowerCase()}`;
     currentPlanContext=data.plan; autosave(data.plan);
     if(typeof data.plan_count==='number') serverPlanCount=data.plan_count;
     if(typeof data.plan_limit==='number') serverPlanLimit=data.plan_limit;
@@ -3633,6 +3879,8 @@ setLogDateDefault();
 // Restore saved state
 const hadSaved=loadSaved();
 if(!hadSaved) initLifts(null);
+buildHeightReels();
+validateAge(); validateBw();
 document.getElementById('savedBanner').style.display=hadSaved?'flex':'none';
 updateUsageBanner();
 tryRestoreAdmin();
