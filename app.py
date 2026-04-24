@@ -149,8 +149,19 @@ def get_auth_user():
     return get_user_from_token(token)
 
 def is_premium_user(user):
-    """Gate for paid features. Free accounts have is_premium=0 (default on register).
+    """Gate for paid features. Returns True if:
+      - user is a paid account (is_premium=1 in DB), OR
+      - a valid admin code was passed in the current request (body or X-Admin-Code header).
+    Admin-code override lets you (or beta testers) bypass Pro gates without a paid account.
     To grant Pro access to a user manually: UPDATE users SET is_premium=1 WHERE email='...'."""
+    # Admin-code bypass — check this FIRST so unauthed-but-admin callers pass through.
+    try:
+        code = request.headers.get("X-Admin-Code","")
+        if not code:
+            body = request.get_json(silent=True) or {}
+            code = str(body.get("adminCode","") or "")
+        if code and verify_admin(code): return True
+    except: pass
     if not user: return False
     try:
         row=get_db().execute("SELECT is_premium FROM users WHERE id=?",(user["id"],)).fetchone()
